@@ -1,0 +1,102 @@
+body {
+  font-family: "Roboto Regular", sans-serif;
+  color: #424242;
+  font-size: 14px; /* Установите размер шрифта 24 пикселя */
+
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2 {
+  font-weight: normal; /* Сделайте текст не жирным */
+}
+
+h1 {
+  font-size: 30px; /* Установите размер шрифта 24 пикселя */
+  text-align: center; /* Выравнивание содержимого по центру */
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  justify-content: center; /* Центрирование по горизонтали */
+  align-items: center; /* Центрирование по вертикали */
+  height: 30vh; /* Высота равная 100% высоты окна браузера */
+}
+
+.auth-container {
+  width: 318px; /* Ширина квадрата */
+  height: 288px; /* Высота квадрата */
+  border: 1px solid #424242; /* Граничная рамка */
+  border-radius: 5px; /* Скругленные углы */
+  margin: 0 auto; /* Центрирование по горизонтали */
+  padding: 19px; /* Внутренний отступ */
+  text-align: center; /* Выравнивание содержимого по центру */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #c0c4cc;
+}
+
+.auth-container h2 {
+  font-size: 20px;
+  margin-top: 1px; /* Расстояние сверху в 1 пикселей */
+  margin-bottom: 27px; /* 10px + 69px = 79px между инпутами */
+}
+
+/* Стили для формы внутри контейнера */
+.auth-container form {
+  margin-top: 19px;
+}
+
+/* Стили для текстовых полей и кнопки */
+.auth-container input[type="email"],
+.auth-container input[type="password"],
+.auth-container button {
+  width: 230px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #606266; /* Граничная рамка */
+  border-radius: 5px; /* Скругленные углы */
+}
+
+.auth-container input[type="email"] {
+  margin-bottom: 27px; /* 10px + 69px = 79px между инпутами */
+}
+
+.auth-container input[type="password"] {
+  margin-bottom: 27px; /* 10px + 69px = 79px между инпутами */
+}
+
+.checkbox {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.checkbox input[type="checkbox"] {
+  margin-right: 16px;
+  transform: translateX(28px); /* Смещение вправо */
+}
+/* Стили для кнопки */
+.auth-container button {
+  background-color: #0074cc;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.register-button {
+  background-color: #4caf50; /* Зеленый цвет (салатовый) */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
