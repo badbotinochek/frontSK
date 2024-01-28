@@ -22,12 +22,12 @@ h1 {
   display: flex;
   justify-content: center; /* Центрирование по горизонтали */
   align-items: center; /* Центрирование по вертикали */
-  height: 30vh; /* Высота равная 100% высоты окна браузера */
+  height: 100vh; /* Высота равная 100% высоты окна браузера */
 }
 
 .auth-container {
-  width: 318px; /* Ширина квадрата */
-  height: 288px; /* Высота квадрата */
+  width: 300px; /* Ширина квадрата */
+  height: 270px; /* Высота квадрата */
   border: 1px solid #424242; /* Граничная рамка */
   border-radius: 5px; /* Скругленные углы */
   margin: 0 auto; /* Центрирование по горизонтали */
@@ -63,29 +63,27 @@ textarea::placeholder {
 }
 
 .auth-container input[type="email"] {
-  margin-bottom: 27px; /* 10px + 69px = 79px между инпутами */
+  margin-bottom: 27px;
 }
 
 .auth-container input[type="password"] {
-  margin-bottom: 27px; /* 10px + 69px = 79px между инпутами */
+  margin-bottom: 27px;
 }
 
 .checkbox {
   display: flex;
   margin-bottom: 16px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .checkbox input[type="checkbox"] {
   margin-right: 16px;
-  transform: translateX(28px); /* Смещение вправо */
+  transform: translateX(20px); /* Смещение вправо */
 }
-/* Стили для кнопки */
-.auth-container button {
-  background-color: #0074cc;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+
+.checkbox label {
+  margin-right: 145px;
 }
 
 .buttons {
@@ -93,10 +91,21 @@ textarea::placeholder {
   justify-content: space-between;
 }
 
-.register-button {
-  background-color: #4caf50; /* Зеленый цвет (салатовый) */
+.signup-button {
+  background-color: #409eff;
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transform: translateX(24px);
+}
+
+.register-button {
+  background-color: #5da937;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 100px;
+  margin-right: 24px;
 }
