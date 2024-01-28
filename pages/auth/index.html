@@ -2,26 +2,21 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Авторизация</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;1,100&display=swap"
-      rel="stylesheet"
-    />
+    <title>Sweet Cash</title>
     <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../crs/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../crs/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../crs/modules/auth/asserts/favicon-16x16.png">
+    <link rel="manifest" href="../../crs/modules/auth/asserts/site.webmanifest">
   </head>
   <body>
     <div class="container">
-    <div>
-      <h1>Sweet Cash</h1>
-    </div>
       <div>
+        <h1>Sweet Cash</h1>
         <div class="auth-container">
           <div>
             <h2>Вход</h2>
           </div>
-          <form name="myForm" onsubmit="validate (); return false">
             <div>
               <input
                 type="email"
@@ -42,22 +37,22 @@
             <small class="text-danger" id="password-validation"></small>
             <div>
               <div class="checkbox">
-                <input type="checkbox" id="remember-me" />
-                <label for="remember-me">Запомнить меня</label>
+                <input type="checkbox" id="remember-me"/>
+                <label for="remember-me"> Запомнить меня</label>
               </div>
             </div>
             <div class="buttons">
-              <button type="submit" class="btn btn-primary" name="u_login">
+              <button type="submit" value="send" id="signup-submit" class="signup-button">
                 Войти
               </button>
-              <a href="/pages/register.html">
-                <button type="button" class="register-button">Регистрация</button>
+                <button type="button" class="register-button">
+                  Регистрация
+                </button>
               </a>
             </div>
-          </form>
         </div>
       </div>
     </div>
-</div>
+    <script src="../../crs/modules/auth/index.js"></script>
   </body>
 </html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sweet Cash</title>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../../crs/modules/auth/asserts/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../../crs/modules/auth/asserts/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../../crs/modules/auth/asserts/favicon-16x16.png"
+    />
+    <link
+      rel="manifest"
+      href="../../crs/modules/auth/asserts/site.webmanifest"
+    />
+  </head>
+  <body>
+    <nav>
+      <button>Операции</button>
+      <button>Мероприятия</button>
+      <button type="submit" id="logout-button">Выйти</button>
+    </nav>
+
+    <main>
+      <div>
+        <input type="text" placeholder="Поиск мероприятия" />
+        <input type="text" placeholder="Период с..." />
+        <button>Создать операцию</button>
+        <span>UserID: 123</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Номер</th>
+            <th>Дата</th>
+            <th>Тип</th>
+            <th>Категория</th>
+            <th>Сумма</th>
+            <th>Создатель</th>
+            <th>Чек</th>
+            <th>Удалить операцию</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Здесь будут данные таблицы -->
+        </tbody>
+      </table>
+    </main>
+    <script src="../../crs/modules/transactions/index.js"></script>
+  </body>
+</html>
