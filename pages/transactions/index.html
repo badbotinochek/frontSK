@@ -7,41 +7,100 @@
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="../../crs/modules/auth/asserts/apple-touch-icon.png"
+      href="../../src/modules/auth/asserts/apple-touch-icon.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="../../crs/modules/auth/asserts/favicon-32x32.png"
+      href="../../src/modules/auth/asserts/favicon-32x32.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="../../crs/modules/auth/asserts/favicon-16x16.png"
+      href="../../src/modules/auth/asserts/favicon-16x16.png"
     />
     <link
       rel="manifest"
-      href="../../crs/modules/auth/asserts/site.webmanifest"
+      href="../../src/modules/auth/asserts/site.webmanifest"
     />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/style.css" />
   </head>
   <body>
-    <nav>
-      <button>Операции</button>
-      <button>Мероприятия</button>
-      <button type="submit" id="logout-button">Выйти</button>
-    </nav>
-
-    <main>
-      <div>
-        <input type="text" placeholder="Поиск мероприятия" />
-        <input type="text" placeholder="Период с..." />
-        <button>Создать операцию</button>
-        <span>UserID: 123</span>
+    <nav class="sidebar close">
+      <header>
+          <div class="image-text">
+            <span class="image">
+              <img src="../../src/modules/auth/asserts/apple-touch-icon.png" alt="logo">
+            </span> 
+          
+          <div class="text header-text">
+            <span class="name">Sweet Cash</span>
+          </div>
+        </div>
+      </header>
+      <div class="menu-bar">
+        <div class="menu">
+          <ul class="menu-links">
+            <li class="nav-link", id="tr">
+              <a href="#">
+                <i class="bx bx-dollar icon", id="dollar"></i>
+                <span class="text nav-text", id="transaction">Транзакции</span>
+              </a>
+            </li>
+            <li class="nav-link">
+              <a href="#">
+                <i class="bx bx-calendar-event icon", id="event"></i>
+                <span class="text nav-text">Мероприятия</span>
+              </a>
+              <li class="nav-link"> 
+                <a href="#">
+                  <i class="bx bx-file icon", id="file"></i>
+                  <span class="text nav-text">Чеки</span>
+                </a>
+              </li>
+              <li class="nav-link"> 
+              <a href="#">
+                <i class="bx bx-bell icon", id="bell"></i>
+                <span class="text nav-text">Уведомление</span>
+              </a>
+              </li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-link2">
+        <a href="../auth/index.html">
+          <i class="bx bx-log-out icon" ></i>
+          <span class="text nav-text">Выход</span>
+        </a>
+      </li>
       </div>
-
-      <table>
+    </nav>
+      <div class="wrapper"> 
+        <div class="dropdown">
+          <input type="text" class="text-box" placeholder="Введите название мероприятия" readonly>
+          <div class="option">
+          </div>
+        </div>
+        <div><label for="period">Период:</label></div>
+        <div><input type="date" id="start-date"></div>
+          <div><input type="date" id="end-date"></div>
+          <div><button type="submit" value="send" id="get-submit" class="get-button">
+            Получить транзакции
+          </button></div>
+          <div><button type="submit" value="send" id="create-submit" class="create-button">
+            Создать
+          </button></div>
+          <div><label class="user-id-label">User ID:</label></div>
+          <div><span id="user_id"></span></div>
+      </div>
+      <div class="table-container">
+      <table class="custom-table">
         <thead>
           <tr>
             <th>Номер</th>
@@ -51,14 +110,24 @@
             <th>Сумма</th>
             <th>Создатель</th>
             <th>Чек</th>
-            <th>Удалить операцию</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          <!-- Здесь будут данные таблицы -->
         </tbody>
       </table>
-    </main>
-    <script src="../../crs/modules/transactions/index.js"></script>
+    </div>
+    <dialog id = "modal" class="modal">
+      <h2 class="modal-title">Подтверждение</h2>
+          <p>Выполнить действие?</p>
+          <div class="buttonsMod">
+          <button class="deleteBtn" id="deleteBtn">Да</button>
+          <button class="closeBtn" id="closeBtn">Нет</button>
+        </div>
+    </dialog>
+
+
+
+    <script src="../../src/modules/transactions/index.js"></script>
   </body>
 </html>

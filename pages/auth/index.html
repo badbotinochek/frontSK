@@ -4,10 +4,14 @@
     <meta charset="utf-8" />
     <title>Sweet Cash</title>
     <link rel="stylesheet" href="../../../styles/style.css" />
-    <link rel="apple-touch-icon" sizes="180x180" href="../../crs/modules/auth/asserts/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../../crs/modules/auth/asserts/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../../crs/modules/auth/asserts/favicon-16x16.png">
-    <link rel="manifest" href="../../crs/modules/auth/asserts/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link rel="manifest" href="../../src/modules/auth/asserts/site.webmanifest">
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="container">
@@ -22,37 +26,40 @@
                 type="email"
                 placeholder="Адрес электронной почты"
                 id="InputEmail"
-                name="u_email"
+                name="email"
+                required 
+                onfocus="this.className='active'"
               />
+              <div class="input-error"> Некорректный адрес эл. почты</div>
             </div>
-            <small class="text-danger" id="email-validation"></small>
             <div>
               <input
                 type="password"
                 placeholder="Пароль"
                 id="InputPassword"
-                name="u_password"
+                name="password"
+                onfocus="this.className='active'"
               />
             </div>
-            <small class="text-danger" id="password-validation"></small>
             <div>
-              <div class="checkbox">
-                <input type="checkbox" id="remember-me"/>
-                <label for="remember-me"> Запомнить меня</label>
-              </div>
+              <input type="checkbox" class="custom-checkbox" id="rememberMe" value="yes">
+              <label for="rememberMe">Запомнить меня</label>
             </div>
             <div class="buttons">
-              <button type="submit" value="send" id="signup-submit" class="signup-button">
+              <button type="submit" value="send" id="signup-submit" class="signup-button disable " >
                 Войти
               </button>
-                <button type="button" class="register-button">
-                  Регистрация
-                </button>
+              <button type="button" class="register-button">
+                Регистрация
+              </button>
               </a>
             </div>
         </div>
       </div>
     </div>
-    <script src="../../crs/modules/auth/index.js"></script>
+    <ul class="ul notifications">
+    <script src="../../src/modules/auth/index.js"></script>
+    <script src="../../src/modules/notifications/index.js"></script>
+    <script src="../../src/modules/other_functions/validations.js"></script>
   </body>
 </html>
