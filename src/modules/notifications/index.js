@@ -20,6 +20,25 @@ const toastDetails = {
   },
 };
 
+// const removeToast = (toast) => {
+//   toast.classList.add("hide");
+//   if (toast.timeoutId) clearTimeout(toast.timeoutId);
+//   setTimeout(() => toast.remove(), 500);
+// };
+
+// const createToast = (id, text) => {
+//   const { icon, title } = toastDetails[id];
+//   const toast = document.createElement("li");
+//   toast.className = `toast ${id}`;
+//   toast.innerHTML = `<div class="column">
+//                             <i class="${icon}"></i>
+//                             <span class="title">${title} ${text}</span>
+//                         </div>
+//                         <i class="bx bx-x" onclick="removeToast(this.parentElement)"></i>`;
+//   notifications.appendChild(toast);
+//   toast.timeoutId = setTimeout(() => removeToast(toast), toastDetails.timer);
+// };
+
 const removeToast = (toast) => {
   toast.classList.add("hide");
   if (toast.timeoutId) clearTimeout(toast.timeoutId);
@@ -32,9 +51,15 @@ const createToast = (id, text) => {
   toast.className = `toast ${id}`;
   toast.innerHTML = `<div class="column">
                             <i class="${icon}"></i>
-                            <span class="title">${title} ${text}</span>
+                            <span class="title"> ${text}</span>
                         </div>
-                        <i class="bx bx-x" onclick="removeToast(this.parentElement)"></i>`;
+                        <i class="bx bx-x" onclick="handleRemoveToast(this)"></i>`;
   notifications.appendChild(toast);
   toast.timeoutId = setTimeout(() => removeToast(toast), toastDetails.timer);
 };
+
+window.handleRemoveToast = (element) => {
+  removeToast(element.parentElement);
+};
+
+export { createToast };

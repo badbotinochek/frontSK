@@ -4,23 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sweet Cash</title>
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="../../src/modules/auth/asserts/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="../../src/modules/auth/asserts/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="../../src/modules/auth/asserts/favicon-16x16.png"
-    />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
     <link
       rel="manifest"
       href="../../src/modules/auth/asserts/site.webmanifest"
@@ -54,7 +40,7 @@
               </a>
             </li>
             <li class="nav-link">
-              <a href="#">
+              <a href="../../pages/events/index.html">
                 <i class="bx bx-calendar-event icon", id="event"></i>
                 <span class="text nav-text">Мероприятия</span>
               </a>
@@ -73,7 +59,7 @@
           </ul>
         </div>
       </li>
-      <li class="nav-link2">
+      <li class="nav-link2" id="exist">
         <a href="../auth/index.html">
           <i class="bx bx-log-out icon" ></i>
           <span class="text nav-text">Выход</span>
@@ -81,42 +67,45 @@
       </li>
       </div>
     </nav>
-      <div class="wrapper"> 
+    
+    <div class="wrapper"> 
         <div class="dropdown">
-          <input type="text" class="text-box" placeholder="Введите название мероприятия" readonly>
+          <input type="text" class="text-box" placeholder="Выберете мероприятие">
           <div class="option">
           </div>
         </div>
         <div><label for="period">Период:</label></div>
         <div><input type="date" id="start-date"></div>
           <div><input type="date" id="end-date"></div>
-          <div><button type="submit" value="send" id="get-submit" class="get-button">
-            Получить транзакции
+          <div><button type="submit" value="send" id="get-event" class="get-button">
+            Показать транзакции
           </button></div>
-          <div><button type="submit" value="send" id="create-submit" class="create-button">
+          <div><button type="submit" value="send" id="create-submit" class="create-button ">
             Создать
           </button></div>
-          <div><label class="user-id-label">User ID:</label></div>
-          <div><span id="user_id"></span></div>
-      </div>
-      <div class="table-container">
+          <div><label class="user-id-label">User ID:</label>
+          <span id="user_id"></span></div>
+    </div>
+    <label id = 'transactionsLabel' >Транзакции </label>
+    <div class="table-container">
       <table class="custom-table">
         <thead>
           <tr>
-            <th>Номер</th>
+            <th class="smallRow" >Номер</th>
             <th>Дата</th>
             <th>Тип</th>
             <th>Категория</th>
             <th>Сумма</th>
             <th>Создатель</th>
-            <th>Чек</th>
-            <th></th>
+            <th class="smallRow">Чек</th>
+            <th class="smallRow" >Действия</th>
           </tr>
         </thead>
         <tbody>
         </tbody>
       </table>
     </div>
+    <label id = 'infoTransactionsLabel' class="disable">Нет транзакций </label>
     <dialog id = "modal" class="modal">
       <h2 class="modal-title">Подтверждение</h2>
           <p>Выполнить действие?</p>
@@ -125,9 +114,110 @@
           <button class="closeBtn" id="closeBtn">Нет</button>
         </div>
     </dialog>
+    
+    <dialog id = "modalTransaction" class="modalTr">
+      <label>Номер </label>
+      <div >
+        <input id="InputId" class="inputBox" disabled placeholder="ID мерпориятия будет присвоен системой">
+      </div>
+      <div class ="label ">
+        <label>Дата</label>   
+        <label class ="star">*</label>
+      </div>
+      <div class ="dateTime">
+        <div><input type="date" id="dateTr"></div>
+        <div><input type="time" id="timeTr"></div>
+      </div>
+      <div class ="label ">
+        <label>Тип</label>
+        <label class ="star">*</label>
+      </div>
+      <div class ="radio">
+        <input class="custom-radio" name="typeTransaction" type="radio" id="radio-1" value="Expense"> 
+        <label for="radio-1" style="margin-right: 162px">Расход</label>
 
+        <input class="custom-radio" name="typeTransaction" type="radio" id="radio-2" value="Income"> 
+        <label for="radio-2">Приход</label>
+      </div>
+      <div class ="label ">
+        <label>Категория</label>
+        <label class ="star">*</label>
+      </div>
+      <div class ="dropdown1" id="dropdownCat">
+        <input type="text"  class="categoryBox" placeholder="Введите название категории" readonly>
+        <div class="option1" id="optionCat">
+        </div>
+      </div>
+      <div class ="label ">
+        <label>Сумма</label>
+        <label class ="star">*</label>
+      </div>
+      <div >
+        <input id="sumTransaction" class="inputBox" placeholder="Введите сумму транзакции"/>
+      </div>
+      <div class ="label "><label>Описание</label></div>
+      <div>
+        <textarea class ="description" name="description" id="descriptionTran" placeholder="Введите описание к транзакции"></textarea>
+      </div>
+      <div class="buttons">
+        <button type="submit" value="send" id="changeTra" class="editButton disable Off " >
+          Изменить
+        </button>
+        <button type="submit" value="send" id="createTra" class="createButton disable" >
+          Создать
+        </button>
+        <button type="button" id="closeBtnTra" class="closeButton">
+          Отмена
+        </button>
+        </a>
+      </div>
+    </dialog>
 
+    <dialog id = "ShowModalTransaction" class="modalTr">
+      <label>Номер </label>
+      <div >
+        <input id="ShowInputId" class="inputBox" disabled/>
+      </div>
+      <div class ="label "></div><label>Дата</label>
+      <div class ="dateTime">
+        <div><input type="date" id="ShowdateTr" disabled></div>
+        <div><input type="time" id="ShowtimeTr" disabled></div>
+      </div>
+      <div class ="label "><label>Тип</label></div>
+      <div class ="radio">
+        <input class="custom-radio" name="showTypeTransaction" type="radio" id="Showradio-1" value="Expense"> 
+        <label for="radio-1" style="margin-right: 162px">Расход</label>
 
-    <script src="../../src/modules/transactions/index.js"></script>
+        <input class="custom-radio" name="showTypeTransaction" type="radio" id="Showradio-2" value="Income"> 
+        <label for="radio-2">Приход</label>
+      </div>
+      <div class ="label "><label>Категория</label></div>
+      <div class ="dropdown" id="ShowdropdownCat">
+        <input type="text" id="showCatTran" class="categoryBox" placeholder="Введите название категории" readonly disabled>
+        <div class="option" id="optionCat">
+        </div>
+      </div>
+      <div class ="label "><label>Сумма</label></div>
+      <div >
+        <input id="ShowsumTransaction" class="inputBox" placeholder="Введите сумму транзакции" disabled>
+      </div>
+      <div class ="label "><label>Описание</label></div>
+      <div>
+        <textarea class ="description" name="description" id="ShowdescriptionTran" placeholder="Введите описание к транзакции" disabled></textarea>
+      </div>
+      <div class ="label "><label>Чек</label></div>
+      <div class="buttons">
+        <button type="submit" value="send" id="ShowchangeTra" class="editButton disable" >
+          Изменить
+        </button>
+        <button type="button" id="showCloseBtnTra" class="closeButton">
+          Отмена
+        </button>
+        </a>
+      </div>
+    </dialog>
+
+    <ul class="ul notifications">
+    <script type="module" src="../../src/modules/transactions/index.js"></script>
   </body>
 </html>

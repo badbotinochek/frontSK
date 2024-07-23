@@ -1,0 +1,15 @@
+export const formRegistration = {
+  userName: document.getElementById("InputName"),
+  mobile: document.getElementById("InputMobile"),
+  email: document.getElementById("InputEmailReg"),
+  password: document.getElementById("InputPassword"),
+  passwordRepeat: document.getElementById("InputPasswordRepeat"),
+  registrationButton: document.getElementById("RegistrationButton"),
+  redirectToAuthButton: document.getElementById("RedirectAuthButton"),
+  textEmailError: document.querySelector(".textEmailError"),
+  textMobileError: document.querySelector(".textMobileError"),
+  textPasswordErrorRepeat: document.querySelector(".textPasswordErrorRepeat"),
+  textPasswordErrorRepeat: document.querySelector(".textPasswordErrorRepeat"),
+  textPasswordError: document.querySelector(".textPasswordError"),
+  textPasswordError2: document.querySelector(".textPasswordError2"),
+};
