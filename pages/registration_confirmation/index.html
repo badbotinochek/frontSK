@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sweet Cash</title>
+    <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link rel="manifest" href="../../src/modules/auth/asserts/site.webmanifest">
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <h1>Sweet Cash</h1>
+        <div class="confRegContainer">
+            <div>
+              <h2>Подтверждение регистрации</h2>
+            </div>
+            <p>
+              Для успешного завершения регистрации Вам необходимо перейти по ссылке, отправленного на адрес <span id="user_email"></span>.
+            </p>
+            <div class="regConButtons">
+              <button type="submit" id="RedirectAuthButton" class="authButton" >
+                Далее
+              </button>
+              <button type="submit" id="RedirectRegButton" class="cancellButtonReg">
+                Отмена
+              </button>
+              </a>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <ul class="ul notifications">
+    <script type="module" src="../../src/modules/registration_confirmation/index.js"></script>
+  </body>
+</html>

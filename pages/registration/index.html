@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sweet Cash</title>
+    <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link rel="manifest" href="../../src/modules/auth/asserts/site.webmanifest">
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <h1>Sweet Cash</h1>
+        <div class="registrationContainer">
+            <div>
+                <h2>Регистрация</h2>
+            </div>
+            <div>
+              <input
+                placeholder="Как к Вам обращаться?"
+                id="InputName"
+                required 
+                onfocus="this.className='active'"
+              />
+            </div>
+            <div>
+                <input
+                  placeholder="Номер мобильного телефона"
+                  id="InputMobile" 
+                  onfocus="this.className='active'"
+                  type="tel"
+                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                  title="Пожалуйста, введите действующий номер телефона"
+                  maxlength="18"
+                  
+                />
+                <div class="textMobileError"> Введите корректный номер телефона</div>
+            </div>
+            <div>
+                <input
+                  placeholder="Адрес электронной почты"
+                  id="InputEmailReg"
+                  name="email"
+                  required 
+                  onfocus="this.className='active'"
+                  title="Пожалуйста, введите действующий электронный адрес."
+                />
+              <div class="textEmailError"> Введите действительный электронный адрес</div>
+            </div>
+            <div>
+              <input
+                placeholder="Пароль"
+                id="InputPassword"
+                name="password"
+                onfocus="this.className='active'"
+                title="Должен соддержать не менее 8 символов, цифру, латинские буквы в верхнем и нижнем регистре и специальный символ @$!%*#?&"
+              />
+              <div class="textPasswordError" id='errorpass1'> Пароль должен содержать как минимум 8 символов</div>
+              <!-- <div class="textPasswordError3" id='errorpass2'> Пароль должен содержать буквы (a-z, A-Z) и цифры</div> -->
+              <div class="textPasswordError2" id='errorpass2'> Пароль должен содержать только буквы (a–z, A–Z), цифры и символы ! @ # $ % ^ & * ( ) - _ + = ; : , . / ? \ | ` ~ { }</div>
+              <!-- <div class="textPasswordError4" id='errorpass4'> Не используйте личные данные, последовательности (123456, qwerty) и популярные пароли (password).</div> -->
+            </div>
+            <div>
+                <input
+                  placeholder="Подтвердите пароль"
+                  id="InputPasswordRepeat"
+                  name="password"
+                  onfocus="this.className='active'"
+                  title="Повторите ранее введенный пароль"
+                />
+                <div class="textPasswordErrorRepeat"> Пароли не совпадают. Повторите попытку</div>
+            </div>
+            <div class="registrationButtons">
+              <button type="submit" value="send" id="RegistrationButton" class="registrationButton disable " >
+                Регистрация
+              </button>
+              <button type="submit" id="RedirectAuthButton" class="cancellButton">
+                Отмена
+              </button>
+              </a>
+            </div>
+        </div>
+      </div>
+    </div>
+    <ul class="ul notifications">
+    <script type="module" src="../../src/modules/registration/index.js"></script>
+  </body>
+</html>

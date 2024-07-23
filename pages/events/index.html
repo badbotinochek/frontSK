@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sweet Cash</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link
+      rel="manifest"
+      href="../../src/modules/auth/asserts/site.webmanifest"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="stylesheet" href="../../styles/events/events.css" />
+  </head>
+  <body>
+
+    <nav class="sidebar close">
+      <header>
+          <div class="image-text">
+            <span class="image">
+              <img src="../../src/modules/auth/asserts/apple-touch-icon.png" alt="logo">
+            </span> 
+          
+          <div class="text header-text">
+            <span class="name">Sweet Cash</span>
+          </div>
+        </div>
+      </header>
+      <div class="menu-bar">
+        <div class="menu">
+          <ul class="menu-links">
+            <li class="nav-link">
+              <a href="../../pages/transactions/index.html">
+                <i class="bx bx-dollar icon", id="dollar"></i>
+                <span class="text nav-text", id="transaction">Транзакции</span>
+              </a>
+            </li>
+            <li class="nav-link " , id="tr">
+              <a href="#">
+                <i class="bx bx-calendar-event icon", id="event"></i>
+                <span class="text nav-text" , id="event">Мероприятия</span>
+              </a>
+              <li class="nav-link"> 
+                <a href="#">
+                  <i class="bx bx-file icon", id="file"></i>
+                  <span class="text nav-text">Чеки</span>
+                </a>
+              </li>
+              <li class="nav-link"> 
+              <a href="#">
+                <i class="bx bx-bell icon", id="bell"></i>
+                <span class="text nav-text">Уведомление</span>
+              </a>
+              </li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-link2">
+        <a href="../auth/index.html">
+          <i class="bx bx-log-out icon" ></i>
+          <span class="text nav-text">Выход</span>
+        </a>
+      </li>
+      </div>
+    </nav>
+
+    <div class="wrapper"> 
+          <div><button type="submit" value="send" id="createEventButton" class="create-button">
+            Создать мерпориятие
+          </button></div>
+          <div>
+            <label class="userIdLabel">User ID:</label>
+            <span id="userId"></span>
+        </div>
+    </div>
+
+    <div class="tabs">
+      <input class="input" name="tabs" type="radio" id="tab-1" checked="checked"/>
+      <label class="label" for="tab-1">Мои</label>
+      <div class="panel">
+        <label id = 'eventLabel'>Мои мероприятия </label>
+        <div id="MyEventsTable" class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Наименование</th>
+                <th>Начало</th>
+                <th>Окончание</th>
+                <th>Количество участников</th>
+                <th class="smallRow">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <input class="input" name="tabs" type="radio" id="tab-2"/>
+      <label class="label" for="tab-2">Чужие</label>
+      <div class="panel">
+        <label id = 'eventLabel'>Чужие мероприятия </label>
+         <div id="hisEventsTable" class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Наименование</th>
+            <th>Начало</th>
+            <th>Окончание</th>
+            <th>Количество участников</th>
+            <th>Ваша роль</th>
+            <th class="smallRow" >Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+      </div>
+      <input class="input" name="tabs" type="radio" id="tab-3"/>
+      <label class="label" for="tab-3">Приглашения</label>
+      <div class="panel">
+        <label id = 'eventLabel'>Приглашения </label>
+        <div id="Invitations" class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Наименование</th>
+                <th>Начало</th>
+                <th>Окончание</th>
+                <th>Количество участников</th>
+                <th>Ваша роль</th>
+                <th class="smallRow">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <dialog id = "modalEvent" class="modalEvent">
+      <label>Номер</label> 
+      <div >
+        <input id="eventId" class="inputBox" disabled placeholder="ID мерпориятия будет присвоен системой" >
+      </div>
+      <div class ="label" id="labelNameEvent" > 
+        <label for="inputEventName">Наименование</label> 
+        <label class ="star">*</label>
+      </div>
+      <div> 
+        <input type="text"  id="inputEventName" class="inputEventName" placeholder="Введите название мероприятия"> 
+      </div>
+      <div class ="label">
+        <label>Период действия</label>
+        <label class ="star">*</label>
+      </div>
+      <div class ="dateTime">
+        <div><input type="date" id="dateStartEvent"></div>
+        <div><input type="date" id="dateEndEvent"></div>
+      </div>
+      <div class ="label "><label>Описание</label></div>
+      <div>
+        <textarea class ="descriptionEvent" name="description" placeholder="Введите описание мероприятия"></textarea>
+      </div>
+      <div class="buttons1">
+        <button type="submit" value="send" id="addParticipantButton" class="createButton" >
+          Добавить участника
+        </button>
+      </div>
+      <div class ="label">
+        <label>Участники</label>
+      </div>
+      <div class="tableContainer">
+        <table class="customTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Роль</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="buttons">
+        <button type="submit" value="send" id="editEventButton" class="editEventButton disable Off " >
+          Изменить
+        </button>
+        <button type="submit" id="createModalEventButton" class="modalEventButton disable" >
+          Создать
+        </button>
+        <button type="button" id="closeModalEvent" class="modalEventButton">
+          Отмена
+        </button>
+        </a>
+      </div>
+    </dialog>
+
+    <dialog id = "modalShowEvent" class="modalEvent">
+        <label>Номер</label> 
+        <div >
+          <input id="eventShowId" class="inputBox" disabled/>
+        </div>
+        <div class ="label" id="labelNameEvent" > 
+          <label for="inputEventName">Наименование</label> 
+          <label class ="star">*</label>
+        </div>
+        <div> 
+          <input type="text"  id="inputEventShowName" class="inputEventName" placeholder="Введите название мероприятия"> 
+        </div>
+        <div class ="label">
+          <label>Период действия</label>
+          <label class ="star">*</label>
+        </div>
+        <div class ="dateTime">
+          <div><input type="date" id="dateStartShowEvent"></div>
+          <div><input type="date" id="dateEndShowEvent"></div>
+        </div>
+        <div class ="label "><label>Описание</label></div>
+        <div>
+          <textarea class ="descriptionShowEvent" name="description" placeholder="Введите описание мероприятия"></textarea>
+        </div>
+        <div class="buttons1">
+          <button type="submit" value="send" id="addParticipantShowButton" class="createButton" >
+            Добавить участника
+          </button>
+        </div>
+        <div class ="label">
+          <label>Участники</label>
+        </div>
+        <div class="tableContainer">
+          <table class="customTable" id="customTableShow">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Роль</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+        <div class="buttons">
+          <button type="submit" value="send" id="editEventButton" class="editEventButton disable " >
+            Изменить
+          </button>
+          <button type="button" id="closeModalShowEvent" class="modalEventButton">
+            Отмена
+          </button>
+          </a>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </dialog>
+
+    <dialog id = "modalParticipant" class="modalParticipant">
+      <div class ="labelIdUser"><label>ID пользователя</label>     <label class ="star">*</label></div>
+      <div >
+        <input id="idUser" class="inputBox" placeholder="Введите ID пользователя"/>
+      </div>
+      <div class ="label "><label>Тип участника</label>
+        <label class ="star">*</label></div>
+      <div class ="radioPar">
+        <input class="custom-radio" name="typeParticipant" type="radio" id="radio-1" value="Partner"> 
+        <label for="radio-1" style="margin-right: 162px">Партнер</label>
+        <input class="custom-radio" name="typeParticipant" type="radio" id="radio-2" value="Observer"> 
+        <label for="radio-2">Контролёр</label>
+      </div>
+      <div class="buttonsParticipant">
+        <button type="submit" id="createParticipantButton" class="createParticipantButton disable" >
+          Создать
+        </button>
+        <button type="button"  class="closeModalParticipant">
+          Отмена
+        </button>
+        </a>
+      </div>
+    </dialog>
+
+    <ul class="ul notifications">
+
+    <script type="module" src="../../src/modules/events/index.js"></script>
+  </body>
+</html>
