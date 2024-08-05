@@ -95,5 +95,5 @@ export function hidepassword() {
 }
 
 export function redirectToRegistration() {
-  window.location.href = "../../registration/index.html";
+  window.location.href = "../../pages/registration/index.html";
 }
