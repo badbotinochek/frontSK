@@ -63,6 +63,7 @@ export async function loginUser() {
 
     if (loginData.refresh_token) {
       localStorage.setItem("user_id", loginData.user_id);
+      localStorage.setItem("user_name", loginData.user.name);
       await refreshAccessToken(loginData.refresh_token);
     }
   } catch (error) {
@@ -81,6 +82,18 @@ export async function loginUser() {
   }
 }
 
+export function hidepassword() {
+  if (formAuth.password.type === "password") {
+    formAuth.password.type = "text";
+    formAuth.eyecon.classList.add("fa-eye");
+    formAuth.eyecon.classList.remove("fa-eye-slash");
+  } else {
+    formAuth.password.type = "password";
+    formAuth.eyecon.classList.remove("fa-eye");
+    formAuth.eyecon.classList.add("fa-eye-slash");
+  }
+}
+
 export function redirectToRegistration() {
-  window.location.href = "../pages/registration/index.html";
+  window.location.href = "../../registration/index.html";
 }

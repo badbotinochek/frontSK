@@ -9,6 +9,8 @@ import {
   removeErrorPassword,
   onPhoneInput,
   onPhoneKeyDown,
+  hidepassword1,
+  hidepassword2,
 } from "./utils.js";
 
 window.onload = function () {
@@ -41,4 +43,7 @@ window.onload = function () {
 
   formRegistration.mobile.addEventListener("input", onPhoneInput);
   formRegistration.mobile.addEventListener("keydown", onPhoneKeyDown);
+
+  formRegistration.eyecon1.addEventListener("click", hidepassword1);
+  formRegistration.eyecon2.addEventListener("click", hidepassword2);
 };

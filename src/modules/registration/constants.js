@@ -12,4 +12,6 @@ export const formRegistration = {
   textPasswordErrorRepeat: document.querySelector(".textPasswordErrorRepeat"),
   textPasswordError: document.querySelector(".textPasswordError"),
   textPasswordError2: document.querySelector(".textPasswordError2"),
+  eyecon1: document.getElementById("eye-1"),
+  eyecon2: document.getElementById("eye-2"),
 };

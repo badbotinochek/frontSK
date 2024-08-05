@@ -5,6 +5,7 @@ import {
   getAllMyEvents,
   getCategoryTransaction,
   createTransactionApi,
+  updateTransactionApi,
   refreshAccessToken,
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
@@ -26,9 +27,9 @@ export function checkForm() {
     : "";
   // console.log(12, start_date && end_date && input_event);
   if (start_date && end_date && input_event) {
-    formTransactions.button.classList.remove("disable");
+    formTransactions.getTransactionButton.classList.remove("disable");
   } else {
-    formTransactions.button.classList.add("disable");
+    formTransactions.getTransactionButton.classList.add("disable");
   }
 }
 
@@ -50,6 +51,7 @@ export function handleClick() {
   formTransactions.modalElement.close();
   clearModalData();
 }
+
 export function handleClickTra() {
   formTransactions.modalElementTr.close();
   clearModalData();
@@ -60,6 +62,7 @@ export function handleClickTraShow() {
 }
 
 export function createTransaction() {
+  clearModalData();
   var buttonEdit = document.getElementById("changeTra");
   buttonEdit.classList.add("Off");
   var buttonCreate = document.getElementById("createTra");
@@ -92,14 +95,15 @@ export function deleteEErrorBorder() {
   formTransactions.end_date.classList.remove("error");
 }
 
-export async function getTransactions() {
-  let buttonClicked = false;
-  if (buttonClicked) {
-    return;
-  }
-  buttonClicked = true;
-  formTransactions.button.classList.add("disable");
+export function getCountTransactions() {
+  var screenHeight = window.innerHeight;
 
+  var countTransaction = (screenHeight - 157) / 47 - 1;
+  let intNumber = Math.floor(countTransaction);
+  return intNumber;
+}
+
+export async function getTransactionsForPaginations(pagination) {
   const start_date = new Date(formTransactions.start_date.value);
   const end_date = new Date(formTransactions.end_date.value);
 
@@ -107,24 +111,17 @@ export async function getTransactions() {
     start_date.toISOString().slice(0, 10) + "T00:00:00Z";
   const formattedEndDate = end_date.toISOString().slice(0, 10) + "T23:59:59Z";
   const event_id = localStorage.getItem("event");
-  const limit = 40;
-  const offset = 0;
-  const access_token = localStorage.getItem("access_token");
-
-  if (checkDate(formattedStartDate, formattedEndDate)) {
+  var limit = 15;
+  var offset = 0;
+  if (pagination) {
+    offset = getCountRowsTable();
+    console.log(offset);
   } else {
-    const errorMessage = `Дата окончания мероприятия не может быть меньше даты начала мероприятия`;
-    createToast("error", errorMessage);
-    formTransactions.button.classList.add("disable");
-    formTransactions.start_date.classList.add("error");
-    formTransactions.end_date.classList.add("error");
-
-    return;
+    offset = getCountTransactions();
   }
 
-  formTransactions.start_date.classList.remove("error");
-  formTransactions.end_date.classList.remove("error");
-  console.log("2234");
+  const access_token = localStorage.getItem("access_token");
+
   try {
     const responseData = await getTransacionsForEvent(
       formattedStartDate,
@@ -134,14 +131,83 @@ export async function getTransactions() {
       offset,
       access_token
     );
-    setTimeout(() => {
-      formTransactions.button.disabled = false;
-      buttonClicked = false;
-    }, 1000);
 
-    console.log(responseData);
+    if (responseData.length > 0) {
+      formTransactions.labelMoreTransaction.classList.remove("disable");
+    } else {
+      formTransactions.labelMoreTransaction.classList.add("disable");
+    }
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+export function getCountRowsTable() {
+  const tbody = document.querySelector("tbody");
+  const rows = tbody.querySelectorAll("tr");
+  const rowCount = rows.length;
+
+  console.log(`Количество строк в таблице: ${rowCount}`);
+  return rowCount;
+}
+
+export async function getTransactions(offset = 0, append = false) {
+  if (formTransactions.getTransactionButton.disabled) {
+    return;
+  }
+  formTransactions.getTransactionButton.disabled = true;
+  formTransactions.getTransactionButton.classList.add("disable");
+
+  try {
+    const start_date = new Date(formTransactions.start_date.value);
+    const end_date = new Date(formTransactions.end_date.value);
+    const formattedStartDate =
+      start_date.toISOString().slice(0, 10) + "T00:00:00Z";
+    const formattedEndDate = end_date.toISOString().slice(0, 10) + "T23:59:59Z";
+    const event_id = localStorage.getItem("event");
+    const limit = getCountTransactions();
+    var offset = offset;
+    const access_token = localStorage.getItem("access_token");
+
+    if (checkDate(formattedStartDate, formattedEndDate)) {
+    } else {
+      const errorMessage = `Дата окончания мероприятия не может быть меньше даты начала мероприятия`;
+      createToast("error", errorMessage);
+      formTransactions.getTransactionButton.classList.add("disable");
+      formTransactions.start_date.classList.add("error");
+      formTransactions.end_date.classList.add("error");
+      return;
+    }
+
+    formTransactions.start_date.classList.remove("error");
+    formTransactions.end_date.classList.remove("error");
+
+    getTransactionsForPaginations(false);
+
+    const responseCat = getCategoryTransaction();
+
+    const responseData = await getTransacionsForEvent(
+      formattedStartDate,
+      formattedEndDate,
+      event_id,
+      limit,
+      offset,
+      access_token
+    );
     const tbody = document.querySelector("tbody");
-    tbody.innerHTML = "";
+    // Проверка, есть ли данные
+    const label = document.getElementById("infoTransactionsLabel");
+    if (responseData.length === 0) {
+      label.classList.remove("disable");
+      tbody.innerHTML = "";
+      return;
+    } else {
+      label.classList.add("disable");
+    }
+
+    if (!append) {
+      tbody.innerHTML = "";
+    }
 
     // Перебираем полученные данные и добавляем строки в таблицу
     responseData.forEach((transaction) => {
@@ -153,13 +219,12 @@ export async function getTransactions() {
       const minutes = ("0" + date.getMinutes()).slice(-2);
       const seconds = ("0" + date.getSeconds()).slice(-2);
       const formattedTime = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+
+      responseCat;
+
       const categoryTran = idToNameMap[transaction.category_id];
 
       let type;
-      let receipt_id;
-      const user_id = parseInt(localStorage.getItem("user_id"), 10);
-      let user;
-      // console.log(transaction);
       if (transaction.type === "Income") {
         type = "Доход";
       } else if (transaction.type === "Expense") {
@@ -168,94 +233,57 @@ export async function getTransactions() {
         type = transaction.type;
       }
 
-      if (transaction.receipt_id === null) {
-        receipt_id = "";
-      } else {
-        receipt_id = transaction.receipt_id;
-      }
+      const receipt_id = transaction.receipt_id || "";
 
+      const user_id = parseInt(localStorage.getItem("user_id"), 10);
+      let user;
       if (transaction.user_id === user_id) {
         user = "Вы";
-        // console.log(transaction.user_id);
       } else {
         user = transaction.user_id;
       }
-      // console.log(transaction);
+
       const newRow = document.createElement("tr");
-
       const eventRole = localStorage.getItem("eventRole");
+      let rowHTML = `
+      <td>${transaction.number}</td>
+      <td>${formattedTime}</td>
+      <td>${type}</td>
+      <td>${categoryTran}</td>
+      <td>${transaction.amount} руб</td>
+      <td>${user}</td>
+      <td>${receipt_id}</td>`;
 
-      if (eventRole === "Manager") {
-        newRow.innerHTML = `
-        <td>${transaction.number}</td>
-        <td>${formattedTime}</td>
-        <td>${type}</td>
-        <td>${categoryTran}</td>
-        <td>${transaction.amount + " р"}</td>
-        <td>${user}</td>
-        <td>${receipt_id}</td>
-        <td> 
-          <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow" > 
-          <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit" > 
-          <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${
-            transaction.id
-          }">
-        </td>
-    `;
+      if (
+        eventRole === "Manager" ||
+        (eventRole === "Observer" &&
+          transaction.user_id === parseInt(localStorage.getItem("user_id"), 10))
+      ) {
+        rowHTML += `
+          <td>
+            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
+            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
+          </td>`;
       } else if (eventRole === "Partner") {
-        newRow.innerHTML = `
-            <td>${transaction.number}</td>
-            <td>${formattedTime}</td>
-            <td>${type}</td>
-            <td>${categoryTran}</td>
-            <td>${transaction.amount + " р"}</td>
-            <td>${user}</td>
-            <td>${receipt_id}</td>
-            <td> 
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow" > 
-            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit" > 
-            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${
-              transaction.id
-            }">
-          </td>
-      `;
-      } else if (eventRole === "Observer") {
-        if (transaction.user_id === user_id) {
-          newRow.innerHTML = `
-          <td>${transaction.number}</td>
-          <td>${formattedTime}</td>
-          <td>${type}</td>
-          <td>${categoryTran}</td>
-          <td>${transaction.amount + " р"}</td>
-          <td>${user}</td>
-          <td>${receipt_id}</td>
-          <td> 
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow" > 
-            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit" > 
-            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${
-              transaction.id
-            }">
-          </td>
-      `;
-        } else {
-          newRow.innerHTML = `
-          <td>${transaction.number}</td>
-          <td>${formattedTime}</td>
-          <td>${type}</td>
-          <td>${categoryTran}</td>
-          <td>${transaction.amount + " р"}</td>
-          <td>${user}</td>
-          <td>${receipt_id}</td>
-          <td> 
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow" > 
-          </td>
-      `;
-        }
+        rowHTML += `
+          <td>
+            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
+            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
+          </td>`;
+      } else {
+        rowHTML += `
+          <td>
+            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+          </td>`;
       }
 
       // newRow.addEventListener("click", function () {
       //   console.log(transaction);
       // });
+
+      newRow.innerHTML = rowHTML;
       tbody.appendChild(newRow);
 
       const iconsDelete = document.querySelectorAll(".iconDelete");
@@ -263,7 +291,6 @@ export async function getTransactions() {
       iconsDelete.forEach(function (icon) {
         icon.addEventListener("click", function () {
           const transactionId = icon.getAttribute("data-transaction-id");
-          // console.log(transactionId);
           localStorage.setItem("transactionId", transactionId);
 
           formTransactions.modalElement.showModal();
@@ -271,9 +298,8 @@ export async function getTransactions() {
       });
 
       newRow.addEventListener("click", function () {
-        // console.log(transaction);
-
         const categoryTransa = idToNameMap[transaction.category_id];
+        console.log(categoryTransa);
         const idTransactionEdit = transaction.number;
         const dateTransaction = transaction.transaction_date;
         const timeTransaction = transaction.transaction_date;
@@ -316,9 +342,7 @@ export async function getTransactions() {
         buttonEdit.classList.remove("Off");
         var buttonCreate = document.getElementById("createTra");
         buttonCreate.classList.add("Off");
-        saveOriginalValues();
-        // console.log(originalValues);
-        checkForChanges();
+        getCategory();
         modalTransaction.showModal();
       });
     });
@@ -327,7 +351,7 @@ export async function getTransactions() {
     iconsShow.forEach(function (icon) {
       icon.addEventListener("click", function () {
         const inputs = formTransactions.showModalElementTr.querySelectorAll(
-          "input, textarea, button"
+          "input, textarea, getTransactionButton"
         );
 
         formTransactions.showIdTransaction.style.background = "#f5f7fa";
@@ -340,23 +364,15 @@ export async function getTransactions() {
         formTransactions.showModalElementTr.showModal();
       });
     });
-
-    if (responseData.length === 0) {
-      const label = document.getElementById("infoTransactionsLabel");
-      label.classList.remove("disable");
-    } else {
-      const label = document.getElementById("infoTransactionsLabel");
-      label.classList.add("disable");
+    if (append) {
+      getTransactionsForPaginations(true);
     }
-
-    formTransactions.button.classList.remove("disable");
   } catch (error) {
     console.error("Произошла ошибка:", error);
     alert("Произошла ошибка при обращении к серверу.");
-    setTimeout(() => {
-      formTransactions.button.classList.remove("disable");
-      buttonClicked = false;
-    }, 1000);
+  } finally {
+    formTransactions.getTransactionButton.classList.remove("disable");
+    formTransactions.getTransactionButton.disabled = false;
   }
 }
 
@@ -386,6 +402,9 @@ export function checkForChanges() {
     description: document.getElementById("descriptionTran").value,
   };
 
+  console.log(originalValues);
+  console.log(currentValues);
+
   const hasChanges = Object.keys(originalValues).some(
     (key) => originalValues[key] !== currentValues[key]
   );
@@ -412,14 +431,17 @@ function fillModalWithData(
   InputId.value = id;
   formTransactions.dateTransaction.value = date;
   formTransactions.timeTransaction.value = time;
-  radioButtons.forEach((button) => {
-    if (button.value === type) {
-      button.checked = true;
+  radioButtons.forEach((getTransactionButton) => {
+    if (getTransactionButton.value === type) {
+      getTransactionButton.checked = true;
     }
   });
   formTransactions.catTransaction.value = category;
   formTransactions.sumTransaction.value = amount;
   formTransactions.description.value = description;
+  saveOriginalValues();
+  const changeBtn = document.getElementById("changeTra");
+  changeBtn.classList.add("disable");
 }
 
 function fillModaShowlWithData(
@@ -437,9 +459,9 @@ function fillModaShowlWithData(
   formTransactions.showIdTransaction.value = id;
   formTransactions.showDateTransaction.value = date;
   formTransactions.showTimeTransaction.value = time;
-  radioButtons.forEach((button) => {
-    if (button.value === type) {
-      button.checked = true;
+  radioButtons.forEach((getTransactionButton) => {
+    if (getTransactionButton.value === type) {
+      getTransactionButton.checked = true;
     }
   });
   formTransactions.showCatTransaction.value = category;
@@ -501,7 +523,7 @@ export async function getEvent() {
 const foo = () => {
   const list = document.querySelector(".option");
   const input = document.querySelector(".text-box");
-  //   console.log(list);
+  console.log(list);
   for (let i = 0; i < list.children.length; i++) {
     list?.children[i].addEventListener("click", (e) => {
       const selectedId = list.children[i].getAttribute("data-id");
@@ -591,6 +613,17 @@ export function closeDropdown(event) {
   }
 }
 
+export function toggleDropdownCat(event) {
+  formTransactions.dropdownCat.classList.toggle("active");
+  event.stopPropagation();
+}
+
+export function closeDropdownTransaction(event) {
+  if (!formTransactions.option1.contains(event.target)) {
+    formTransactions.dropdown1.classList.remove("active");
+  }
+}
+
 function getInputSumValue(input) {
   return input.value.replace(/[^\d,]/g, "");
 }
@@ -631,36 +664,194 @@ export function onPhoneKeyDown(e) {
     input.value = "";
   }
 }
-let data;
+
+export async function getAllCategory() {
+  try {
+    const categories = await getCategoryTransaction();
+    categories.forEach((item) => {
+      idToNameMap[item.id] = item.name;
+    });
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+// function createCategoryTree(categories, parentElement) {
+//   categories.forEach((category) => {
+//     const categoryId = category.id;
+//     const categoryName = category.name;
+//     const listItem = document.createElement("li");
+//     const span = document.createElement("span");
+//     span.classList.add("show");
+//     span.textContent = categoryName;
+//     listItem.setAttribute("data-id", categoryId);
+//     listItem.appendChild(span);
+//     parentElement.appendChild(listItem);
+
+//     if (category.sub_categories && category.sub_categories.length > 0) {
+//       const subList = document.createElement("ul");
+//       listItem.appendChild(subList);
+//       createCategoryTree(category.sub_categories, subList);
+//     }
+//   });
+// }
+
+// function createCategoryTree(categories, parentElement) {
+//   categories.forEach((category) => {
+//     const categoryId = category.id;
+//     const categoryName = category.name;
+
+//     // Создаем элемент списка
+//     const listItem = document.createElement("li");
+//     listItem.setAttribute("data-id", categoryId);
+
+//     // Создаем элемент span для отображения имени категории
+//     const span = document.createElement("span");
+//     span.textContent = categoryName;
+
+//     // Добавляем элемент span в элемент списка
+//     listItem.appendChild(span);
+
+//     let toggleSpan;
+
+//     // Если у категории есть подкатегории, создаем вложенный список
+//     if (category.sub_categories && category.sub_categories.length > 0) {
+//       const subList = document.createElement("ul");
+//       subList.hidden = true; // Изначально скрываем подкатегории
+//       listItem.appendChild(subList);
+//       createCategoryTree(category.sub_categories, subList);
+
+//       // Добавляем класс toggle и плюсик к span
+//       toggleSpan = document.createElement("span");
+//       toggleSpan.classList.add("toggle", "plus");
+//       listItem.insertBefore(toggleSpan, span);
+//     } else {
+//       // Если подкатегорий нет, добавляем минус
+//       toggleSpan = document.createElement("span");
+//       toggleSpan.classList.add("toggle", "minus");
+//       listItem.insertBefore(toggleSpan, span);
+//     }
+
+//     // Добавляем элемент списка в родительский элемент
+//     parentElement.appendChild(listItem);
+
+//     // Обработчик события для переключения видимости подкатегорий
+//     toggleSpan.addEventListener("click", function () {
+//       if (category.sub_categories && category.sub_categories.length > 0) {
+//         const subList = listItem.querySelector("ul");
+//         subList.hidden = !subList.hidden;
+//         // Переключаем класс и текст на плюс или минус
+//         if (subList.hidden) {
+//           toggleSpan.classList.remove("minus");
+//           toggleSpan.classList.add("plus");
+//         } else {
+//           toggleSpan.classList.remove("plus");
+//           toggleSpan.classList.add("minus");
+//         }
+//       }
+//     });
+//   });
+// }
+
+//
+
+function createCategoryTree(categories, parentElement) {
+  // Находим элемент input с классом "categoryBox"
+  const inputElement = document.querySelector(".categoryBox");
+
+  // Создаем контейнер для дерева категорий
+  const treeContainer = document.createElement("div");
+  treeContainer.classList.add("category-tree");
+  parentElement.appendChild(treeContainer);
+
+  // Функция для рекурсивного создания дерева
+  function createTree(categories, container) {
+    categories.forEach((category) => {
+      const categoryId = category.id;
+      const categoryName = category.name;
+
+      // Создаем элемент списка
+      const listItem = document.createElement("li");
+      listItem.setAttribute("data-id", categoryId);
+      listItem.setAttribute("data-name", categoryName); // Сохраняем имя категории
+
+      // Создаем элемент span для отображения имени категории
+      const span = document.createElement("span");
+      span.textContent = categoryName;
+
+      // Добавляем элемент span в элемент списка
+      listItem.appendChild(span);
+
+      // Если у категории есть подкатегории, создаем вложенный список
+      if (category.sub_categories && category.sub_categories.length > 0) {
+        const subList = document.createElement("ul");
+        subList.hidden = true; // Изначально скрываем подкатегории
+        listItem.appendChild(subList);
+        createTree(category.sub_categories, subList);
+
+        // Добавляем span для развертывания/свертывания подкатегорий
+        const toggleSpan = document.createElement("span");
+        toggleSpan.classList.add("toggle", "plus");
+
+        listItem.insertBefore(toggleSpan, span);
+      } else {
+        const toggleSpan = document.createElement("span");
+        toggleSpan.classList.add("toggle", "minus");
+        listItem.insertBefore(toggleSpan, span);
+      }
+
+      // Добавляем элемент списка в контейнер
+      container.appendChild(listItem);
+    });
+  }
+
+  // Создаем дерево категорий
+  createTree(categories, treeContainer);
+
+  // Обработчик кликов на контейнер дерева
+  treeContainer.addEventListener("click", function (event) {
+    const target = event.target;
+
+    // Если клик на элемент с классом toggle
+    if (target.classList.contains("toggle")) {
+      event.stopPropagation(); // Предотвращаем всплытие события
+
+      const listItem = target.parentNode;
+      const subList = listItem.querySelector("ul");
+
+      if (subList) {
+        // Переключаем видимость подкатегорий
+        subList.hidden = !subList.hidden;
+
+        // Обновляем класс и текст toggleSpan
+        if (subList.hidden) {
+          target.classList.remove("minus");
+          target.classList.add("plus");
+        } else {
+          target.classList.remove("plus");
+          target.classList.add("minus");
+        }
+      }
+    }
+    // Если клик на <li> или <span> (с именем категории)
+    else if (target.tagName === "SPAN" || target.tagName === "LI") {
+      // Определяем элемент <li>, на который был произведен клик
+      const listItem = target.tagName === "SPAN" ? target.parentNode : target;
+      inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
+      formTransactions.dropdown1.classList.remove("active");
+      console.log("24");
+      event.stopPropagation();
+      checkForChanges();
+    }
+  });
+}
 
 export async function getCategory() {
   try {
     const categories = await getCategoryTransaction();
-    console.log(categories);
 
     const lista = document.getElementById("optionCat");
     lista.innerHTML = "";
-
-    // Рекурсивная функция для создания дерева категорий
-    function createCategoryTree(categories, parentElement) {
-      categories.forEach((category) => {
-        const categoryId = category.id;
-        const categoryName = category.name;
-        const listItem = document.createElement("li");
-        const span = document.createElement("span");
-        span.classList.add("show");
-        span.textContent = categoryName;
-        listItem.setAttribute("data-id", categoryId);
-        listItem.appendChild(span);
-        parentElement.appendChild(listItem);
-
-        if (category.sub_categories && category.sub_categories.length > 0) {
-          const subList = document.createElement("ul");
-          listItem.appendChild(subList);
-          createCategoryTree(category.sub_categories, subList);
-        }
-      });
-    }
 
     // Создание корневого элемента UL
     const rootUl = document.createElement("ul");
@@ -671,60 +862,10 @@ export async function getCategory() {
     // Создание дерева категорий
     createCategoryTree(categories, rootUl);
 
-    fooq1();
+    // fooq1();
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
   }
-}
-
-const fooq1 = () => {
-  const catTree = document.getElementById("tree");
-  catTree.onclick = function (event) {
-    console.log(event.target.tagName);
-    if (event.target.tagName != "SPAN") return;
-
-    let childerContainer = event.target.parentNode.querySelector("ul");
-
-    if (!childerContainer) return;
-
-    childerContainer.hidden = !childerContainer.hidden;
-
-    if (childerContainer.hidden) {
-      event.target.classList.add("hide");
-      event.target.classList.remove("show");
-    } else {
-      event.target.classList.add("show");
-      event.target.classList.remove("hide");
-    }
-  };
-
-  const list = document.getElementById("optionCat");
-  const input = document.querySelector(".categoryBox");
-
-  // Добавляем обработчики событий для всех элементов списка, включая вложенные
-  function addClickListeners(element) {
-    if (element.children.length === 0) {
-      element.addEventListener("click", (e) => {
-        const selectedId = element.parentElement.getAttribute("data-id");
-        const selectedValue = element.textContent;
-        console.log("Я тут", selectedId);
-
-        input.value = selectedValue;
-        localStorage.setItem("cat_transaction", selectedId);
-      });
-    } else {
-      for (let i = 0; i < element.children.length; i++) {
-        addClickListeners(element.children[i]);
-      }
-    }
-  }
-
-  addClickListeners(list);
-};
-
-export function toggleDropdownCat(event) {
-  formTransactions.dropdownCat.classList.toggle("active");
-  event.stopPropagation();
 }
 
 export function checkCreateTranForm() {
@@ -756,6 +897,20 @@ function getSelectedRadioValue() {
   return null;
 }
 
+function convertTimeToUtc(localDate, localTime) {
+  const transactionDateTime = `${localDate}T${localTime}:00`;
+
+  const transactionDateLocal = new Date(transactionDateTime);
+
+  const transactionDateUTC = new Date(
+    transactionDateLocal.getTime() -
+      transactionDateLocal.getTimezoneOffset() * 60000
+  );
+  const transactionDateUTCString = transactionDateUTC.toISOString();
+
+  return transactionDateUTCString;
+}
+
 export async function createNewTransaction() {
   let buttonClicked = false;
   formTransactions.createTra.classList.add("disable");
@@ -767,9 +922,12 @@ export async function createNewTransaction() {
   const catTransactionId = localStorage.getItem("cat_transaction");
   const sumTransaction = formTransactions.sumTransaction.value;
   const accessToken = localStorage.getItem("access_token");
-  const dateTime = new Date(`${dateTransaction}T${timeTransaction}:00`);
+  // const dateTime = new Date(`${dateTransaction}T${timeTransaction}:00`);
   const description = formTransactions.description.value || null;
   const typeTransaction = getSelectedRadioValue();
+
+  let dateUTCString = "";
+  dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
 
   try {
     const response = await createTransactionApi(
@@ -777,7 +935,7 @@ export async function createNewTransaction() {
       typeTransaction,
       catTransactionId,
       sumTransaction,
-      dateTime,
+      dateUTCString,
       description,
       accessToken
     );
@@ -797,30 +955,64 @@ export async function createNewTransaction() {
   }
 }
 
+export async function updateTransaction() {
+  let buttonClicked = false;
+  formTransactions.createTra.classList.add("disable");
+  buttonClicked = true;
+  const eventId = localStorage.getItem("event");
+  const idTransaction = formTransactions.idTransaction.value;
+  const dateTransaction = formTransactions.dateTransaction.value;
+  const timeTransaction = formTransactions.timeTransaction.value;
+  const catTransactionId = localStorage.getItem("cat_transaction");
+  const sumTransaction = formTransactions.sumTransaction.value;
+  const accessToken = localStorage.getItem("access_token");
+
+  const description = formTransactions.description.value || null;
+  const typeTransaction = getSelectedRadioValue();
+
+  let dateUTCString = "";
+  dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
+
+  try {
+    const response = await updateTransactionApi(
+      idTransaction,
+      eventId,
+      typeTransaction,
+      catTransactionId,
+      sumTransaction,
+      dateUTCString,
+      description,
+      accessToken
+    );
+
+    handleClickTra();
+    const successMessage = `Транзакция успешно обновлена`;
+    createToast("success", successMessage);
+    setTimeout(getTransactions, 100);
+    clearModalData();
+    const changeBtn = document.getElementById("changeTra");
+    changeBtn.classList.add("disable");
+  } catch (error) {
+    // console.log("Я тут ");
+
+    setTimeout(() => {
+      buttonClicked = false;
+    }, 10000);
+  }
+}
+
 export function clearModalData() {
   const InputId = document.getElementById("InputId");
   InputId.value = "";
   formTransactions.dateTransaction.value = ""; // Очищаем поле "Дата"
   formTransactions.timeTransaction.value = ""; // Очищаем поле "Время"
   // Очищаем выбранные радиокнопки
-  formTransactions.radioButtons.forEach((button) => {
-    button.checked = false;
+  formTransactions.radioButtons.forEach((getTransactionButton) => {
+    getTransactionButton.checked = false;
   });
   formTransactions.catTransaction.value = ""; // Очищаем поле "Категория"
   formTransactions.sumTransaction.value = ""; // Очищаем поле "Сумма"
   formTransactions.description.value = ""; // Очищаем поле "Описание"
-}
-
-export async function getAllCategory() {
-  try {
-    const categories = await getCategoryTransaction();
-    categories.forEach((item) => {
-      idToNameMap[item.id] = item.name;
-    });
-    // console.log(idToNameMap);
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
 }
 
 export function checkEditTranForm() {
@@ -831,6 +1023,7 @@ export function checkEditTranForm() {
     typeTransaction: document.querySelector(
       'input[name="typeTransaction"]:checked'
     ),
+
     sumTransaction: document.getElementById("sumTransaction"),
     description: document.getElementById("descriptionTran"),
   };
@@ -875,12 +1068,6 @@ export function checkEditTranForm() {
       field.addEventListener("input", handleChange);
     }
   });
-
-  // if (dateTransaction && timeTransaction && sumTransaction && catTransaction) {
-  //   formTransactions.createTra.classList.remove("disable");
-  // } else {
-  //   formTransactions.createTra.classList.add("disable");
-  // }
 }
 
 export async function checkAndUpdateToken() {
@@ -904,5 +1091,12 @@ export async function checkAndUpdateToken() {
     }
   } else if (timeLeft > 2 * 60 * 1000) {
     setTimeout(checkAndUpdateToken, timeLeft - 2 * 60 * 1000); // Запланировать обновление за 2 минуты до истечения
+  }
+}
+
+export function redirectToAuth() {
+  const access_token = localStorage.getItem("access_token");
+  if (!access_token) {
+    window.location.href = "../auth/index.html";
   }
 }

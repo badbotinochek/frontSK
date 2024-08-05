@@ -7,6 +7,7 @@ import {
   removeErrorStyle,
   loginUser,
   redirectToRegistration,
+  hidepassword,
 } from "./utils.js";
 
 window.onload = function () {
@@ -16,6 +17,8 @@ window.onload = function () {
   formAuth.rememberMeCheckbox.addEventListener("change", addRememberMe);
   formAuth.button.addEventListener("click", loginUser);
   formAuth.registrationButton.addEventListener("click", redirectToRegistration);
+
+  formAuth.eyecon.addEventListener("click", hidepassword);
 
   redirectAutorize();
 };
