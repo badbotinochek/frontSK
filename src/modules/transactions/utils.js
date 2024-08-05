@@ -599,7 +599,7 @@ export function customTextArea() {
 
 export function exit() {
   localStorage.clear();
-  window.location.href = "../auth/index.html";
+  window.location.href = "../../pages/auth/index.html";
 }
 
 export function toggleDropdown(event) {
@@ -1097,6 +1097,6 @@ export async function checkAndUpdateToken() {
 export function redirectToAuth() {
   const access_token = localStorage.getItem("access_token");
   if (!access_token) {
-    window.location.href = "../auth/index.html";
+    window.location.href = "../../pages/auth/index.html";
   }
 }
