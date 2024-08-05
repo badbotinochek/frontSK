@@ -89,6 +89,7 @@ function fillModalWithData(id, name, start, end, description, participants) {
     tableBody.appendChild(newRow);
   });
   saveOriginalValues(id, name, start, end, description, participants);
+
   checkForChanges();
 }
 
@@ -267,6 +268,8 @@ function saveOriginalValues(id, name, start, end, description, participants) {
     description,
     participants: participants.map((p) => ({ id: p.id, role: p.role })),
   };
+  console.log("originalEventData");
+  console.log(originalEventData);
 }
 
 // Функция для проверки изменений
@@ -288,6 +291,8 @@ export function checkForChanges() {
       role: row.dataset.role,
     };
   });
+
+  // console.log(originalEventData);
 
   const hasChanged =
     originalEventData.name !== name ||
@@ -376,8 +381,6 @@ export async function getMyInvitation() {
               </td>`;
 
       newRow.addEventListener("click", function () {
-        console.log(event);
-
         const idEventEdit = event.id;
         const nameEvent = event.name;
         const startEvent = event.start;
@@ -927,4 +930,16 @@ export function clearModalData() {
 
   const tbodyedit = document.querySelector("#modalEvent .customTable tbody");
   tbodyedit.innerHTML = "";
+}
+
+export function redirectToAuth() {
+  const access_token = localStorage.getItem("access_token");
+  if (!access_token) {
+    window.location.href = "../auth/index.html";
+  }
+}
+
+export function exit() {
+  localStorage.clear();
+  window.location.href = "../auth/index.html";
 }

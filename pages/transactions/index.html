@@ -71,8 +71,7 @@
     <div class="wrapper"> 
         <div class="dropdown">
           <input type="text" class="text-box" placeholder="Выберете мероприятие">
-          <div class="option">
-          </div>
+          <div class="option"></div>
         </div>
         <div><label for="period">Период:</label></div>
         <div><input type="date" id="start-date"></div>
@@ -106,6 +105,14 @@
       </table>
     </div>
     <label id = 'infoTransactionsLabel' class="disable">Нет транзакций </label>
+    
+    
+    
+
+    <label id ='more' class="dataBlockMore disable" >Еще </label>
+
+
+
     <dialog id = "modal" class="modal">
       <h2 class="modal-title">Подтверждение</h2>
           <p>Выполнить действие?</p>
@@ -118,7 +125,7 @@
     <dialog id = "modalTransaction" class="modalTr">
       <label>Номер </label>
       <div >
-        <input id="InputId" class="inputBox" disabled placeholder="ID мерпориятия будет присвоен системой">
+        <input id="InputId" class="inputBox" disabled placeholder="Номер транзакции будет присвоен системой">
       </div>
       <div class ="label ">
         <label>Дата</label>   
@@ -137,7 +144,7 @@
         <label for="radio-1" style="margin-right: 162px">Расход</label>
 
         <input class="custom-radio" name="typeTransaction" type="radio" id="radio-2" value="Income"> 
-        <label for="radio-2">Приход</label>
+        <label for="radio-2">Доход</label>
       </div>
       <div class ="label ">
         <label>Категория</label>
@@ -189,10 +196,10 @@
         <label for="radio-1" style="margin-right: 162px">Расход</label>
 
         <input class="custom-radio" name="showTypeTransaction" type="radio" id="Showradio-2" value="Income"> 
-        <label for="radio-2">Приход</label>
+        <label for="radio-2">Доход</label>
       </div>
       <div class ="label "><label>Категория</label></div>
-      <div class ="dropdown" id="ShowdropdownCat">
+      <div class ="dropdown " id="ShowdropdownCat">
         <input type="text" id="showCatTran" class="categoryBox" placeholder="Введите название категории" readonly disabled>
         <div class="option" id="optionCat">
         </div>

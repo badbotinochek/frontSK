@@ -1,5 +1,32 @@
 const BASE_URL = "https://bsikpg.duckdns.org/api/v1/";
 
+export async function register(name, email, phone, password) {
+  try {
+    const requestBody = JSON.stringify({
+      name: name,
+      email: email,
+      phone: phone,
+      password: password,
+    });
+
+    const response = await fetch(BASE_URL + "auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    });
+
+    if (!response.ok) {
+      throw new Error("Ошибка при выполнении запроса");
+    }
+
+    return await response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function authenticateUser(email, password) {
   try {
     const response = await fetch(BASE_URL + "auth/login", {
@@ -146,33 +173,6 @@ export async function getCategoryTransaction() {
   }
 }
 
-export async function register(name, email, phone, password) {
-  try {
-    const requestBody = JSON.stringify({
-      name: name,
-      email: email,
-      phone: phone,
-      password: password,
-    });
-
-    const response = await fetch(BASE_URL + "auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: requestBody,
-    });
-
-    if (!response.ok) {
-      throw new Error("Ошибка при выполнении запроса");
-    }
-
-    return await response;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export async function createTransactionApi(
   event_id,
   type,
@@ -196,6 +196,45 @@ export async function createTransactionApi(
 
     const response = await fetch(BASE_URL + "transactions", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+      body: JSON.stringify(requestData),
+    });
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateTransactionApi(
+  transaction_id,
+  event_id,
+  type,
+  category_id,
+  amount,
+  transaction_date,
+  description,
+  access_token
+) {
+  try {
+    const requestData = {
+      event_id,
+      type,
+      category_id,
+      amount,
+      transaction_date,
+    };
+    if (description) {
+      requestData.description = description;
+    }
+
+    const response = await fetch(BASE_URL + `transactions/${transaction_id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${access_token}`,

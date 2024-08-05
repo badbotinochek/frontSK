@@ -1,8 +1,9 @@
 export const formTransactions = {
+  idTransaction: document.getElementById("InputId"),
   start_date: document.getElementById("start-date"),
   end_date: document.getElementById("end-date"),
   input_event: document.querySelector(".text-box"),
-  button: document.querySelector(".get-button"),
+  getTransactionButton: document.querySelector(".get-button"),
   delete: document.querySelector(".delete-button"),
   aprove_delete: document.getElementById("deleteBtn"),
   cancel: document.getElementById("closeBtn"),
@@ -17,6 +18,8 @@ export const formTransactions = {
   exit: document.getElementById("exist"),
   dropdown: document.querySelector(".dropdown"),
   option: document.querySelector(".option"),
+  option1: document.querySelector(".option1"),
+  dropdown1: document.querySelector(".dropdown1"),
   sumTransactionInput: document.getElementById("sumTransaction"),
   optionCat: document.getElementById("optionCat"),
   dropdownCat: document.getElementById("dropdownCat"),
@@ -39,4 +42,6 @@ export const formTransactions = {
   showSumTransaction: document.getElementById("ShowsumTransaction"),
   showDescription: document.getElementById("ShowdescriptionTran"),
   showCancelTra: document.getElementById("showCloseBtnTra"),
+
+  labelMoreTransaction: document.getElementById("more"),
 };

@@ -6,4 +6,5 @@ export const formAuth = {
   inputs: document.querySelectorAll("input"),
   error: document.querySelector(".input-error"),
   rememberMeCheckbox: document.getElementById("rememberMe"),
+  eyecon: document.getElementById("eye"),
 };

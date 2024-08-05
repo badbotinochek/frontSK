@@ -85,6 +85,20 @@ h1 {
   outline: #6cc440;
 }
 
+.auth-container input[type="text"] {
+  margin-top: 36px;
+  width: 231px;
+  padding: 10px;
+  height: 32px;
+  border: 1px solid #606266;
+  border-radius: 4px;
+  outline: #6cc440;
+}
+
+#InputPassword {
+  padding-right: 30px;
+}
+
 input.active:focus,
 textarea.active:focus {
   border: 1px solid #409eff;
@@ -197,6 +211,34 @@ textarea::placeholder {
 
 .register-button:hover {
   background-color: #7b7c81;
+}
+
+.password-1 {
+  position: relative;
+}
+
+#eye {
+  top: 45px;
+  right: 10px;
+  font-size: 1.2em;
+  cursor: pointer;
+  position: absolute;
+}
+
+#eye-1 {
+  top: 41px;
+  right: 10px;
+  font-size: 1.2em;
+  cursor: pointer;
+  position: absolute;
+}
+
+#eye-2 {
+  top: 41px;
+  right: 10px;
+  font-size: 1.2em;
+  cursor: pointer;
+  position: absolute;
 }
 
 /* ===== Sidebar ===== */
@@ -425,6 +467,7 @@ header .image-text .header-text {
   padding: 0 0 0 13px;
   cursor: pointer;
   outline: none;
+  padding-right: 35px;
 }
 
 .text-box {
@@ -470,6 +513,15 @@ header .image-text .header-text {
   background: #f5f7fa;
 }
 
+#ShowdropdownCat {
+  margin-top: 20px;
+  width: 420px;
+}
+
+#showCatTran {
+  width: 420px;
+}
+
 .item {
   user-select: none;
 }
@@ -485,7 +537,8 @@ input[type="date"] {
 }
 
 input:focus,
-input[type="date"]:focus {
+input[type="date"]:focus,
+input[type="time"]:focus {
   border: 1px solid #409eff;
   outline: none;
 }
@@ -573,6 +626,20 @@ td img:hover {
   width: 160px;
 }
 
+.dataBlockMore {
+  display: inline-block;
+  margin-left: 80px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  color: #06c;
+}
+
+.dataBlockMore.disable {
+  display: none;
+}
+
 /* Стили для модального окна */
 .modal {
   position: fixed;
@@ -650,7 +717,7 @@ td img:hover {
   left: 50%; /* Размещаем левую часть модального окна посередине по горизонтали */
   transform: translate(-50%, -50%);
   width: 460px;
-  height: 763px;
+  height: 730px;
   user-select: text;
   visibility: visible;
   overflow: auto;
@@ -664,6 +731,10 @@ td img:hover {
   border: none;
   border-radius: 6px;
   user-select: none;
+}
+
+#ShowModalTransaction {
+  height: 765px;
 }
 
 .modalTr[open] {
@@ -874,7 +945,7 @@ td img:hover {
   display: block;
 }
 
-.dropdown1 .option1 li {
+/* .dropdown1 .option1 li {
   padding: 8px 13px;
   cursor: pointer;
   border-radius: 5px;
@@ -886,6 +957,31 @@ td img:hover {
 
 .dropdown1 .option1 ul {
   list-style-type: none;
+} */
+
+/* Основной стиль для элементов списка */
+.dropdown1 .option1 li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  background: transparent;
+}
+
+/* Стиль для элемента <li> при наведении */
+.dropdown1 .option1 li.highlight {
+  background: #f5f7fa; /* Подсветка при наведении */
+}
+
+/* Убираем фон у дочерних элементов */
+.dropdown1 .option1 li ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown1 .option1 li ul li {
+  background: transparent;
 }
 
 .item {
@@ -1385,10 +1481,29 @@ input::placeholder {
   border-radius: 5px;
 }
 
-.hide::before {
+/* .hide::before {
   content: "+  ";
 }
 
 .show::before {
   content: "-  ";
+} */
+
+.toggle {
+  cursor: pointer;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  text-align: center;
+  line-height: 10px;
+  background-color: lightgray;
+}
+
+.toggle.plus::before {
+  content: "+";
+}
+
+.toggle.minus::before {
+  content: "-";
 }

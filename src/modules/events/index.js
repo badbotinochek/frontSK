@@ -15,12 +15,15 @@ import {
   handleClickModelShowEvent,
   checkForChanges,
   editEvent,
+  redirectToAuth,
+  exit,
 } from "./utils.js";
 
 import { createToast } from "../notifications/index.js";
 import { formEvent } from "./constants.js";
 
 document.addEventListener("DOMContentLoaded", function () {
+  redirectToAuth();
   const userId = localStorage.getItem("user_id");
   formEvent.userIdElement.textContent = userId;
 
@@ -30,7 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   getMyInvitation();
   getForeignInvitation();
-  
 
   // setTimeout(getForeignInvitation, 100);
 
@@ -147,4 +149,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   formEvent.editModalEventButton.addEventListener("click", editEvent);
+
+  formEvent.exit.addEventListener("click", exit);
 });

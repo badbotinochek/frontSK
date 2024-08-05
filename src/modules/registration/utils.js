@@ -163,3 +163,27 @@ export function onPhoneKeyDown(e) {
     input.value = "";
   }
 }
+
+export function hidepassword1() {
+  if (formRegistration.password.type === "password") {
+    formRegistration.password.type = "text";
+    formRegistration.eyecon1.classList.remove("fa-eye-slash");
+    formRegistration.eyecon1.classList.add("fa-eye");
+  } else {
+    formRegistration.password.type = "password";
+    formRegistration.eyecon1.classList.remove("fa-eye");
+    formRegistration.eyecon1.classList.add("fa-eye-slash");
+  }
+}
+
+export function hidepassword2() {
+  if (formRegistration.passwordRepeat.type === "password") {
+    formRegistration.passwordRepeat.type = "text";
+    formRegistration.eyecon2.classList.add("fa-eye");
+    formRegistration.eyecon2.classList.remove("fa-eye-slash");
+  } else {
+    formRegistration.passwordRepeat.type = "password";
+    formRegistration.eyecon2.classList.remove("fa-eye");
+    formRegistration.eyecon2.classList.add("fa-eye-slash");
+  }
+}

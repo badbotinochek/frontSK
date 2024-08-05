@@ -7,6 +7,7 @@ export const formEvent = {
   dateEndEventInput: document.getElementById("dateEndEvent"),
   descriptionEvent: document.querySelector(".descriptionEvent"),
   createModalEventButton: document.getElementById("createModalEventButton"),
+
   editModalEventButton: document.getElementById("editEventButton"),
   closeEventFormButton: document.getElementById("closeModalEvent"),
   addParticipantButton: document.getElementById("addParticipantButton"),
@@ -26,4 +27,5 @@ export const formEvent = {
   closeModalShowEvent: document.getElementById("closeModalShowEvent"),
 
   userIdElement: document.getElementById("userId"),
+  exit: document.getElementById("exist"),
 };

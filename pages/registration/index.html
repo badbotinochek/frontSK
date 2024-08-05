@@ -12,6 +12,7 @@
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
     />
+    <script src="https://kit.fontawesome.com/22c45d22f8.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="container">
@@ -53,28 +54,33 @@
                 />
               <div class="textEmailError"> Введите действительный электронный адрес</div>
             </div>
-            <div>
+            <div class="password-1">
               <input
                 placeholder="Пароль"
                 id="InputPassword"
                 name="password"
                 onfocus="this.className='active'"
                 title="Должен соддержать не менее 8 символов, цифру, латинские буквы в верхнем и нижнем регистре и специальный символ @$!%*#?&"
+                type="password"
               />
               <div class="textPasswordError" id='errorpass1'> Пароль должен содержать как минимум 8 символов</div>
               <!-- <div class="textPasswordError3" id='errorpass2'> Пароль должен содержать буквы (a-z, A-Z) и цифры</div> -->
               <div class="textPasswordError2" id='errorpass2'> Пароль должен содержать только буквы (a–z, A–Z), цифры и символы ! @ # $ % ^ & * ( ) - _ + = ; : , . / ? \ | ` ~ { }</div>
               <!-- <div class="textPasswordError4" id='errorpass4'> Не используйте личные данные, последовательности (123456, qwerty) и популярные пароли (password).</div> -->
+              <i id="eye-1" class="fa-regular fa-eye-slash"></i>
             </div>
-            <div>
+            <div class="password-1">
                 <input
                   placeholder="Подтвердите пароль"
                   id="InputPasswordRepeat"
                   name="password"
                   onfocus="this.className='active'"
                   title="Повторите ранее введенный пароль"
+                  type="password"
                 />
+                
                 <div class="textPasswordErrorRepeat"> Пароли не совпадают. Повторите попытку</div>
+                <i id="eye-2" class="fa-regular fa-eye-slash"></i>
             </div>
             <div class="registrationButtons">
               <button type="submit" value="send" id="RegistrationButton" class="registrationButton disable " >
