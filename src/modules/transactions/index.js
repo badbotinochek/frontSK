@@ -254,12 +254,11 @@ document.addEventListener("DOMContentLoaded", function (e) {
     Html5Qrcode.getCameras()
       .then((cameras) => {
         if (cameras && cameras.length) {
-          const cameraId = cameras[0].id;
+          var cameraId = cameras[0].id;
           reader.style.display = "block";
           html5QrCode
             .start(
-              { deviceId: cameraId },
-              { facingMode: "environment" },
+              { deviceId: { exact: cameraId } },
               {
                 fps: 10, // Количество кадров в секунду
                 qrbox: { width: 250, height: 250 }, // Размер области сканирования
