@@ -2,7 +2,6 @@ import { formAuth } from "./constants.js";
 import { EmailValidator } from "../other_functions/validations.js";
 import { createToast } from "../notifications/index.js";
 import { authenticateUser, refreshAccessToken } from "../../utils/api.js";
-import { toast } from "../../shared/Toast/toast.js";
 
 export function checkForm() {
   const email = formAuth.email.value;
@@ -68,6 +67,7 @@ export async function loginUser() {
     }
   } catch (error) {
     if (error.message === "Ошибка аутентификации") {
+      console.log(error);
       formAuth.button.classList.remove("disable");
       const errorMessage = "Неверный логин или пароль.";
       formAuth.email.classList.add("email-error");

@@ -1,5 +1,5 @@
 export const formAuth = {
-  email: document.getElementById("InputEmail"),
+  email: document.getElementById("inputEmail"),
   password: document.getElementById("InputPassword"),
   button: document.querySelector(".signup-button"),
   registrationButton: document.getElementById("registrationButton"),

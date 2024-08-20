@@ -13,6 +13,9 @@ import { checkDate, isFieldFilled } from "../other_functions/validations.js";
 
 const idToNameMap = {};
 
+let countTr = 0;
+let countTransac = 0;
+
 export function checkForm() {
   // console.log(formTransactions.input_event.value);
 
@@ -98,7 +101,7 @@ export function deleteEErrorBorder() {
 export function getCountTransactions() {
   var screenHeight = window.innerHeight;
 
-  var countTransaction = (screenHeight - 157) / 47 - 1;
+  var countTransaction = (screenHeight - 157) / 49 - 1;
   let intNumber = Math.floor(countTransaction);
   return intNumber;
 }
@@ -209,7 +212,8 @@ export async function getTransactions(offset = 0, append = false) {
       tbody.innerHTML = "";
     }
 
-    // Перебираем полученные данные и добавляем строки в таблицу
+    countTr = 0;
+    // Перебираем полученныеs данные и добавляем строки в таблицу
     responseData.forEach((transaction) => {
       const date = new Date(transaction.transaction_date);
       const day = ("0" + date.getDate()).slice(-2);
@@ -227,8 +231,10 @@ export async function getTransactions(offset = 0, append = false) {
       let type;
       if (transaction.type === "Income") {
         type = "Доход";
+        countTr += transaction.amount;
       } else if (transaction.type === "Expense") {
         type = "Расход";
+        countTr -= transaction.amount;
       } else {
         type = transaction.type;
       }
@@ -299,7 +305,7 @@ export async function getTransactions(offset = 0, append = false) {
 
       newRow.addEventListener("click", function () {
         const categoryTransa = idToNameMap[transaction.category_id];
-        console.log(categoryTransa);
+
         const idTransactionEdit = transaction.number;
         const dateTransaction = transaction.transaction_date;
         const timeTransaction = transaction.transaction_date;
@@ -332,6 +338,20 @@ export async function getTransactions(offset = 0, append = false) {
         );
       });
     });
+
+    let rowHTML = `
+    <td> Итого </td>
+    <td> </td>
+    <td> </td>
+    <td> </td>
+    <td>${countTr} руб </td>
+    <td> </td>
+    <td> </td>`;
+
+    const newRow = document.createElement("tr");
+
+    newRow.innerHTML = rowHTML;
+    tbody.appendChild(newRow);
 
     const iconsEdit = document.querySelectorAll(".iconEdit");
 
@@ -401,9 +421,6 @@ export function checkForChanges() {
     sum: document.getElementById("sumTransaction").value,
     description: document.getElementById("descriptionTran").value,
   };
-
-  console.log(originalValues);
-  console.log(currentValues);
 
   const hasChanges = Object.keys(originalValues).some(
     (key) => originalValues[key] !== currentValues[key]
@@ -838,8 +855,10 @@ function createCategoryTree(categories, parentElement) {
       // Определяем элемент <li>, на который был произведен клик
       const listItem = target.tagName === "SPAN" ? target.parentNode : target;
       inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
+      console.log(listItem.getAttribute("data-id"));
+      localStorage.setItem("cat_transaction", listItem.getAttribute("data-id"));
       formTransactions.dropdown1.classList.remove("active");
-      console.log("24");
+
       event.stopPropagation();
       checkForChanges();
     }

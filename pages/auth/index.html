@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>Sweet Cash</title>
     <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="stylesheet" href="../../../styles/auth/auth.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
@@ -23,32 +24,34 @@
           <div>
             <h2>Вход</h2>
           </div>
-            <div>
+          <div>
               <input
                 type="email"
                 placeholder="Адрес электронной почты"
-                id="InputEmail"
+                id="inputEmail"
                 name="email"
                 required 
-                onfocus="this.className='active'"
+                onfocus="this.className='active'" 
+                onblur="this.className=''"
               />
               <div class="input-error"> Некорректный адрес эл. почты</div>
-            </div>
-            <div class="password-1"> 
+          </div>
+          <div class="password-container"> 
               <input
                 type="password"
                 placeholder="Пароль"
                 id="InputPassword"
                 name="password"
-                onfocus="this.className='active'"
+                onfocus="this.className='active'" 
+                onblur="this.className=''"
               />
               <i id="eye" class="fa-regular fa-eye-slash"></i>
-            </div>
-            <div>
+          </div>
+          <div>
               <input type="checkbox" class="custom-checkbox" id="rememberMe" value="yes">
               <label for="rememberMe">Запомнить меня</label>
-            </div>
-            <div class="buttons">
+          </div>
+          <div class="buttons">
               <button type="submit" value="send" id="signup-submit" class="signup-button disable " >
                 Вход
               </button>
@@ -56,7 +59,7 @@
                 Регистрация
               </button>
               </a>
-            </div>
+          </div>
         </div>
       </div>
     </div>
