@@ -44,8 +44,11 @@ export function checkEvent() {
   if (input_event) {
     // console.log("Удалить");
     formTransactions.create_transaction.classList.remove("disable");
+    formTransactions.buttonScanQr.classList.remove("disable");
   } else {
     formTransactions.create_transaction.classList.add("disable");
+    formTransactions.buttonScanQr.classList.add("disable");
+
     // console.log("Установить");
   }
 }
