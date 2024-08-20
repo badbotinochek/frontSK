@@ -82,6 +82,9 @@
           <div><button type="submit" value="send" id="create-submit" class="create-button ">
             Создать
           </button></div>
+          <div><button type="submit" value="send" id="button_scan_qr" class="create-button ">
+            Отсканировать QR код
+          </button></div>
           <div><label class="user-id-label">User ID:</label>
           <span id="user_id"></span></div>
     </div>
@@ -105,10 +108,6 @@
       </table>
     </div>
     <label id = 'infoTransactionsLabel' class="disable">Нет транзакций </label>
-    
-    
-    
-
     <label id ='more' class="dataBlockMore disable" >Еще </label>
 
 
@@ -224,7 +223,19 @@
       </div>
     </dialog>
 
+    
+     
+    
+      <div id="scanner-form">
+        <div id="reader" class="qr-reader"></div>
+        <p id="result">Scan result will appear here</p>
+        <button id="stop-button">Stop Scanner</button>
+      </div>
+  
+
+
     <ul class="ul notifications">
     <script type="module" src="../../src/modules/transactions/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
   </body>
 </html>

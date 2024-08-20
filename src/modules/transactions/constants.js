@@ -44,4 +44,6 @@ export const formTransactions = {
   showCancelTra: document.getElementById("showCloseBtnTra"),
 
   labelMoreTransaction: document.getElementById("more"),
+
+  buttonScanQr: document.getElementById("button_scan_qr"),
 };
