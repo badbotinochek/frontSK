@@ -1123,7 +1123,10 @@ export function redirectToAuth() {
   }
 }
 
-export async function createReceipt(qr) {
+async function onScanSuccess(decodedText, decodedResult) {
+  // handle the scanned code as you like, for example:
+  console.log(`Code matched = ${decodedText}`, decodedResult);
+  alert("Это сообщение отображается в алерте!");
   const access_token = localStorage.getItem("access_token");
   const event_id = localStorage.getItem("event");
   try {
@@ -1132,14 +1135,6 @@ export async function createReceipt(qr) {
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
   }
-}
-
-function onScanSuccess(decodedText, decodedResult) {
-  // handle the scanned code as you like, for example:
-  console.log(`Code matched = ${decodedText}`, decodedResult);
-  alert("Это сообщение отображается в алерте!");
-
-  createReceipt(decodedText);
 }
 
 function onScanFailure(error) {
