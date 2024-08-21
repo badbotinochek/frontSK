@@ -30,6 +30,7 @@ import {
   updateTransaction,
   getAllCategory,
   closeDropdownTransaction,
+  openQrScanner,
 } from "./utils.js";
 
 import { formTransactions } from "./constants.js";
@@ -215,29 +216,5 @@ document.addEventListener("DOMContentLoaded", function (e) {
     }
   });
 
-  function onScanSuccess(decodedText, decodedResult) {
-    // handle the scanned code as you like, for example:
-    console.log(`Code matched = ${decodedText}`, decodedResult);
-    alert("Это сообщение отображается в алерте!");
-  }
-
-  function onScanFailure(error) {
-    // handle scan failure, usually better to ignore and keep scanning.
-    // for example:
-    console.warn(`Code scan error = ${error}`);
-  }
-
-  let html5QrcodeScanner = new Html5QrcodeScanner(
-    "reader",
-    { fps: 50, qrbox: { width: 250, height: 250 } },
-    /* verbose= */ false
-  );
-
-  document
-    .getElementById("button_scan_qr")
-    .addEventListener("click", function () {
-      formTransactions.modalElementScan.showModal();
-
-      html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-    });
+  formTransactions.buttonScanQr.addEventListener("click", openQrScanner);
 });
