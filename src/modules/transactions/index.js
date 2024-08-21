@@ -218,6 +218,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
   function onScanSuccess(decodedText, decodedResult) {
     // handle the scanned code as you like, for example:
     console.log(`Code matched = ${decodedText}`, decodedResult);
+    alert("Это сообщение отображается в алерте!");
   }
 
   function onScanFailure(error) {
@@ -228,15 +229,14 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   let html5QrcodeScanner = new Html5QrcodeScanner(
     "reader",
-    { fps: 10, qrbox: { width: 250, height: 250 } },
+    { fps: 50, qrbox: { width: 250, height: 250 } },
     /* verbose= */ false
   );
 
   document
     .getElementById("button_scan_qr")
     .addEventListener("click", function () {
-      const scannerForm = document.getElementById("scanner-form");
-      scannerForm.style.display = "block";
+      formTransactions.modalElementScan.showModal();
 
       html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     });
