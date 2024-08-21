@@ -1311,7 +1311,6 @@ input::placeholder {
 }
 
 #scanner-form {
-  display: none; /* Скрыть форму по умолчанию */
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1321,49 +1320,6 @@ input::placeholder {
   border: 1px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-}
-
-.qr-reader {
-  width: 300px;
-  height: 300px;
-  margin: 20px auto;
-  border: 1px solid #ccc;
-}
-
-#result {
-  margin-top: 20px;
-  font-size: 18px;
-  color: #333;
-}
-
-.button-container {
-  margin-top: 20px;
-}
-
-.button-container button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-#start-button {
-  background-color: #007bff;
-  color: white;
-}
-
-#start-button:hover {
-  background-color: #0056b3;
-}
-
-#stop-button {
-  background-color: #dc3545;
-  color: white;
-  margin-left: 10px;
-}
-
-#stop-button:hover {
-  background-color: #c82333;
+  width: 400px;
+  height: 400px;
 }
