@@ -1128,6 +1128,7 @@ export async function createReceipt(qr) {
   const event_id = localStorage.getItem("event");
   try {
     const response = await createReceiptApi(event_id, qr, access_token);
+    alert(response);
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
   }
