@@ -215,89 +215,29 @@ document.addEventListener("DOMContentLoaded", function (e) {
     }
   });
 
-  let html5QrCode;
-  let scanning = false;
+  function onScanSuccess(decodedText, decodedResult) {
+    // handle the scanned code as you like, for example:
+    console.log(`Code matched = ${decodedText}`, decodedResult);
+  }
+
+  function onScanFailure(error) {
+    // handle scan failure, usually better to ignore and keep scanning.
+    // for example:
+    console.warn(`Code scan error = ${error}`);
+  }
+
+  let html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader",
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    /* verbose= */ false
+  );
 
   document
     .getElementById("button_scan_qr")
     .addEventListener("click", function () {
-      if (scanning) return;
+      const scannerForm = document.getElementById("scanner-form");
+      scannerForm.style.display = "block";
 
-      // Запрашиваем доступ к камере
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then(() => {
-          const scannerForm = document.getElementById("scanner-form");
-          scannerForm.style.display = "block"; // Показываем форму
-          startScanner(); // Запускаем сканирование
-        })
-        .catch((err) => {
-          console.error("Ошибка доступа к камере: ", err);
-          alert(
-            "Не удалось получить доступ к камере. Пожалуйста, проверьте разрешения."
-          );
-        });
+      html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     });
-
-  document.getElementById("stop-button").addEventListener("click", function () {
-    stopScanner();
-  });
-
-  function startScanner() {
-    const reader = document.getElementById("reader");
-    const result = document.getElementById("result");
-    const startButton = document.getElementById("button_scan_qr");
-    const stopButton = document.getElementById("stop-button");
-
-    html5QrCode = new Html5Qrcode("reader");
-
-    Html5Qrcode.getCameras()
-      .then((cameras) => {
-        if (cameras && cameras.length) {
-          var cameraId = cameras[0].id;
-          reader.style.display = "block";
-          html5QrCode
-            .start(
-              { deviceId: { exact: cameraId } },
-              {
-                fps: 10, // Количество кадров в секунду
-                qrbox: { width: 250, height: 250 }, // Размер области сканирования
-              },
-              (qrCodeMessage) => {
-                result.innerHTML = `QR Code detected: ${qrCodeMessage}`;
-                stopScanner(); // Остановить сканер после успешного сканирования
-              },
-              (errorMessage) => {
-                console.warn(`Ошибка: ${errorMessage}`);
-              }
-            )
-            .catch((err) => {
-              console.error("Ошибка при запуске сканера: ", err);
-            });
-
-          scanning = true;
-          startButton.disabled = true;
-          stopButton.disabled = false;
-        }
-      })
-      .catch((err) => {
-        console.error("Ошибка при получении камеры: ", err);
-      });
-  }
-
-  function stopScanner() {
-    if (scanning && html5QrCode) {
-      html5QrCode
-        .stop()
-        .then(() => {
-          document.getElementById("scanner-form").style.display = "none"; // Скрываем форму
-          scanning = false;
-          document.getElementById("start-button").disabled = false;
-          document.getElementById("stop-button").disabled = true;
-        })
-        .catch((err) => {
-          console.error("Ошибка при остановке сканера: ", err);
-        });
-    }
-  }
 });
