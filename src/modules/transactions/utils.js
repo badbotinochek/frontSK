@@ -1123,10 +1123,22 @@ export function redirectToAuth() {
   }
 }
 
+export async function createReceipt(qr) {
+  const access_token = localStorage.getItem("access_token");
+  const event_id = localStorage.getItem("event");
+  try {
+    const response = await createReceiptApi(event_id, qr, access_token);
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
 function onScanSuccess(decodedText, decodedResult) {
   // handle the scanned code as you like, for example:
   console.log(`Code matched = ${decodedText}`, decodedResult);
   alert("Это сообщение отображается в алерте!");
+
+  createReceipt(decodedText);
 }
 
 function onScanFailure(error) {
