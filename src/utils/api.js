@@ -440,3 +440,27 @@ export async function updateEventApi(
     throw error;
   }
 }
+
+export async function createReceiptApi(event_id, qr, access_token) {
+  try {
+    const requestData = {
+      event_id,
+      qr,
+    };
+
+    const response = await fetch(BASE_URL + `receipts/qr`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+      body: JSON.stringify(requestData),
+    });
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
