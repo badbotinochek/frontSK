@@ -1135,14 +1135,12 @@ function onScanFailure(error) {
   console.warn(`Code scan error = ${error}`);
 }
 
-let html5QrcodeScanner = new Html5QrcodeScanner(
-  "reader",
-  { fps: 50, qrbox: { width: 250, height: 250 } },
-  /* verbose= */ false
-);
-
 export function openQrScanner() {
   formTransactions.modalElementScan.showModal();
-
+  let html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader",
+    { fps: 50, qrbox: { width: 250, height: 250 } },
+    /* verbose= */ false
+  );
   html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 }
