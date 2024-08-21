@@ -1122,3 +1122,27 @@ export function redirectToAuth() {
     window.location.href = "../../pages/auth/index.html";
   }
 }
+
+function onScanSuccess(decodedText, decodedResult) {
+  // handle the scanned code as you like, for example:
+  console.log(`Code matched = ${decodedText}`, decodedResult);
+  alert("Это сообщение отображается в алерте!");
+}
+
+function onScanFailure(error) {
+  // handle scan failure, usually better to ignore and keep scanning.
+  // for example:
+  console.warn(`Code scan error = ${error}`);
+}
+
+let html5QrcodeScanner = new Html5QrcodeScanner(
+  "reader",
+  { fps: 50, qrbox: { width: 250, height: 250 } },
+  /* verbose= */ false
+);
+
+export function openQrScanner() {
+  formTransactions.modalElementScan.showModal();
+
+  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+}
