@@ -7,6 +7,7 @@ import {
   createTransactionApi,
   updateTransactionApi,
   refreshAccessToken,
+  createReceiptApi,
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
@@ -1123,17 +1124,51 @@ export function redirectToAuth() {
   }
 }
 
+function validateQrCode(message) {
+  const regex =
+    /^t=\w{1,}&s=[a-zA-Z0-9.]{1,}&fn=\w{1,}&i=\w{1,}&fp=\w{1,}&n=\w{1,}$/;
+  return regex.test(message);
+}
+
 async function onScanSuccess(decodedText, decodedResult) {
   // handle the scanned code as you like, for example:
+
   console.log(`Code matched = ${decodedText}`, decodedResult);
-  alert("Это сообщение отображается в алерте!");
   const access_token = localStorage.getItem("access_token");
   const event_id = localStorage.getItem("event");
+
+  html5QrcodeScanner
+    .clear()
+    .then((ignore) => {
+      // QR Code scanning is stopped.
+    })
+    .catch((err) => {
+      // Stop failed, handle it.
+    });
+
+  console.log(validateQrCode(decodedText));
+
+  if (!validateQrCode(decodedText)) {
+    alert("Это не QR код");
+    formTransactions.modalElementScan.close();
+    formTransactions.buttonScanQr.classList.remove("disable");
+    formTransactions.buttonScanQr.disabled = false;
+  } else {
+    console.log("Message is valid.");
+  }
+
   try {
-    const response = await createReceiptApi(event_id, qr, access_token);
-    alert(response);
+    const response = await createReceiptApi(
+      event_id,
+      decodedText,
+      access_token
+    );
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
+  } finally {
+    formTransactions.buttonScanQr.classList.remove("disable");
+    formTransactions.buttonScanQr.disabled = false;
+    formTransactions.modalElementScan.close();
   }
 }
 
@@ -1143,12 +1178,16 @@ function onScanFailure(error) {
   console.warn(`Code scan error = ${error}`);
 }
 
+let html5QrcodeScanner = new Html5QrcodeScanner(
+  "reader",
+  { fps: 50, qrbox: { width: 250, height: 250 } },
+  /* verbose= */ false
+);
+
 export function openQrScanner() {
+  formTransactions.buttonScanQr.disabled = true;
+  formTransactions.buttonScanQr.classList.add("disable");
   formTransactions.modalElementScan.showModal();
-  let html5QrcodeScanner = new Html5QrcodeScanner(
-    "reader",
-    { fps: 50, qrbox: { width: 250, height: 250 } },
-    /* verbose= */ false
-  );
+
   html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 }
