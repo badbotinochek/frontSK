@@ -1323,3 +1323,23 @@ input::placeholder {
   width: 400px;
   height: 400px;
 }
+
+.password-1 {
+  position: relative;
+}
+
+#eye-1 {
+  top: 37px;
+  right: 10px;
+  font-size: 1.3em;
+  cursor: pointer;
+  position: absolute;
+}
+
+#eye-2 {
+  top: 37px;
+  right: 10px;
+  font-size: 1.3em;
+  cursor: pointer;
+  position: absolute;
+}

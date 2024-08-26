@@ -342,13 +342,38 @@ export async function getTransactions(offset = 0, append = false) {
         );
       });
     });
+    let countTrValue = 0;
+
+    let table = document.querySelector(".custom-table");
+
+    // Ищем строку с ячейкой <td data-name="Total"> Итого </td>
+    let totalRow = table.querySelector('td[data-name="Total"]')?.parentElement;
+
+    if (totalRow) {
+      // Ищем ячейку с суммой (предполагаем, что она находится в 5-й ячейке)
+      let countTrCell = totalRow.cells[4];
+
+      // Извлекаем значение countTr
+      countTrValue = parseFloat(
+        countTrCell.textContent.trim().replace(" руб", "")
+      );
+
+      // Удаляем строку из таблицы
+      totalRow.remove();
+
+      // Теперь значение countTr сохранено в переменной countTrValue
+      console.log("Значение countTr:", countTrValue);
+    }
+
+    let countTrTotal = countTrValue + countTr;
+    console.log(countTr);
 
     let rowHTML = `
-    <td> Итого </td>
+    <td data-name="Total"> Итого  </td>
     <td> </td>
     <td> </td>
     <td> </td>
-    <td>${countTr} руб </td>
+    <td>${countTrTotal} руб </td>
     <td> </td>
     <td> </td>`;
 
