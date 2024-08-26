@@ -81,7 +81,17 @@ export async function userRegistration() {
     return;
   }
 
-  const cleanedNumber = mobile.replace(/\D/g, "");
+  let cleanedNumber = mobile.replace(/\D/g, "");
+
+  if (cleanedNumber.startsWith("9")) {
+    cleanedNumber = "+7" + cleanedNumber;
+  } else if (cleanedNumber.startsWith("7")) {
+    cleanedNumber = "+" + cleanedNumber;
+  } else if (cleanedNumber.startsWith("8")) {
+    cleanedNumber = "+7" + cleanedNumber.slice(1); // Удаляем первый символ (8) и добавляем +7
+  }
+  console.log(cleanedNumber);
+
   try {
     const response = await register(userName, email, cleanedNumber, password);
     console.log(response.status);
