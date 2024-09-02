@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sweet Cash</title>
+    <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link rel="manifest" href="../../src/modules/auth/asserts/site.webmanifest">
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <h1>Sweet Cash</h1>
+        <div class="confRecContainer">
+            <div>
+              <h2>Подтверждение смены пароля</h2>
+            </div>
+            <p>
+              Для успешного завершения смены пароля Вам необходимо перейти по ссылке, отправленной на адрес <span id="user_recovery_email"></span>.
+            </p>
+        </div>
+      </div>
+    </div>
+    
+    <ul class="ul notifications">
+    <script type="module" src="../../src/modules/registration_confirmation/index.js"></script>
+
+
+
+    <script>
+      const userEmail = localStorage.getItem("user_recovery_email");
+      document.getElementById("user_recovery_email").textContent = userEmail;
+    </script>
+
+  </body>
+</html>

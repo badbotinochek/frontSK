@@ -8,7 +8,7 @@
 
 .auth-container {
   width: 288px;
-  height: 318px;
+  height: 350px;
   border: 1px solid #606266;
   border-radius: 5px;
   padding: 19px 25px 29px 25px;
@@ -176,18 +176,15 @@ textarea::placeholder {
   position: absolute;
 }
 
-#eye-1 {
-  top: 41px;
-  right: 10px;
-  font-size: 1.2em;
+#forgetPassword {
+  margin-top: 18px;
+  display: inline-flex;
+  font-size: 12px;
+  text-decoration: underline;
   cursor: pointer;
-  position: absolute;
+  color: #0b22ef;
 }
 
-#eye-2 {
-  top: 41px;
-  right: 10px;
-  font-size: 1.2em;
-  cursor: pointer;
-  position: absolute;
+#forgetPassword:hover {
+  color: #1020b3;
 }

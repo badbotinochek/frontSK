@@ -464,3 +464,23 @@ export async function createReceiptApi(event_id, qr, access_token) {
     throw error;
   }
 }
+
+export async function recoveryPasswordApi(email) {
+  try {
+    const response = await fetch(
+      BASE_URL + `auth/password/recovery?email=${email}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
