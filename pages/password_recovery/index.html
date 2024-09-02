@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Sweet Cash</title>
-    <link rel="stylesheet" href="../../../styles/style.css" />
-    <link rel="stylesheet" href="../../../styles/auth/auth.css" />
+    <link rel="stylesheet" href="../../styles/style.css" />
+    <link rel="stylesheet" href="../../styles/password_recovery/password_recovery.css" />
+
+
     <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
@@ -20,54 +22,40 @@
     <div class="container">
       <div>
         <h1>Sweet Cash</h1>
-        <div class="auth-container">
+        <div class="password-recovery-container">
           <div>
-            <h2>Вход</h2>
+            <h2>Восстановление доступа</h2>
           </div>
+          <div>
+            <label id="clueText" >Введите Вашу почту, которую использовали в Sweet Cash</label>
+        </div>
           <div>
               <input
                 type="email"
                 placeholder="Адрес электронной почты"
-                id="inputEmail"
+                id="inputEmailRecovery"
                 name="email"
                 required 
                 onfocus="this.className='active'" 
                 onblur="this.className=''"
               />
-              <div class="input-error"> Некорректный адрес эл. почты</div>
+              <div class="input-error-email"> Некорректный адрес эл. почты</div>
           </div>
-          <div class="password-container"> 
-              <input
-                type="password"
-                placeholder="Пароль"
-                id="InputPassword"
-                name="password"
-                onfocus="this.className='active'" 
-                onblur="this.className=''"
-              />
-              <i id="eye" class="fa-regular fa-eye-slash"></i>
-          </div>
-          <div>
-              <input type="checkbox" class="custom-checkbox" id="rememberMe" value="yes">
-              <label for="rememberMe">Запомнить меня</label>
-          </div>
+  
           <div class="buttons">
-              <button type="submit" value="send" id="signup-submit" class="signup-button disable " >
-                Вход
+              <button type="submit" value="send" id="RecoveryPasswordButton" class="signup-button disable " >
+                Отправить
               </button>
-              <button type="button"  id="registrationButton" class="register-button">
-                Регистрация
+              <button type="submit" id="RedirectAuthButton" class="cancellButton">
+                Отмена
               </button>
               </a>
           </div>
-          <div>
-            <label id="forgetPassword" >Забыли пароль?</label>
-        </div>
         </div>
       </div>
     </div>
     
     <ul class="ul notifications">
-    <script type="module" src="../../src/modules/auth/index.js"></script>
+    <script type="module" src="../../src/modules/password_recovery/index.js"></script>
   </body>
 </html>

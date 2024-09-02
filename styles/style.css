@@ -1343,3 +1343,12 @@ input::placeholder {
   cursor: pointer;
   position: absolute;
 }
+
+.confRecContainer {
+  width: 380px;
+  height: 160px;
+  border: 1px solid #606266;
+  border-radius: 5px;
+  padding: 19px 25px 19px 25px;
+  text-align: center;
+}

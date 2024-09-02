@@ -97,3 +97,7 @@ export function hidepassword() {
 export function redirectToRegistration() {
   window.location.href = "../../pages/registration/index.html";
 }
+
+export function redirectToRecoveryPassword() {
+  window.location.href = "../../pages/password_recovery/index.html";
+}

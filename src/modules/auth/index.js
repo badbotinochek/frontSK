@@ -8,6 +8,7 @@ import {
   loginUser,
   redirectToRegistration,
   hidepassword,
+  redirectToRecoveryPassword,
 } from "./utils.js";
 
 window.onload = function () {
@@ -19,6 +20,10 @@ window.onload = function () {
   formAuth.registrationButton.addEventListener("click", redirectToRegistration);
 
   formAuth.eyecon.addEventListener("click", hidepassword);
+  formAuth.labelForgetPassword.addEventListener(
+    "click",
+    redirectToRecoveryPassword
+  );
 
   redirectAutorize();
 };
