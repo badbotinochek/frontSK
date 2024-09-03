@@ -50,7 +50,7 @@ export async function recoveryPassword() {
     if (response.message === "Ok") {
       // Редирект на другую страницу
       localStorage.setItem("user_recovery_email", email);
-      window.location.href = "../registration_confirmation/index.html";
+      window.location.href = "../password_recovery_confirmation/index.html";
     } else {
       // Обработка других случаев
 
