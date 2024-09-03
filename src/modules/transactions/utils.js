@@ -366,16 +366,28 @@ export async function getTransactions(offset = 0, append = false) {
     }
 
     let countTrTotal = countTrValue + countTr;
-    console.log(countTr);
+    let rowHTML = ``;
 
-    let rowHTML = `
-    <td data-name="Total"> Итого  </td>
-    <td> </td>
-    <td> </td>
-    <td> </td>
-    <td>${countTrTotal} руб </td>
-    <td> </td>
-    <td> </td>`;
+    if (countTrTotal > 0) {
+      rowHTML = `
+      <td data-name="Total"> Итого  </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td style="padding-left: 35px; color: green">${countTrTotal} руб </td>
+      <td> </td>
+      <td> </td>`;
+    } else {
+      rowHTML = `
+      <td data-name="Total"> Итого  </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td style="padding-left: 35px; color: red">${countTrTotal} руб </td>
+      <td> </td>
+      <td> </td>`;
+    }
+    console.log(countTr);
 
     const newRow = document.createElement("tr");
 
