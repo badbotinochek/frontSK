@@ -189,28 +189,23 @@ textarea::placeholder {
   color: #1020b3;
 }
 
-/* Медиа-запрос для экранов шириной до 600px */
-@media (max-width: 600px) {
-  .login-container {
-    padding: 15px;
-    box-shadow: none;
-  }
-
-  .login-form input,
-  .login-form button {
-    padding: 12px;
-    font-size: 16px;
-  }
-}
-
-/* Медиа-запрос для экранов шириной до 400px */
 @media (max-width: 400px) {
-  .login-form h2 {
-    font-size: 24px;
+  .auth-container h2 {
+    font-size: 1.2rem;
   }
 
-  .login-form input,
-  .login-form button {
-    font-size: 14px;
+  .auth-container input[type="email"],
+  .auth-container input[type="password"] {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .buttons button {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .password-container i {
+    font-size: 1rem;
   }
 }
