@@ -8,6 +8,7 @@ import {
   updateTransactionApi,
   refreshAccessToken,
   createReceiptApi,
+  getReceiptApi,
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
@@ -255,14 +256,37 @@ export async function getTransactions(offset = 0, append = false) {
 
       const newRow = document.createElement("tr");
       const eventRole = localStorage.getItem("eventRole");
-      let rowHTML = `
-      <td>${transaction.number}</td>
-      <td>${formattedTime}</td>
-      <td>${type}</td>
-      <td>${categoryTran}</td>
-      <td>${transaction.amount} руб</td>
-      <td>${user}</td>
-      <td>${receipt_id}</td>`;
+
+      let rowHTML = ``;
+      if (type === "Доход") {
+        rowHTML = `
+          <td>${transaction.number}</td>
+          <td>${formattedTime}</td>
+          <td>${type}</td>
+          <td>${categoryTran}</td>
+          <td style="color: green"> +${transaction.amount} руб</td>
+          <td>${user}</td>
+          ${
+            receipt_id
+              ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
+              : `<td class="receipt">${receipt_id}</td>`
+          }
+        `;
+      } else {
+        rowHTML = `
+          <td>${transaction.number}</td>
+          <td>${formattedTime}</td>
+          <td>${type}</td>
+          <td>${categoryTran}</td>
+          <td style="color: red"> -${transaction.amount} руб</td>
+          <td>${user}</td>
+          ${
+            receipt_id
+              ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
+              : `<td class="receipt">${receipt_id}</td>`
+          }
+        `;
+      }
 
       if (
         eventRole === "Manager" ||
@@ -289,12 +313,32 @@ export async function getTransactions(offset = 0, append = false) {
           </td>`;
       }
 
-      // newRow.addEventListener("click", function () {
-      //   console.log(transaction);
-      // });
-
       newRow.innerHTML = rowHTML;
       tbody.appendChild(newRow);
+
+      const receiptCells = document.querySelectorAll(".receipt");
+      receiptCells.forEach((receiptCell) => {
+        if (receiptCell.dataset.id && receiptCell.dataset.id.trim() !== "") {
+          // Устанавливаем cursor: pointer, если есть data-id
+          receiptCell.style.cursor = "pointer";
+
+          // Добавляем обработчик клика
+          receiptCell.addEventListener("click", function () {
+            const receipt_id = receiptCell.dataset.id;
+
+            // Если чек существует, показываем модальное окно
+            if (receipt_id) {
+              clearModalReceipt(); // Очистить данные из модалки (если нужно)
+              formTransactions.modalReceiptDetails.showModal(); // Показать модальное окно
+
+              // Загружаем чек с задержкой
+              setTimeout(function () {
+                getReceipt(receipt_id); // Получаем информацию о чеке
+              }, 1000);
+            }
+          });
+        }
+      });
 
       const iconsDelete = document.querySelectorAll(".iconDelete");
 
@@ -374,7 +418,7 @@ export async function getTransactions(offset = 0, append = false) {
       <td> </td>
       <td> </td>
       <td> </td>
-      <td style="padding-left: 35px; color: green">${countTrTotal} руб </td>
+      <td style="padding-left: 35px; color: green"> +${countTrTotal} руб </td>
       <td> </td>
       <td> </td>`;
     } else {
@@ -387,7 +431,6 @@ export async function getTransactions(offset = 0, append = false) {
       <td> </td>
       <td> </td>`;
     }
-    console.log(countTr);
 
     const newRow = document.createElement("tr");
 
@@ -435,6 +478,293 @@ export async function getTransactions(offset = 0, append = false) {
     formTransactions.getTransactionButton.classList.remove("disable");
     formTransactions.getTransactionButton.disabled = false;
   }
+}
+
+async function getReceipt(receipt_id) {
+  const accessToken = localStorage.getItem("access_token");
+
+  try {
+    const receipt = await getReceiptApi(accessToken, receipt_id);
+    addReceiptToHTML(receipt);
+  } catch (error) {}
+}
+
+function generateReceiptHTML(receipt) {
+  // Разбираем данные чека
+
+  // Проверяем, что receipt — это массив и содержит хотя бы один элемент
+
+  const receipt1 = receipt[0]; // Берем первый элемент массива
+  console.log(receipt1);
+
+  const cashTotalSum =
+    receipt1?.data.ticket.document.receipt.cashTotalSum || "0,00";
+  const ecashTotalSum = receipt1.data.ticket.document.receipt.ecashTotalSum;
+  const creditSum = receipt1?.data.ticket.document.receipt.creditSum || "0,00";
+  const sellerInn = receipt1?.data.seller.inn || "--";
+  const shiftNumber =
+    receipt1?.data.ticket.document.receipt.shiftNumber || "--";
+  const requestNumber =
+    receipt1?.data.ticket.document.receipt.requestNumber || "--";
+  const machineNumber =
+    receipt1?.data.ticket.document.receipt.machineNumber || "--";
+  const cho = receipt1?.data.ticket.document.receipt.taxationType || "--";
+  const createdAt = receipt1?.data.operation.date || "--";
+  const documentId = receipt1?.data.query.documentId || "--";
+  const fiscalDocumentNumber = receipt?.fiscalDocumentNumber || "--";
+  const fiscalDriveNumber =
+    receipt1?.data.ticket.document.receipt.fiscalDriveNumber || "--";
+  const kktRegId = receipt1?.data.ticket.document.receipt.kktRegId || "--";
+  const fiscalSign = receipt1?.data.ticket.document.receipt.fiscalSign || "--";
+  const operator = receipt1?.data.ticket.document.receipt.operator || "--";
+  const retailPlace = receipt1?.data.ticket.document.receipt.retailPlace;
+  const retailPlaceAddress =
+    receipt1?.data.ticket.document.receipt.retailPlaceAddress || "--";
+
+  // Здесь продолжаем работать с receipt1, например, разбираем данные
+
+  const totalSum = receipt1.data.ticket.document.receipt.totalSum;
+  const user = receipt?.user || "Неизвестно";
+  const userInn = receipt?.userInn || "Неизвестно";
+
+  const dateTime = receipt?.dateTime || Date.now() / 1000; // если нет даты, используем текущую
+
+  const items = receipt1.data.ticket.document.receipt.items;
+  const itemsHTML = items
+    .map(
+      (item, index) => `
+
+                <div class="sc-cTApHj fVRyQa">
+                  <div class="sc-cNKpQo bSevbG">
+                    <div class="sc-bBHHQT iVWrCP">${index + 1}.</div>
+                    <div class="sc-AjmZR juOfWY">
+                      <div>${item.name}</div>
+                    </div>
+                  </div>
+                  <div class="sc-jObXwK cBBNUN">${item.quantity}</div>
+                  <div class="sc-dPiKHq jtMGgR">
+                  ${(item.sum / 100).toLocaleString("ru-RU", {
+                    minimumFractionDigits: 2,
+                  })}</div>
+                </div>
+
+  `
+    )
+    .join("");
+
+  const dateObj = new Date(createdAt);
+
+  // Форматируем в нужный вид: день.месяц.год часы:минуты
+  const formattedDate = dateObj
+    .toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .replace(",", "");
+
+  // Формируем HTML-код чека
+  return `
+  <div>
+        <div
+          class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+          data-reach-dialog-overlay=""
+        >
+          <div
+            aria-modal="true"
+            role="dialog"
+            tabindex="-1"
+            aria-label="receipt-details-modal"
+            class="sc-hGPAah hfwvPT"
+            data-reach-dialog-content=""
+          >
+            <div class="sc-dlVyqM fPYzXc">
+              <div id="receipt-container" class="sc-iNGGwv hsrLVo">
+                <div class="sc-cCcYRi kmLPwf">
+                
+                  <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+                  <span
+                    class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+                    title=""
+                    id="close-icon"
+                  >
+                    <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+                        fill="#4164E3"
+                      ></path>
+                    </svg>
+                  </span>
+                </div>
+                <span class="sc-caiKgP ipNIuR">Приход</span>
+                <div class="sc-cidCJl gHtjd">
+                  <div class="sc-iUKrWq kSLLaF">
+                    <div class="sc-iAKVOt klLDEA">
+                      <div class="sc-cNKpQo bSevbG">Предмет расчета</div>
+                      <div class="sc-jObXwK cBBNUN">Кол-во</div>
+                      <div class="sc-dPiKHq jtMGgR">Сумма, ₽</div>
+                    </div>
+                      <div class="sc-efQUeY eWLxTJ">
+                    ${itemsHTML}
+                      </div>
+                    </div>
+            </div>
+            <div class="sc-gSQGeZ iOAir">
+              <div class="sc-jeqYYF sc-eJwXpk frkNye jMA-dWh">
+                <div>Итог:</div>
+                <div>${(totalSum / 100).toLocaleString("ru-RU", {
+                  minimumFractionDigits: 2,
+                })} </div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Наличные</div>
+                <div>${cashTotalSum} 
+                </div>
+              
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Безналичные</div>
+                <div>${(totalSum / 100).toLocaleString("ru-RU", {
+                  minimumFractionDigits: 2,
+                })} </div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Предоплата (аванс)</div>
+                <div>${creditSum}</div>
+              </div>
+            </div>
+            <div class="sc-gSQGeZ sc-lbhJmS iOAir gRgzMw">
+              <div class="sc-nVjpj jzhAMS">
+                <div class="sc-jeqYYF frkNye">
+                  <div class="sc-hiwReK iFZavI">ИНН</div>
+                  <div>${sellerInn}</div>
+                </div>
+                <div class="sc-jeqYYF frkNye">
+                  <div class="sc-hiwReK iFZavI">№ смены</div>
+                  <div>${shiftNumber}</div>
+                </div>
+                <div class="sc-jeqYYF frkNye">
+                  <div class="sc-hiwReK iFZavI">Чек №</div>
+                  <div>${requestNumber}</div>
+                </div>
+              </div>
+              <div class="sc-nVjpj jzhAMS">
+                <div class="sc-jeqYYF frkNye">
+                  <div class="sc-hiwReK iFZavI">№ АВТ</div>
+                  <div>${machineNumber}</div>
+                </div>
+         
+              </div>
+            </div>
+            <div class="sc-gSQGeZ iOAir2">
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Дата/Время</div>
+                <div>${formattedDate}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">ФД №:</div>
+                <div>${documentId}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">ФН:</div>
+                <div>${fiscalDriveNumber}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">РН ККТ:</div>
+                <div>${kktRegId}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">ФП:</div>
+                <div>${fiscalSign}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Кассир:</div>
+                <div class="sc-ehCIER jXeQeS">${operator}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Место расчетов:</div>
+                <div>${retailPlace}</div>
+              </div>
+              <div class="sc-jeqYYF frkNye">
+                <div class="sc-hiwReK iFZavI">Адрес расчетов:</div>
+                <div class="sc-ehCIER jXeQeS">
+                  ${retailPlaceAddress}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  `;
+}
+
+function addReceiptToHTML(receipt) {
+  // Получаем контейнер для чека
+  const container = document.getElementById("receipt-container");
+
+  // Проверяем, существует ли элемент
+  if (!container) {
+    console.error('Элемент с id "receipt-container" не найден.');
+    return;
+  }
+
+  // Преобразуем объект чека в HTML
+  const receiptHTML = generateReceiptHTML(receipt);
+
+  // Добавляем HTML в контейнер
+  container.innerHTML = receiptHTML;
+}
+
+function clearModalReceipt() {
+  const container = document.getElementById("receipt-container");
+  const receiptHTML = `<div>
+<div
+  class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+  data-reach-dialog-overlay=""
+>
+  <div
+    aria-modal="true"
+    role="dialog"
+    tabindex="-1"
+    aria-label="receipt-details-modal"
+    class="sc-hGPAah hfwvPT"
+    data-reach-dialog-content=""
+  >
+    <div class="sc-dlVyqM fPYzXc">
+      <div id="receipt-container" class="sc-iNGGwv hsrLVo">
+        <div class="sc-cCcYRi kmLPwf">
+          </span>
+          <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+          <span
+            class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+            title=""
+            id="close-icon"
+          >
+          <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+              fill="#4164E3"
+            ></path>
+          </svg>
+          </span>
+
+        </div>
+          <span class="sc-caiKgP ipNIuR"> <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b' ></box-icon></span>
+        </div>
+    </div>
+  </div>
+</div>
+</div>`;
+  container.innerHTML = receiptHTML;
 }
 
 let originalValues = {};
@@ -682,8 +1012,8 @@ export function closeDropdownTransaction(event) {
   }
 }
 
-function getInputSumValue(input) {
-  return input.value.replace(/[^\d,]/g, "");
+export function getInputSumValue(input) {
+  return input.value.replace(/[^\d.]/g, ""); // Убираем всё, кроме цифр и точки
 }
 
 export function onSumInput(e) {
@@ -695,31 +1025,42 @@ export function onSumInput(e) {
     return (input.value = "");
   }
 
-  const commaCount = (inputSumValue.match(/,/g) || []).length; // Считаем количество запятых
+  const dotCount = (inputSumValue.match(/\./g) || []).length; // Считаем количество точек
 
-  if (commaCount > 1) {
-    // Если количество запятых больше 1, убираем последнюю запятую
+  if (dotCount > 1) {
+    // Если количество точек больше 1, убираем последнюю точку
     inputSumValue = inputSumValue.slice(0, -1);
   }
 
-  if (commaCount === 0 && inputSumValue === "0") {
-    // Правило 1: Если введен 0 в начале, заменить на 0 и запятую
-    formattedInputValue = "0,";
+  // Если есть точка и более двух цифр после неё, обрезаем лишние
+  if (inputSumValue.includes(".")) {
+    let [wholePart, decimalPart] = inputSumValue.split("."); // Разделяем целую и дробную части
+    if (decimalPart.length > 2) {
+      decimalPart = decimalPart.slice(0, 2); // Оставляем только первые две цифры после точки
+    }
+    inputSumValue = `${wholePart}.${decimalPart}`; // Объединяем обратно
+  }
+
+  if (dotCount === 0 && inputSumValue === "0") {
+    // Если введен 0 в начале и нет точки, добавляем 0.
+    formattedInputValue = "0.";
   } else {
     formattedInputValue = inputSumValue;
   }
-  input.value = formattedInputValue;
+
+  input.value = formattedInputValue; // Устанавливаем отформатированное значение
 }
 
 export function onPhoneKeyDown(e) {
   let input = e.target;
   let inputValue = getInputSumValue(input);
+
   if (
-    e.keyCode === 8 &&
+    e.keyCode === 8 && // Проверка нажатия клавиши Backspace
     inputValue.length == 2 &&
-    inputValue[inputValue.length - 1] == ","
+    inputValue[inputValue.length - 1] == "." // Проверяем, что последний символ - точка
   ) {
-    input.value = "";
+    input.value = ""; // Очищаем поле
   }
 }
 

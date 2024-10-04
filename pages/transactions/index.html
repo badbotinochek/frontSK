@@ -15,9 +15,15 @@
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
     />
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="stylesheet" href="../../../styles/receipt.css" />
   </head>
   <body>
+
+    <div id="preloader">
+      <div></div>
+    </div>
     <nav class="sidebar close">
       <header>
           <div class="image-text">
@@ -231,7 +237,56 @@
       </div>
     </dialog>
 
+    <dialog id = "receipt-details" >
+    <div data-focus-lock-disabled="false">
+      <div>
+        <div
+          class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+          data-reach-dialog-overlay=""
+        >
+          <div
+            aria-modal="true"
+            role="dialog"
+            tabindex="-1"
+            aria-label="receipt-details-modal"
+            class="sc-hGPAah hfwvPT"
+            data-reach-dialog-content=""
+          >
+            <div class="sc-dlVyqM fPYzXc">
+              <div id="receipt-container" class="sc-iNGGwv hsrLVo">
+                <div class="sc-cCcYRi kmLPwf">
+                  </span>
+                  <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+                  <span
+                    class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+                    title=""
+                    id="close-icon"
+                  >
+                  <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+                      fill="#4164E3"
+                    ></path>
+                  </svg>
+                  </span>
 
+                </div>
+                  <span class="sc-caiKgP ipNIuR"> <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b' ></box-icon></span>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+  </dialog>
+
+ 
+
+
+  
     <ul class="ul notifications">
       <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script type="module" src="../../src/modules/transactions/index.js"></script>
