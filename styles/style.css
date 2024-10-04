@@ -923,7 +923,6 @@ textarea.active:focus {
 
 .textPasswordErrorRepeat {
   color: var(--error);
-  padding-right: 80px;
   font-size: 10px;
   position: absolute;
   display: none;
