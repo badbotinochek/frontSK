@@ -35,7 +35,40 @@ import {
 
 import { formTransactions } from "./constants.js";
 
+const MIN_PRELOADER_DURATION = 1000; // Минимальная продолжительность в миллисекундах (1 секунда)
+
+function hidePreloader() {
+  const preloader = document.getElementById("preloader");
+  if (preloader) {
+    // Устанавливаем текущее время и время, когда прелоадер должен исчезнуть
+    const startTime = new Date().getTime();
+    const hideTime = startTime + MIN_PRELOADER_DURATION;
+
+    // Функция для скрытия прелоадера
+    function removePreloader() {
+      preloader.style.opacity = "0"; // Плавное исчезновение
+      setTimeout(() => {
+        preloader.style.display = "none"; // Полное удаление с экрана
+      }, 500); // Время плавного исчезновения
+    }
+
+    // Определяем текущее время и вычисляем оставшееся время
+    const currentTime = new Date().getTime();
+    const delay = Math.max(0, hideTime - currentTime);
+
+    // Устанавливаем таймер на минимальное время или задержку до текущего времени
+    setTimeout(removePreloader, delay);
+  }
+}
+
+// Скрытие прелоадера после полной загрузки страницы
+window.addEventListener("load", () => {
+  hidePreloader();
+});
+
 document.addEventListener("DOMContentLoaded", function (e) {
+  checkAndUpdateToken();
+
   getAllCategory();
   redirectToAuth();
 
@@ -115,11 +148,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   document.addEventListener("click", closeDropdownTransaction);
 
-  formTransactions.sumTransactionInput.addEventListener("input", onSumInput);
-  formTransactions.sumTransactionInput.addEventListener(
-    "keydown",
-    onPhoneKeyDown
-  );
+  formTransactions.sumTransaction.addEventListener("input", onSumInput);
+  formTransactions.sumTransaction.addEventListener("keydown", onPhoneKeyDown);
 
   formTransactions.dateTransaction.addEventListener(
     "input",
@@ -217,4 +247,11 @@ document.addEventListener("DOMContentLoaded", function (e) {
   });
 
   formTransactions.buttonScanQr.addEventListener("click", openQrScanner);
+
+  document.addEventListener("click", function (event) {
+    const target = event.target.closest("#close-icon"); // Проверяем, кликнули ли по иконке закрытия
+    if (target) {
+      formTransactions.modalReceiptDetails.close(); // Закрываем диалог
+    }
+  });
 });

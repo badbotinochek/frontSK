@@ -484,3 +484,22 @@ export async function recoveryPasswordApi(email) {
     throw error;
   }
 }
+
+export async function getReceiptApi(access_token, receipt_id) {
+  try {
+    const response = await fetch(
+      BASE_URL + `receipts?receipts_ids=${receipt_id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}

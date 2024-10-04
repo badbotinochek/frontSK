@@ -48,4 +48,7 @@ export const formTransactions = {
   buttonScanQr: document.getElementById("button_scan_qr"),
 
   modalElementScan: document.getElementById("scanner-form"),
+  modalReceiptDetails: document.getElementById("receipt-details"),
+
+  closeIcon: document.getElementById("close-icon"),
 };
