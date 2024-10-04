@@ -209,7 +209,7 @@ export async function getMyEvents() {
         var table = document.getElementById("customTableShow");
         var rows = table.querySelectorAll("tr");
         if (rows.length == 1 || rows.length == 2) {
-          modalShowEvent.style.height = "760px";
+          modalShowEvent.style.height = "761px";
         } else {
           modalShowEvent.style.height = "804px";
         }
@@ -432,7 +432,7 @@ export async function getMyInvitation() {
         var table = document.getElementById("customTableShow");
         var rows = table.querySelectorAll("tr");
         if (rows.length == 1 || rows.length == 2) {
-          modalShowEvent.style.height = "760px";
+          modalShowEvent.style.height = "761px";
         } else {
           modalShowEvent.style.height = "804px";
         }
@@ -769,10 +769,10 @@ export async function createEvent() {
     const year = dateParts[0];
     const month = dateParts[1].padStart(2, "0");
     const day = dateParts[2].padStart(2, "0");
-    return `${year}-${month}-${day}T00:00:00.000Z`;
+    return `${year}-${month}-${day}`;
   };
 
-  const formattedStartDate = formatDate(dateStartEventInput);
+  const formattedStartDate = `${formatDate(dateStartEventInput)}T00:00:00.000Z`;
   const formattedEndDate = dateEndEventInput
     ? `${formatDate(dateEndEventInput)}T23:59:59.999Z`
     : null;

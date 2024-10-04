@@ -14,3 +14,5 @@ export function checkDate(startDate, endDate) {
 export function isFieldFilled(fieldValue) {
   return fieldValue && fieldValue.trim() !== "";
 }
+
+const formatDate = (dateString) => {};
