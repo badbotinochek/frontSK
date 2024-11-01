@@ -13,14 +13,13 @@ import {
 import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
 
+let cachedCategories = null;
 const idToNameMap = {};
 
 let countTr = 0;
 let countTransac = 0;
 
 export function checkForm() {
-  // console.log(formTransactions.input_event.value);
-
   const start_date = formTransactions.start_date
     ? formTransactions.start_date.value
     : "";
@@ -30,7 +29,7 @@ export function checkForm() {
   const input_event = formTransactions.input_event
     ? formTransactions.input_event.value
     : "";
-  // console.log(12, start_date && end_date && input_event);
+
   if (start_date && end_date && input_event) {
     formTransactions.getTransactionButton.classList.remove("disable");
   } else {
@@ -42,16 +41,13 @@ export function checkEvent() {
   const input_event = formTransactions.input_event
     ? formTransactions.input_event.value
     : "";
-  // console.log(input_event);
+
   if (input_event) {
-    // console.log("Удалить");
     formTransactions.create_transaction.classList.remove("disable");
     formTransactions.buttonScanQr.classList.remove("disable");
   } else {
     formTransactions.create_transaction.classList.add("disable");
     formTransactions.buttonScanQr.classList.add("disable");
-
-    // console.log("Установить");
   }
 }
 
@@ -76,6 +72,7 @@ export function createTransaction() {
   var buttonCreate = document.getElementById("createTra");
   buttonCreate.classList.remove("Off");
   buttonCreate.classList.add("disable");
+  getCategory();
   formTransactions.modalElementTr.showModal();
 }
 
@@ -85,14 +82,11 @@ export async function deleteTransactions() {
   try {
     const response = await deleteTransaction(transactionId, access_token);
 
-    // console.log("Транзакция успешно удалена");
     handleClick();
     const successMessage = `Транзакция успешно удалена`;
     createToast("success", successMessage);
     setTimeout(getTransactions, 10);
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
+  } catch (error) {}
 }
 
 export function deleteSErrorBorder() {
@@ -123,7 +117,6 @@ export async function getTransactionsForPaginations(pagination) {
   var offset = 0;
   if (pagination) {
     offset = getCountRowsTable();
-    console.log(offset);
   } else {
     offset = getCountTransactions();
   }
@@ -145,9 +138,7 @@ export async function getTransactionsForPaginations(pagination) {
     } else {
       formTransactions.labelMoreTransaction.classList.add("disable");
     }
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
+  } catch (error) {}
 }
 
 export function getCountRowsTable() {
@@ -155,7 +146,6 @@ export function getCountRowsTable() {
   const rows = tbody.querySelectorAll("tr");
   const rowCount = rows.length;
 
-  console.log(`Количество строк в таблице: ${rowCount}`);
   return rowCount;
 }
 
@@ -229,7 +219,7 @@ export async function getTransactions(offset = 0, append = false) {
       const seconds = ("0" + date.getSeconds()).slice(-2);
       const formattedTime = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 
-      responseCat;
+      // responseCat;
 
       const categoryTran = idToNameMap[transaction.category_id];
 
@@ -251,7 +241,7 @@ export async function getTransactions(offset = 0, append = false) {
       if (transaction.user_id === user_id) {
         user = "Вы";
       } else {
-        user = transaction.user_id;
+        user = transaction.user.name;
       }
 
       const newRow = document.createElement("tr");
@@ -404,9 +394,6 @@ export async function getTransactions(offset = 0, append = false) {
 
       // Удаляем строку из таблицы
       totalRow.remove();
-
-      // Теперь значение countTr сохранено в переменной countTrValue
-      console.log("Значение countTr:", countTrValue);
     }
 
     let countTrTotal = countTrValue + countTr;
@@ -472,7 +459,6 @@ export async function getTransactions(offset = 0, append = false) {
       getTransactionsForPaginations(true);
     }
   } catch (error) {
-    console.error("Произошла ошибка:", error);
     alert("Произошла ошибка при обращении к серверу.");
   } finally {
     formTransactions.getTransactionButton.classList.remove("disable");
@@ -495,7 +481,6 @@ function generateReceiptHTML(receipt) {
   // Проверяем, что receipt — это массив и содержит хотя бы один элемент
 
   const receipt1 = receipt[0]; // Берем первый элемент массива
-  console.log(receipt1);
 
   const cashTotalSum =
     receipt1?.data.ticket.document.receipt.cashTotalSum || "0,00";
@@ -709,12 +694,6 @@ function addReceiptToHTML(receipt) {
   // Получаем контейнер для чека
   const container = document.getElementById("receipt-container");
 
-  // Проверяем, существует ли элемент
-  if (!container) {
-    console.error('Элемент с id "receipt-container" не найден.');
-    return;
-  }
-
   // Преобразуем объект чека в HTML
   const receiptHTML = generateReceiptHTML(receipt);
 
@@ -868,7 +847,7 @@ function formatDate(dateString) {
 
 function formatTime(timeString) {
   const date = new Date(timeString);
-  // console.log(date);
+
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
@@ -882,7 +861,6 @@ export async function getEvent() {
     const events = await getAllMyEvents(token);
     const user_id = parseInt(localStorage.getItem("user_id"), 10);
 
-    // console.log(events);
     events.forEach((event) => {
       const eventId = event.id;
       const eventName = event.name;
@@ -894,7 +872,7 @@ export async function getEvent() {
 
       var lista = document.querySelector(".option");
       var listItem = document.createElement("li");
-      // console.log(participants);
+
       listItem.textContent = eventName;
       listItem.setAttribute("data-id", eventId);
       listItem.setAttribute("data-role", userRole);
@@ -903,15 +881,13 @@ export async function getEvent() {
 
     // Вызываем функцию foo() после добавления элементов списка
     foo();
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
+  } catch (error) {}
 }
 
 const foo = () => {
   const list = document.querySelector(".option");
   const input = document.querySelector(".text-box");
-  console.log(list);
+
   for (let i = 0; i < list.children.length; i++) {
     list?.children[i].addEventListener("click", (e) => {
       const selectedId = list.children[i].getAttribute("data-id");
@@ -924,7 +900,6 @@ const foo = () => {
 
       checkForm();
       checkEvent();
-      // console.log(localStorage.getItem("event"));
     });
   }
 };
@@ -1066,93 +1041,22 @@ export function onPhoneKeyDown(e) {
 
 export async function getAllCategory() {
   try {
-    const categories = await getCategoryTransaction();
-    categories.forEach((item) => {
+    const allCategories = await getCategoryTransaction();
+
+    allCategories.forEach((item) => {
       idToNameMap[item.id] = item.name;
+
+      if (item.sub_categories && item.sub_categories.length > 0) {
+        // Проход по подкатегориям
+        item.sub_categories.forEach((subCategory) => {
+          idToNameMap[subCategory.id] = subCategory.name;
+        });
+      }
     });
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
   }
 }
-
-// function createCategoryTree(categories, parentElement) {
-//   categories.forEach((category) => {
-//     const categoryId = category.id;
-//     const categoryName = category.name;
-//     const listItem = document.createElement("li");
-//     const span = document.createElement("span");
-//     span.classList.add("show");
-//     span.textContent = categoryName;
-//     listItem.setAttribute("data-id", categoryId);
-//     listItem.appendChild(span);
-//     parentElement.appendChild(listItem);
-
-//     if (category.sub_categories && category.sub_categories.length > 0) {
-//       const subList = document.createElement("ul");
-//       listItem.appendChild(subList);
-//       createCategoryTree(category.sub_categories, subList);
-//     }
-//   });
-// }
-
-// function createCategoryTree(categories, parentElement) {
-//   categories.forEach((category) => {
-//     const categoryId = category.id;
-//     const categoryName = category.name;
-
-//     // Создаем элемент списка
-//     const listItem = document.createElement("li");
-//     listItem.setAttribute("data-id", categoryId);
-
-//     // Создаем элемент span для отображения имени категории
-//     const span = document.createElement("span");
-//     span.textContent = categoryName;
-
-//     // Добавляем элемент span в элемент списка
-//     listItem.appendChild(span);
-
-//     let toggleSpan;
-
-//     // Если у категории есть подкатегории, создаем вложенный список
-//     if (category.sub_categories && category.sub_categories.length > 0) {
-//       const subList = document.createElement("ul");
-//       subList.hidden = true; // Изначально скрываем подкатегории
-//       listItem.appendChild(subList);
-//       createCategoryTree(category.sub_categories, subList);
-
-//       // Добавляем класс toggle и плюсик к span
-//       toggleSpan = document.createElement("span");
-//       toggleSpan.classList.add("toggle", "plus");
-//       listItem.insertBefore(toggleSpan, span);
-//     } else {
-//       // Если подкатегорий нет, добавляем минус
-//       toggleSpan = document.createElement("span");
-//       toggleSpan.classList.add("toggle", "minus");
-//       listItem.insertBefore(toggleSpan, span);
-//     }
-
-//     // Добавляем элемент списка в родительский элемент
-//     parentElement.appendChild(listItem);
-
-//     // Обработчик события для переключения видимости подкатегорий
-//     toggleSpan.addEventListener("click", function () {
-//       if (category.sub_categories && category.sub_categories.length > 0) {
-//         const subList = listItem.querySelector("ul");
-//         subList.hidden = !subList.hidden;
-//         // Переключаем класс и текст на плюс или минус
-//         if (subList.hidden) {
-//           toggleSpan.classList.remove("minus");
-//           toggleSpan.classList.add("plus");
-//         } else {
-//           toggleSpan.classList.remove("plus");
-//           toggleSpan.classList.add("minus");
-//         }
-//       }
-//     });
-//   });
-// }
-
-//
 
 function createCategoryTree(categories, parentElement) {
   // Находим элемент input с классом "categoryBox"
@@ -1237,7 +1141,7 @@ function createCategoryTree(categories, parentElement) {
       // Определяем элемент <li>, на который был произведен клик
       const listItem = target.tagName === "SPAN" ? target.parentNode : target;
       inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
-      console.log(listItem.getAttribute("data-id"));
+
       localStorage.setItem("cat_transaction", listItem.getAttribute("data-id"));
       formTransactions.dropdown1.classList.remove("active");
 
@@ -1250,23 +1154,28 @@ function createCategoryTree(categories, parentElement) {
 export async function getCategory() {
   try {
     const categories = await getCategoryTransaction();
-
-    const lista = document.getElementById("optionCat");
-    lista.innerHTML = "";
-
-    // Создание корневого элемента UL
-    const rootUl = document.createElement("ul");
-    rootUl.classList.add("tree");
-    rootUl.id = "tree";
-    lista.appendChild(rootUl);
-
-    // Создание дерева категорий
-    createCategoryTree(categories, rootUl);
-
-    // fooq1();
+    cachedCategories = categories;
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
   }
+}
+
+export function renderCategoryTree(type) {
+  const filteredCategories = cachedCategories.filter(
+    (category) => category.type === type
+  );
+
+  const lista = document.getElementById("optionCat");
+  lista.innerHTML = "";
+
+  // Создание корневого элемента UL
+  const rootUl = document.createElement("ul");
+  rootUl.classList.add("tree");
+  rootUl.id = "tree";
+  lista.appendChild(rootUl);
+
+  // Создание дерева категорий
+  createCategoryTree(filteredCategories, rootUl);
 }
 
 export function checkCreateTranForm() {
@@ -1316,7 +1225,7 @@ export async function createNewTransaction() {
   let buttonClicked = false;
   formTransactions.createTra.classList.add("disable");
   buttonClicked = true;
-  // console.log("Я тут ");
+
   const eventId = localStorage.getItem("event");
   const dateTransaction = formTransactions.dateTransaction.value;
   const timeTransaction = formTransactions.timeTransaction.value;
@@ -1341,14 +1250,12 @@ export async function createNewTransaction() {
       accessToken
     );
 
-    // console.log(response);
     handleClickTra();
     const successMessage = `Транзакция успешно добавленна`;
     createToast("success", successMessage);
     setTimeout(getTransactions, 100);
     clearModalData();
   } catch (error) {
-    // console.log("Я тут ");
     setTimeout(() => {
       formTransactions.createTra.classList.remove("disable");
       buttonClicked = false;
@@ -1394,8 +1301,6 @@ export async function updateTransaction() {
     const changeBtn = document.getElementById("changeTra");
     changeBtn.classList.add("disable");
   } catch (error) {
-    // console.log("Я тут ");
-
     setTimeout(() => {
       buttonClicked = false;
     }, 10000);
@@ -1453,9 +1358,7 @@ export function checkEditTranForm() {
 
     const initial = initialValues[id];
     if (currentValue !== undefined && currentValue !== initial) {
-      // console.log("true");
     } else {
-      // console.log("false");
     }
   };
 
@@ -1479,13 +1382,12 @@ export async function checkAndUpdateToken() {
   const currentTime = Date.now();
   const timeLeft = expireTime - currentTime;
 
-  if (timeLeft > 0 && timeLeft <= 2 * 60 * 1000) {
+  if (timeLeft <= 2 * 60 * 10000) {
     // 2 минуты в миллисекундах
     try {
       const refreshToken = localStorage.getItem("refresh_token");
       await refreshAccessToken(refreshToken);
     } catch (error) {
-      console.error("Ошибка обновления токена доступа:", error);
       setTimeout(() => {
         checkAndUpdateToken();
       }, 60 * 1000); // Повторить попытку через 1 минуту
@@ -1511,7 +1413,6 @@ function validateQrCode(message) {
 async function onScanSuccess(decodedText, decodedResult) {
   // handle the scanned code as you like, for example:
 
-  console.log(`Code matched = ${decodedText}`, decodedResult);
   const access_token = localStorage.getItem("access_token");
   const event_id = localStorage.getItem("event");
 
@@ -1524,15 +1425,12 @@ async function onScanSuccess(decodedText, decodedResult) {
       // Stop failed, handle it.
     });
 
-  console.log(validateQrCode(decodedText));
-
   if (!validateQrCode(decodedText)) {
     alert("Это не QR код");
     formTransactions.modalElementScan.close();
     formTransactions.buttonScanQr.classList.remove("disable");
     formTransactions.buttonScanQr.disabled = false;
   } else {
-    console.log("Message is valid.");
   }
 
   try {
@@ -1542,7 +1440,6 @@ async function onScanSuccess(decodedText, decodedResult) {
       access_token
     );
   } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
   } finally {
     formTransactions.buttonScanQr.classList.remove("disable");
     formTransactions.buttonScanQr.disabled = false;
@@ -1568,4 +1465,30 @@ export function openQrScanner() {
   formTransactions.modalElementScan.showModal();
 
   html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+}
+
+const MIN_PRELOADER_DURATION = 1000; // Минимальная продолжительность в миллисекундах (1 секунда)
+
+export function hidePreloader() {
+  const preloader = document.getElementById("preloader");
+  if (preloader) {
+    // Устанавливаем текущее время и время, когда прелоадер должен исчезнуть
+    const startTime = new Date().getTime();
+    const hideTime = startTime + MIN_PRELOADER_DURATION;
+
+    // Функция для скрытия прелоадера
+    function removePreloader() {
+      preloader.style.opacity = "0"; // Плавное исчезновение
+      setTimeout(() => {
+        preloader.style.display = "none"; // Полное удаление с экрана
+      }, 500); // Время плавного исчезновения
+    }
+
+    // Определяем текущее время и вычисляем оставшееся время
+    const currentTime = new Date().getTime();
+    const delay = Math.max(0, hideTime - currentTime);
+
+    // Устанавливаем таймер на минимальное время или задержку до текущего времени
+    setTimeout(removePreloader, delay);
+  }
 }

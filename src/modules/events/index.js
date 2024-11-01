@@ -17,6 +17,7 @@ import {
   editEvent,
   redirectToAuth,
   exit,
+  hidePreloader,
 } from "./utils.js";
 
 import { createToast } from "../notifications/index.js";
@@ -151,4 +152,5 @@ document.addEventListener("DOMContentLoaded", function () {
   formEvent.editModalEventButton.addEventListener("click", editEvent);
 
   formEvent.exit.addEventListener("click", exit);
+  hidePreloader();
 });

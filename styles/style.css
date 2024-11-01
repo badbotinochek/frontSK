@@ -524,7 +524,7 @@ td img:hover {
   left: 50%; /* Размещаем левую часть модального окна посередине по горизонтали */
   transform: translate(-50%, -50%);
   width: 460px;
-  height: 730px;
+  height: 737px;
   user-select: text;
   visibility: visible;
   overflow: auto;
@@ -541,7 +541,7 @@ td img:hover {
 }
 
 #ShowModalTransaction {
-  height: 765px;
+  height: 775px;
 }
 
 .modalTr[open] {
@@ -1436,4 +1436,134 @@ input::placeholder {
     align-items: center;
     height: 100vh; /* Центрируем по высоте */
   }
+}
+
+.inputCountName {
+  margin-top: 20px;
+  width: 420px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid #e4e7ed;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+}
+
+.modalAccount {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 460px;
+  user-select: text;
+  visibility: visible;
+  overflow: auto;
+  background: #fff;
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  opacity: 0;
+  visibility: hidden;
+  border: none;
+  border-radius: 6px;
+  user-select: none;
+}
+
+.modalAccount[open] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modalAccount::backdrop {
+  background: #00000000;
+}
+
+.modalAccount {
+  padding: 20px;
+  color: #303133;
+  text-align: left;
+}
+
+.modalAccount .label {
+  color: #606266;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.modalAccount .inputEventName {
+  background: #ffffff;
+  width: 420px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  margin-top: 20px;
+}
+
+.modalAccount .buttons {
+  margin-top: 40px;
+}
+
+.editAccountButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.editAccountButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.editAccountButton.Off {
+  display: none;
+}
+
+.modalAccountButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.modalAccountButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.modalAccountButton.Off {
+  display: none;
+}
+
+.modalCreateInputDescriptionAccount {
+  margin-top: 20px;
+  width: 420px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid #e4e7ed;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+}
+
+.modalEditInputDescriptionAccount {
+  margin-top: 20px;
+  width: 420px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid #e4e7ed;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
 }

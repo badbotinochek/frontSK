@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sweet Cash</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link
+      rel="manifest"
+      href="../../src/modules/auth/asserts/site.webmanifest"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="stylesheet" href="../../styles/events/events.css" />
+  </head>
+  <body>
+    <div id="preloader">
+      <div></div>
+    </div>
+
+    <nav class="sidebar close">
+      <header>
+          <div class="image-text">
+            <span class="image">
+              <img src="../../src/modules/auth/asserts/apple-touch-icon.png" alt="logo">
+            </span> 
+          
+          <div class="text header-text">
+            <span class="name">Sweet Cash</span>
+          </div>
+        </div>
+      </header>
+      <div class="menu-bar">
+        <div class="menu">
+          <ul class="menu-links">
+            <li class="nav-link">
+              <a href="../../pages/transactions/index.html">
+                <i class="bx bx-dollar icon", id="dollar"></i>
+                <span class="text nav-text", id="transaction">Транзакции</span>
+              </a>
+            </li>
+            <li class="nav-link " >
+              <a href="../../pages/events/index.html">
+                <i class="bx bx-calendar-event icon"></i>
+                <span class="text nav-text" >Мероприятия</span>
+              </a>
+            </li>
+            <li class="nav-link" , id="tr">
+                <a href="#">
+                  <i class='bx bx-detail icon', id="event"></i>
+                  <span class="text nav-text" , id="event">Счета</span>
+                </a>
+              </li>
+              <li class="nav-link"> 
+                <a href="#">
+                  <i class="bx bx-file icon", id="file"></i>
+                  <span class="text nav-text">Чеки</span>
+                </a>
+              </li>
+              <li class="nav-link"> 
+              <a href="#">
+                <i class="bx bx-bell icon", id="bell"></i>
+                <span class="text nav-text">Уведомление</span>
+              </a>
+              </li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-link2" id="exist">
+        <a href="../auth/index.html">
+          <i class="bx bx-log-out icon" ></i>
+          <span class="text nav-text">Выход</span>
+        </a>
+      </li>
+      </div>
+    </nav>
+
+    <div class="wrapper"> 
+          <div><button type="submit" value="send" id="openModalCreateAccountButton" class="create-button">
+            Создать счет
+          </button></div>
+          <div><label class="user-id-label">User ID:</label>
+            <span id="user_id"></span></div>
+        </div>
+    </div>
+
+    <label id = 'transactionsLabel' >Счета </label>
+    <div class="table-container" id="MyCountsTable">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="smallRow" >Номер</th>
+            <th>Название</th>
+            <th>Дата создания</th>
+            <th>Владелец</th>
+            <th>Статус</th>
+            <th class="smallRow" >Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+
+    <dialog id = "modalCreateFormAccount" class="modalAccount">
+      <label>Номер </label>
+      <div >
+        <input id="modalCreateInputIdAccount" class="inputBox" disabled placeholder="Номер счета будет присвоен системой">
+      </div>
+      
+      <div class ="label" id="labelNameEvent" > 
+        <label for="modalCreateInputNameAccount">Наименование</label> 
+        <label class ="star">*</label>
+      </div>
+      <div> 
+        <input type="text"  id="modalCreateInputNameAccount" class="inputEventName" placeholder="Введите название счета"> 
+      </div>
+      <div class ="label "><label>Описание</label></div>
+      <div>
+        <textarea class ="modalCreateInputDescriptionAccount" name="description" placeholder="Введите описание счета"></textarea>
+      </div>
+      <!-- <div class="buttons1">
+        <button type="submit" value="send" id="addParticipantButton" class="createButton" >
+          Добавить участника
+        </button>
+      </div>
+      <div class ="label">
+        <label>Участники</label>
+      </div>
+      <div class="tableContainer">
+        <table class="customTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Роль</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div> -->
+      <div class="buttons">
+        <button type="submit" id="modalCreateCreateButtonAccount" class="modalAccountButton disable" >
+          Создать
+        </button>
+        <button type="button" id="modalCreateCloseButtonAccount" class="closeButton">
+          Отмена
+        </button>
+        </a>
+      </div>
+    </dialog>
+
+
+    <dialog id = "modalEditFormAccount" class="modalAccount">
+      <label>Номер </label>
+      <div >
+        <input id="modalEditInputIdAccount" class="inputBox" disabled>
+      </div>
+      <div class ="label" id="labelNameEvent" > 
+        <label for="modalEditInputNameAccount">Наименование</label> 
+        <label class ="star">*</label>
+      </div>
+      <div> 
+        <input type="text"  id="modalEditInputNameAccount" class="inputEventName" placeholder="Введите название счета"> 
+      </div>
+      <div class ="label" id="labelRadioButtonAccount">
+        <label>Статус</label>
+        <label class ="star">*</label>
+      </div>
+      <div class ="radio">
+        <input class="custom-radio" name="modalEditRadioButtons" type="radio" id="radio-1" value="false"> 
+        <label for="radio-1" style="margin-right: 162px">Активный</label>
+
+        <input class="custom-radio" name="modalEditRadioButtons" type="radio" id="radio-2" value="true"> 
+        <label for="radio-2">Архивный</label>
+      </div>
+      <div class ="label "><label>Описание</label></div>
+      <div>
+        <textarea id="modalEditInputDescriptionAccount" class ="modalEditInputDescriptionAccount" name="description" placeholder="Введите описание счета"></textarea>
+      </div>
+      <!-- <div class="buttons1">
+        <button type="submit" value="send" id="addParticipantButton" class="createButton" >
+          Добавить участника
+        </button>
+      </div>
+      <div class ="label">
+        <label>Участники</label>
+      </div>
+      <div class="tableContainer">
+        <table class="customTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Роль</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div> -->
+      <div class="buttons">
+        <button type="submit" value="send" id="modalEditButtonAccount" class="editAccountButton disable " >
+          Изменить
+        </button>
+        <button type="button" id="modalEditCloseButtonAccount" class="closeButton">
+          Отмена
+        </button>
+        </a>
+      </div>
+    </dialog>
+
+
+
+
+    <label id = 'infoTransactionsLabel' class="disable">Нет транзакций </label>
+    <script type="module" src="../../src/modules/counts/index.js"></script>
+    <ul class="ul notifications">
+
+ 
+  </body>
+</html>
