@@ -123,6 +123,7 @@ export async function getTransacionsForEvent(
         Authorization: `Bearer ${access_token}`,
       },
     });
+    console.log(response);
     if (!response.ok) {
       throw new Error("Ошибка при выполнении запроса");
     }
@@ -501,5 +502,83 @@ export async function getReceiptApi(access_token, receipt_id) {
     return await response.json();
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+export async function getAllMyAccountsApi(access_token, blocked) {
+  try {
+    const response = await fetch(
+      BASE_URL + `accounts/by_user?with_blocked=${blocked}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+export async function createAccountApi(name, description, access_token) {
+  try {
+    const requestData = {
+      name,
+    };
+    if (description) {
+      requestData.description = description;
+    }
+
+    const response = await fetch(BASE_URL + "accounts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+      body: JSON.stringify(requestData),
+    });
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateAccountApi(
+  account_id,
+  name,
+  description,
+  is_blocked,
+  access_token
+) {
+  try {
+    const requestData = {
+      name,
+      is_blocked,
+    };
+    if (description) {
+      requestData.description = description;
+    }
+
+    const response = await fetch(BASE_URL + `accounts/${account_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+      body: JSON.stringify(requestData),
+    });
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
   }
 }
