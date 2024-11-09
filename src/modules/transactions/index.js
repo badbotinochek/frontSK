@@ -33,6 +33,8 @@ import {
   openQrScanner,
   hidePreloader,
   renderCategoryTree,
+  getActiveAccounts,
+  toggleDropdownAcc,
 } from "./utils.js";
 
 import { formTransactions } from "./constants.js";
@@ -44,7 +46,7 @@ import { formTransactions } from "./constants.js";
 
 document.addEventListener("DOMContentLoaded", function (e) {
   checkAndUpdateToken();
-
+  getActiveAccounts();
   getAllCategory();
   redirectToAuth();
 
@@ -120,6 +122,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
   formTransactions.dropdown.addEventListener("click", toggleDropdown);
   formTransactions.dropdownCat.addEventListener("click", toggleDropdownCat);
 
+  formTransactions.dropdownAcc.addEventListener("click", toggleDropdownAcc);
+
   document.addEventListener("click", closeDropdown);
 
   document.addEventListener("click", closeDropdownTransaction);
@@ -143,6 +147,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
     "input",
     checkCreateTranForm
   );
+  formTransactions.accountBox.addEventListener("input", checkCreateTranForm);
+
   const radioButtons = document.querySelectorAll(
     "input[name='typeTransaction']"
   );
