@@ -321,7 +321,7 @@ header .image-text .header-text {
 }
 
 #ShowdropdownCat {
-  margin-top: 20px;
+  margin-top: 5px;
   width: 420px;
 }
 
@@ -562,7 +562,7 @@ td img:hover {
 .modalTr label {
   color: #606266;
   text-align: left;
-  margin-top: 20px !important;
+  margin-top: 5px !important;
 }
 
 .inputBox {
@@ -573,7 +573,7 @@ td img:hover {
   height: 40px;
   border: 1px solid #e4e7ed;
   padding: 0 0 0 13px;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 #InputId {
@@ -591,7 +591,7 @@ td img:hover {
 .dateTime {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 #timeTr {
@@ -683,7 +683,7 @@ td img:hover {
   width: 420px;
   height: 40px;
   border-radius: 5px;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .dropdown1::before {
@@ -796,7 +796,7 @@ td img:hover {
 }
 
 .description {
-  margin-top: 20px;
+  margin-top: 5px;
   width: 420px;
   height: 128px;
   outline: none;
@@ -1566,4 +1566,102 @@ input::placeholder {
   border-radius: 5px;
   resize: none;
   padding: 0 0 0 13px;
+}
+
+.dropdown2 {
+  position: relative;
+  background: #ffffff;
+  width: 420px;
+  height: 40px;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.dropdown2::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #333;
+  right: 20px;
+  top: 12px;
+  z-index: 10000;
+  border-top: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
+  transform: rotate(-45deg);
+  transition: 0.5s;
+  pointer-events: none;
+}
+
+.dropdown2.active::before {
+  transform: rotate(-225deg);
+  top: 20px;
+}
+
+.dropdown2 input {
+  position: relative;
+  background: #ffffff;
+  width: 420px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.text-box {
+  user-select: none;
+}
+
+.dropdown2 .input::placeholder {
+  font-size: 29px;
+}
+
+.dropdown2 .option2 {
+  background: #ffffff;
+  position: absolute;
+  width: 100%;
+  top: 50px;
+  border: 1px solid #e4e7ed;
+  list-style: none;
+  border-radius: 5px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-y: scroll;
+  max-height: 130px;
+  display: none;
+  z-index: 500;
+}
+
+.dropdown2.active .option2 {
+  display: block;
+}
+
+/* Основной стиль для элементов списка */
+.dropdown2 .option2 li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  background: transparent;
+}
+
+/* Стиль для элемента <li> при наведении */
+.account-div li:hover {
+  background-color: #f5f7fa; /* Цвет фона при наведении */
+  cursor: pointer; /* Указатель при наведении */
+}
+
+.time {
+  margin-left: 180px;
+}
+
+.timeShow {
+  margin-left: 190px;
 }

@@ -23,8 +23,11 @@ export const formTransactions = {
   sumTransactionInput: document.getElementById("sumTransaction"),
   optionCat: document.getElementById("optionCat"),
   dropdownCat: document.getElementById("dropdownCat"),
+  dropdownAcc: document.getElementById("dropdownAcc"),
+
   dateTransaction: document.getElementById("dateTr"),
   timeTransaction: document.getElementById("timeTr"),
+  accountBox: document.querySelector(".accountBox"),
   typeTransaction: document.querySelector(".radio"),
   catTransaction: document.querySelector(".categoryBox"),
   sumTransaction: document.getElementById("sumTransaction"),
@@ -38,6 +41,7 @@ export const formTransactions = {
   showIdTransaction: document.getElementById("ShowInputId"),
   showDateTransaction: document.getElementById("ShowdateTr"),
   showTimeTransaction: document.getElementById("ShowtimeTr"),
+  showAccountTransaction: document.getElementById("showAccountTransaction"),
   showCatTransaction: document.getElementById("showCatTran"),
   showSumTransaction: document.getElementById("ShowsumTransaction"),
   showDescription: document.getElementById("ShowdescriptionTran"),
@@ -51,4 +55,7 @@ export const formTransactions = {
   modalReceiptDetails: document.getElementById("receipt-details"),
 
   closeIcon: document.getElementById("close-icon"),
+
+  dropdown2: document.querySelector(".dropdown2"),
+  dropdownAcc: document.getElementById("dropdownAcc"),
 };

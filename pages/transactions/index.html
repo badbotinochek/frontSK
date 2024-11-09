@@ -178,6 +178,7 @@
             <th>Категория</th>
             <th>Сумма</th>
             <th>Создатель</th>
+            <th>Счет</th>
             <th class="smallRow">Чек</th>
             <th class="smallRow" >Действия</th>
           </tr>
@@ -206,12 +207,22 @@
         <input id="InputId" class="inputBox" disabled placeholder="Номер транзакции будет присвоен системой">
       </div>
       <div class ="label ">
-        <label>Дата и время</label>   
-        <label class ="star">*</label>
+        <label>Дата</label> 
+        <label class ="star">*</label>  
+        <label class ="time">Время</label>
       </div>
       <div class ="dateTime">
         <div><input type="date" id="dateTr"></div>
         <div><input type="time" id="timeTr"></div>
+      </div>
+      <div class ="label ">
+        <label>Счет</label>
+        <label class ="star">*</label>
+      </div>
+      <div class ="dropdown2" id="dropdownAcc">
+        <input type="text"  class="accountBox" placeholder="Выберете счет" readonly>
+        <div class="option2" id="optionAcc">
+        </div>
       </div>
       <div class ="label ">
         <label>Тип</label>
@@ -264,9 +275,14 @@
         <input id="ShowInputId" class="inputBox" disabled/>
       </div>
       <div class ="label "></div><label>Дата</label>
+      <label class ="timeShow">Время</label>
       <div class ="dateTime">
         <div><input type="date" id="ShowdateTr" disabled></div>
         <div><input type="time" id="ShowtimeTr" disabled></div>
+      </div>
+      <div class ="label"><label>Счет</label></div>
+      <div >
+        <input id="showAccountTransaction" class="inputBox" disabled>
       </div>
       <div class ="label "><label>Тип</label></div>
       <div class ="radio">
@@ -276,10 +292,9 @@
         <input class="custom-radio" name="showTypeTransaction" type="radio" id="Showradio-2" value="Income"> 
         <label for="radio-2">Доход</label>
       </div>
-      <div class ="label "><label>Категория</label></div>
-      <div class ="dropdown " id="ShowdropdownCat">
+      <div class ="label"><label>Категория</label></div>
+      <div class ="dropdown" id="ShowdropdownCat">
         <input type="text" id="showCatTran" class="categoryBox" placeholder="Введите название категории" readonly disabled>
-        <div class="option" id="optionCat">
         </div>
       </div>
       <div class ="label "><label>Сумма</label></div>

@@ -9,11 +9,13 @@ import {
   refreshAccessToken,
   createReceiptApi,
   getReceiptApi,
+  getAllMyAccountsApi,
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
 
 let cachedCategories = null;
+let cachedActiveAccounts = null;
 const idToNameMap = {};
 
 let countTr = 0;
@@ -219,8 +221,6 @@ export async function getTransactions(offset = 0, append = false) {
       const seconds = ("0" + date.getSeconds()).slice(-2);
       const formattedTime = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 
-      // responseCat;
-
       const categoryTran = idToNameMap[transaction.category_id];
 
       let type;
@@ -235,6 +235,23 @@ export async function getTransactions(offset = 0, append = false) {
       }
 
       const receipt_id = transaction.receipt_id || "";
+      let account;
+
+      if (transaction.type === "Income") {
+        if (!transaction.target_account.name) {
+          account = transaction.target_account.id;
+        } else {
+          account = transaction.target_account.name;
+        }
+      } else if (transaction.type === "Expense") {
+        if (!transaction.source_account.name) {
+          account = transaction.source_account.id;
+        } else {
+          account = transaction.source_account.name;
+        }
+      } else {
+        account = "yep";
+      }
 
       const user_id = parseInt(localStorage.getItem("user_id"), 10);
       let user;
@@ -256,6 +273,7 @@ export async function getTransactions(offset = 0, append = false) {
           <td>${categoryTran}</td>
           <td style="color: green"> +${transaction.amount} руб</td>
           <td>${user}</td>
+          <td>${account}</td>
           ${
             receipt_id
               ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
@@ -270,6 +288,7 @@ export async function getTransactions(offset = 0, append = false) {
           <td>${categoryTran}</td>
           <td style="color: red"> -${transaction.amount} руб</td>
           <td>${user}</td>
+          <td>${account}</td>
           ${
             receipt_id
               ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
@@ -342,6 +361,24 @@ export async function getTransactions(offset = 0, append = false) {
       });
 
       newRow.addEventListener("click", function () {
+        let account;
+
+        if (transaction.type === "Income") {
+          if (!transaction.target_account.name) {
+            account = transaction.target_account.id;
+          } else {
+            account = transaction.target_account.name;
+          }
+        } else if (transaction.type === "Expense") {
+          if (!transaction.source_account.name) {
+            account = transaction.source_account.id;
+          } else {
+            account = transaction.source_account.name;
+          }
+        } else {
+          account = "yep";
+        }
+
         const categoryTransa = idToNameMap[transaction.category_id];
 
         const idTransactionEdit = transaction.number;
@@ -359,6 +396,7 @@ export async function getTransactions(offset = 0, append = false) {
           idTransactionEdit,
           formatterDate,
           formatterTime,
+          account,
           typeTransaction,
           categoryTransaction,
           amountTransaction,
@@ -369,6 +407,7 @@ export async function getTransactions(offset = 0, append = false) {
           idTransactionEdit,
           formatterDate,
           formatterTime,
+          account,
           typeTransaction,
           categoryTransaction,
           amountTransaction,
@@ -448,6 +487,7 @@ export async function getTransactions(offset = 0, append = false) {
         formTransactions.showIdTransaction.style.background = "#f5f7fa";
         formTransactions.showDateTransaction.style.background = "#f5f7fa";
         formTransactions.showTimeTransaction.style.background = "#f5f7fa";
+        formTransactions.showAccountTransaction.style.background = "#f5f7fa";
         formTransactions.showCatTransaction.style.background = "#f5f7fa";
         formTransactions.showSumTransaction.style.background = "#f5f7fa";
         formTransactions.showDescription.style.background = "#f5f7fa";
@@ -752,6 +792,7 @@ function saveOriginalValues() {
   originalValues = {
     date: document.getElementById("dateTr").value,
     time: document.getElementById("timeTr").value,
+    account: document.querySelector(".accountBox").value,
     type: document.querySelector('input[name="typeTransaction"]:checked')
       ?.value,
     category: document.querySelector(".categoryBox").value,
@@ -765,13 +806,14 @@ export function checkForChanges() {
   const currentValues = {
     date: document.getElementById("dateTr").value,
     time: document.getElementById("timeTr").value,
+    account: document.querySelector(".accountBox").value,
     type: document.querySelector('input[name="typeTransaction"]:checked')
       ?.value,
     category: document.querySelector(".categoryBox").value,
     sum: document.getElementById("sumTransaction").value,
     description: document.getElementById("descriptionTran").value,
   };
-
+  console.log(currentValues);
   const hasChanges = Object.keys(originalValues).some(
     (key) => originalValues[key] !== currentValues[key]
   );
@@ -786,6 +828,7 @@ function fillModalWithData(
   id,
   date,
   time,
+  account,
   type,
   category,
   amount,
@@ -798,6 +841,7 @@ function fillModalWithData(
   InputId.value = id;
   formTransactions.dateTransaction.value = date;
   formTransactions.timeTransaction.value = time;
+  formTransactions.accountBox.value = account;
   radioButtons.forEach((getTransactionButton) => {
     if (getTransactionButton.value === type) {
       getTransactionButton.checked = true;
@@ -815,6 +859,7 @@ function fillModaShowlWithData(
   id,
   date,
   time,
+  account,
   type,
   category,
   amount,
@@ -826,6 +871,7 @@ function fillModaShowlWithData(
   formTransactions.showIdTransaction.value = id;
   formTransactions.showDateTransaction.value = date;
   formTransactions.showTimeTransaction.value = time;
+  formTransactions.showAccountTransaction.value = account;
   radioButtons.forEach((getTransactionButton) => {
     if (getTransactionButton.value === type) {
       getTransactionButton.checked = true;
@@ -967,17 +1013,20 @@ export function exit() {
 
 export function toggleDropdown(event) {
   formTransactions.dropdown.classList.toggle("active");
+  formTransactions.dropdown2.classList.remove("active");
   event.stopPropagation();
 }
 
 export function closeDropdown(event) {
   if (!formTransactions.option.contains(event.target)) {
     formTransactions.dropdown.classList.remove("active");
+    formTransactions.dropdown2.classList.remove("active");
   }
 }
 
 export function toggleDropdownCat(event) {
   formTransactions.dropdownCat.classList.toggle("active");
+  formTransactions.dropdown2.classList.remove("active");
   event.stopPropagation();
 }
 
@@ -1180,11 +1229,18 @@ export function renderCategoryTree(type) {
 
 export function checkCreateTranForm() {
   const dateTransaction = formTransactions.dateTransaction.value;
-  const timeTransaction = formTransactions.timeTransaction.value;
+  // const timeTransaction = formTransactions.timeTransaction.value;
+  const accountBox = formTransactions.accountBox.value;
   const catTransaction = formTransactions.catTransaction.value;
   const typeTransaction = formTransactions.typeTransaction.value;
   const sumTransaction = formTransactions.sumTransaction.value;
-  if (dateTransaction && timeTransaction && sumTransaction && catTransaction) {
+  if (
+    dateTransaction &&
+    // timeTransaction &&
+    sumTransaction &&
+    catTransaction &&
+    accountBox
+  ) {
     formTransactions.createTra.classList.remove("disable");
   } else {
     formTransactions.createTra.classList.add("disable");
@@ -1228,13 +1284,18 @@ export async function createNewTransaction() {
 
   const eventId = localStorage.getItem("event");
   const dateTransaction = formTransactions.dateTransaction.value;
-  const timeTransaction = formTransactions.timeTransaction.value;
+  let timeTransaction = formTransactions.timeTransaction.value;
+  const accountTransactionId = localStorage.getItem("account_id");
   const catTransactionId = localStorage.getItem("cat_transaction");
   const sumTransaction = formTransactions.sumTransaction.value;
   const accessToken = localStorage.getItem("access_token");
   // const dateTime = new Date(`${dateTransaction}T${timeTransaction}:00`);
   const description = formTransactions.description.value || null;
   const typeTransaction = getSelectedRadioValue();
+
+  if (!timeTransaction) {
+    timeTransaction = "00:00";
+  }
 
   let dateUTCString = "";
   dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
@@ -1247,6 +1308,7 @@ export async function createNewTransaction() {
       sumTransaction,
       dateUTCString,
       description,
+      accountTransactionId,
       accessToken
     );
 
@@ -1312,6 +1374,7 @@ export function clearModalData() {
   InputId.value = "";
   formTransactions.dateTransaction.value = ""; // Очищаем поле "Дата"
   formTransactions.timeTransaction.value = ""; // Очищаем поле "Время"
+  formTransactions.accountBox.value = "";
   // Очищаем выбранные радиокнопки
   formTransactions.radioButtons.forEach((getTransactionButton) => {
     getTransactionButton.checked = false;
@@ -1491,4 +1554,64 @@ export function hidePreloader() {
     // Устанавливаем таймер на минимальное время или задержку до текущего времени
     setTimeout(removePreloader, delay);
   }
+}
+
+export async function getActiveAccounts() {
+  try {
+    const access_token = localStorage.getItem("access_token");
+    const activeAccounts = await getAllMyAccountsApi(access_token, false);
+    cachedActiveAccounts = activeAccounts;
+
+    renderAccount();
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+export function toggleDropdownAcc(event) {
+  formTransactions.dropdownAcc.classList.toggle("active");
+  event.stopPropagation();
+  formTransactions.dropdown1.classList.remove("active");
+}
+
+export function renderAccount() {
+  const inputElement = document.querySelector(".accountBox");
+
+  const lista = document.getElementById("optionAcc");
+  lista.innerHTML = "";
+
+  const treeContainer = document.createElement("div");
+  treeContainer.classList.add("account-div");
+  lista.appendChild(treeContainer);
+
+  cachedActiveAccounts.forEach((account) => {
+    const accountId = account.id;
+    const accountName = account.name;
+
+    const listItem = document.createElement("li");
+    listItem.setAttribute("data-id", accountId);
+    listItem.setAttribute("data-name", accountName);
+
+    const span = document.createElement("span");
+    span.textContent = accountName;
+
+    listItem.appendChild(span);
+    treeContainer.appendChild(listItem);
+  });
+
+  treeContainer.addEventListener("click", function (event) {
+    const target = event.target;
+
+    // Если клик на <li> или <span> (с именем категории)
+    if (target.tagName === "SPAN" || target.tagName === "LI") {
+      // Определяем элемент <li>, на который был произведен клик
+      const listItem = target.tagName === "SPAN" ? target.parentNode : target;
+      inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
+
+      localStorage.setItem("account_id", listItem.getAttribute("data-id"));
+      formTransactions.dropdown2.classList.remove("active");
+
+      event.stopPropagation();
+    }
+  });
 }

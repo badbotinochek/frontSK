@@ -1,4 +1,4 @@
-const BASE_URL = "https://bsikpg.duckdns.org/api/v1/";
+const BASE_URL = "https://bsikpg.duckdns.org/api/";
 
 export async function register(name, email, phone, password) {
   try {
@@ -9,7 +9,7 @@ export async function register(name, email, phone, password) {
       password: password,
     });
 
-    const response = await fetch(BASE_URL + "auth/register", {
+    const response = await fetch(BASE_URL + "v1/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,7 +29,7 @@ export async function register(name, email, phone, password) {
 
 export async function authenticateUser(email, password) {
   try {
-    const response = await fetch(BASE_URL + "auth/login", {
+    const response = await fetch(BASE_URL + "v1/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export async function authenticateUser(email, password) {
 
 export async function refreshAccessToken(refreshToken) {
   try {
-    const response = await fetch(BASE_URL + "auth/token", {
+    const response = await fetch(BASE_URL + "v1/auth/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export function redirectAutorize() {
 export async function getAllMyEvents(access_token) {
   try {
     const response = await fetch(
-      BASE_URL + "events/by_role?roles=Manager%2CObserver%2CPartner ",
+      BASE_URL + "v1/events/by_role?roles=Manager%2CObserver%2CPartner ",
       {
         method: "GET",
         headers: {
@@ -115,7 +115,7 @@ export async function getTransacionsForEvent(
       offset: offset,
     });
 
-    const fullUrl = `${BASE_URL}transactions/all?${params}`;
+    const fullUrl = `${BASE_URL}v2/transactions/all?${params}`;
     const response = await fetch(fullUrl, {
       method: "GET",
       headers: {
@@ -123,7 +123,7 @@ export async function getTransacionsForEvent(
         Authorization: `Bearer ${access_token}`,
       },
     });
-    console.log(response);
+
     if (!response.ok) {
       throw new Error("Ошибка при выполнении запроса");
     }
@@ -134,7 +134,7 @@ export async function getTransacionsForEvent(
 }
 
 export async function deleteTransaction(transactionId, access_token) {
-  const url = `transactions/${transactionId}`;
+  const url = `v2/transactions/${transactionId}`;
 
   try {
     const response = await fetch(BASE_URL + url, {
@@ -157,7 +157,7 @@ export async function getCategoryTransaction() {
   const access_token = localStorage.getItem("access_token");
 
   try {
-    const response = await fetch(BASE_URL + "transactions/categories", {
+    const response = await fetch(BASE_URL + "v1/transactions/categories", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -181,6 +181,7 @@ export async function createTransactionApi(
   amount,
   transaction_date,
   description,
+  source_account_id,
   access_token
 ) {
   try {
@@ -190,12 +191,13 @@ export async function createTransactionApi(
       category_id,
       amount,
       transaction_date,
+      source_account_id,
     };
     if (description) {
       requestData.description = description;
     }
 
-    const response = await fetch(BASE_URL + "transactions", {
+    const response = await fetch(BASE_URL + "v2/transactions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -234,14 +236,17 @@ export async function updateTransactionApi(
       requestData.description = description;
     }
 
-    const response = await fetch(BASE_URL + `transactions/${transaction_id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access_token}`,
-      },
-      body: JSON.stringify(requestData),
-    });
+    const response = await fetch(
+      BASE_URL + `v2/transactions/${transaction_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify(requestData),
+      }
+    );
     if (!response.ok) {
       throw new Error("Ошибка аутентификации");
     }
@@ -253,7 +258,7 @@ export async function updateTransactionApi(
 
 export async function getMyEventsApi(access_token) {
   try {
-    const response = await fetch(BASE_URL + "events/by_role?roles=Manager", {
+    const response = await fetch(BASE_URL + "v1/events/by_role?roles=Manager", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -269,7 +274,7 @@ export async function getMyEventsApi(access_token) {
 
 export async function getMyInvitationApi(access_token) {
   try {
-    const response = await fetch(BASE_URL + "events/invitations", {
+    const response = await fetch(BASE_URL + "v1/events/invitations", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -286,7 +291,7 @@ export async function getMyInvitationApi(access_token) {
 export async function getForeignInvitationApi(access_token) {
   try {
     const response = await fetch(
-      BASE_URL + "events/by_role?roles=Observer%2CPartner",
+      BASE_URL + "v1/events/by_role?roles=Observer%2CPartner",
       {
         method: "GET",
         headers: {
@@ -305,7 +310,7 @@ export async function getForeignInvitationApi(access_token) {
 export async function eventConfirmApi(event_id, access_token) {
   try {
     const response = await fetch(
-      BASE_URL + `events/${event_id}/participant/confirm`,
+      BASE_URL + `v1/events/${event_id}/participant/confirm`,
       {
         method: "Put",
         headers: {
@@ -324,7 +329,7 @@ export async function eventConfirmApi(event_id, access_token) {
 export async function eventRejectApi(event_id, access_token) {
   try {
     const response = await fetch(
-      BASE_URL + `events/${event_id}/participant/reject`,
+      BASE_URL + `v1/events/${event_id}/participant/reject`,
       {
         method: "Put",
         headers: {
@@ -359,7 +364,7 @@ export async function createEventApi(
       requestData.description = description;
     }
 
-    const response = await fetch(BASE_URL + "events", {
+    const response = await fetch(BASE_URL + "v1/events", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -388,14 +393,17 @@ export async function createParticipantApi(
       role,
     };
 
-    const response = await fetch(BASE_URL + `events/${event_id}/participant`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access_token}`,
-      },
-      body: JSON.stringify(requestData),
-    });
+    const response = await fetch(
+      BASE_URL + `v1/events/${event_id}/participant`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify(requestData),
+      }
+    );
     if (!response.ok) {
       throw new Error("Ошибка аутентификации");
     }
@@ -425,7 +433,7 @@ export async function updateEventApi(
       requestData.description = description;
     }
 
-    const response = await fetch(BASE_URL + `events/${event_id}`, {
+    const response = await fetch(BASE_URL + `v1/events/${event_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -449,7 +457,7 @@ export async function createReceiptApi(event_id, qr, access_token) {
       qr,
     };
 
-    const response = await fetch(BASE_URL + `receipts/qr`, {
+    const response = await fetch(BASE_URL + `v1/receipts/qr`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -469,7 +477,7 @@ export async function createReceiptApi(event_id, qr, access_token) {
 export async function recoveryPasswordApi(email) {
   try {
     const response = await fetch(
-      BASE_URL + `auth/password/recovery?email=${email}`,
+      BASE_URL + `v1/auth/password/recovery?email=${email}`,
       {
         method: "POST",
         headers: {
@@ -489,7 +497,7 @@ export async function recoveryPasswordApi(email) {
 export async function getReceiptApi(access_token, receipt_id) {
   try {
     const response = await fetch(
-      BASE_URL + `receipts?receipts_ids=${receipt_id}`,
+      BASE_URL + `v1/receipts?receipts_ids=${receipt_id}`,
       {
         method: "GET",
         headers: {
@@ -508,7 +516,7 @@ export async function getReceiptApi(access_token, receipt_id) {
 export async function getAllMyAccountsApi(access_token, blocked) {
   try {
     const response = await fetch(
-      BASE_URL + `accounts/by_user?with_blocked=${blocked}`,
+      BASE_URL + `v1/accounts/by_user?with_blocked=${blocked}`,
       {
         method: "GET",
         headers: {
@@ -533,7 +541,7 @@ export async function createAccountApi(name, description, access_token) {
       requestData.description = description;
     }
 
-    const response = await fetch(BASE_URL + "accounts", {
+    const response = await fetch(BASE_URL + "v1/accounts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -566,7 +574,7 @@ export async function updateAccountApi(
       requestData.description = description;
     }
 
-    const response = await fetch(BASE_URL + `accounts/${account_id}`, {
+    const response = await fetch(BASE_URL + `v1/accounts/${account_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
