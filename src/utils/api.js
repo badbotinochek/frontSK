@@ -125,7 +125,7 @@ export async function getTransacionsForEvent(
     });
 
     if (!response.ok) {
-      throw new Error("Ошибка при выполнении запроса");
+      throw new Error("Ошибкwewа при выполнении запроса");
     }
     return await response.json();
   } catch (error) {
