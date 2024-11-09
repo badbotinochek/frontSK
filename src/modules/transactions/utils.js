@@ -237,8 +237,6 @@ export async function getTransactions(offset = 0, append = false) {
       const receipt_id = transaction.receipt_id || "";
       let account;
 
-      console.log(transaction);
-      console.log(transaction.target_account);
       if (transaction.type === "Income") {
         if (!transaction.target_account) {
           account = "?";
@@ -374,21 +372,28 @@ export async function getTransactions(offset = 0, append = false) {
         let account;
 
         if (transaction.type === "Income") {
-          if (!transaction.target_account.name) {
-            account = transaction.target_account.id;
+          if (!transaction.target_account) {
+            account = "?";
           } else {
-            account = transaction.target_account.name;
+            if (!transaction.target_account.name) {
+              account = transaction.target_account.id;
+            } else {
+              account = transaction.target_account.name;
+            }
           }
         } else if (transaction.type === "Expense") {
-          if (!transaction.source_account.name) {
-            account = transaction.source_account.id;
+          if (!transaction.source_account) {
+            account = "?";
           } else {
-            account = transaction.source_account.name;
+            if (!transaction.source_account.name) {
+              account = transaction.source_account.id;
+            } else {
+              account = transaction.source_account.name;
+            }
           }
         } else {
           account = "yep";
         }
-
         const categoryTransa = idToNameMap[transaction.category_id];
 
         const idTransactionEdit = transaction.number;
