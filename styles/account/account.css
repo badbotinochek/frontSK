@@ -1,0 +1,194 @@
+.customTableAccount {
+  height: 48px;
+  overflow: auto;
+  border: 1px solid #dddddd;
+  table-layout: fixed;
+  min-width: 420px;
+  border-collapse: collapse;
+  margin-top: 10px;
+  user-select: none;
+}
+
+.modalAccount .createButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  margin-top: 20px;
+}
+
+.modalAccount .createButton:hover {
+  background-color: #2f86e4;
+}
+
+.modalParticipant {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 170px;
+  user-select: text;
+  visibility: visible;
+  overflow: auto;
+  background: #fff;
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  opacity: 0;
+  visibility: hidden;
+  border: none;
+  border-radius: 6px;
+  user-select: none;
+}
+
+.modalParticipant[open] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modalParticipant::backdrop {
+  background: #00000000;
+}
+
+.modalParticipant {
+  padding: 20px;
+  color: #303133;
+  text-align: left;
+}
+
+.modalParticipant .label {
+  color: #606266;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.modalParticipant .label {
+  color: #606266;
+  font-size: 15px;
+}
+
+#idUser {
+  width: 360px;
+  padding: 10px;
+  height: 32px;
+  border: 1px solid #faf8f8;
+  border-radius: 4px;
+}
+
+#idUser:focus {
+  border-color: #409eff;
+}
+
+.buttonsAddUserAccount {
+  display: flex;
+  height: 32px;
+  margin-top: 30px;
+}
+
+.addUserButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.addUserButton :hover {
+  background-color: #2f86e4;
+}
+
+.addUserButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.closeModalAddUser {
+  background: #82848a;
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  height: 40px;
+  border: none;
+  margin-left: 20px;
+}
+
+.closeModalAddUser:hover {
+  background-color: #7b7c81;
+}
+
+.iconDelete {
+  width: 30px;
+  height: 30px;
+  margin-top: 9px;
+  margin-left: 60px;
+  cursor: pointer;
+}
+
+.customTableAccount th.smallRow {
+  width: 1px;
+}
+
+#event {
+  color: var(--primary-color);
+}
+
+.nav-text#transaction {
+  color: var(--light);
+}
+
+.icon#dollar {
+  color: var(--light);
+}
+
+/* th,
+td {
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+  padding: 10px 40px;
+  text-align: left;
+  height: 48px;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: #909399;
+  z-index: 100;
+  background-color: #faf8f8;
+}
+
+td img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  text-align: center;
+}
+
+td img:hover {
+  filter: brightness(80%);
+}
+
+.smallRow {
+  width: 170px;
+}
+
+.dataBlockMore {
+  display: inline-block;
+  margin-left: 80px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  color: #06c;
+}
+
+.dataBlockMore.disable {
+  display: none;
+} */

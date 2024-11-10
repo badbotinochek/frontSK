@@ -390,9 +390,6 @@ input[type="date"].error {
   height: 48px;
   overflow: auto;
   border: 1px solid #dddddd;
-}
-
-table {
   width: 95%;
   table-layout: fixed;
   min-width: 900px;
@@ -401,6 +398,16 @@ table {
   margin-top: 10px;
   user-select: none;
 }
+
+/* table {
+  width: 95%;
+  table-layout: fixed;
+  min-width: 900px;
+  border-collapse: collapse;
+  margin-left: 80px;
+  margin-top: 10px;
+  user-select: none;
+} */
 
 th,
 td {
@@ -612,6 +619,7 @@ td img:hover {
 .radio {
   display: flex;
   justify-content: left;
+  margin-top: 5px;
 }
 
 .custom-radio {
@@ -1269,7 +1277,7 @@ input::placeholder {
   background-color: #f0f0f0; /* Любой цвет фона, который вы хотите использовать */
 }
 
-.modalTr .star {
+.star {
   margin-left: -3px;
   color: #fc0000;
 }
@@ -1497,7 +1505,7 @@ input::placeholder {
   height: 40px;
   border: 1px solid #e4e7ed;
   padding: 0 0 0 13px;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .modalAccount .buttons {
@@ -1557,7 +1565,7 @@ input::placeholder {
 }
 
 .modalEditInputDescriptionAccount {
-  margin-top: 20px;
+  margin-top: 5px;
   width: 420px;
   height: 128px;
   outline: none;
