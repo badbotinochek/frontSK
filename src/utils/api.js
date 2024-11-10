@@ -181,7 +181,7 @@ export async function createTransactionApi(
   amount,
   transaction_date,
   description,
-  source_account_id,
+  account_id,
   access_token
 ) {
   try {
@@ -191,8 +191,14 @@ export async function createTransactionApi(
       category_id,
       amount,
       transaction_date,
-      source_account_id,
     };
+
+    if (type === "Income") {
+      requestData.target_account_id = account_id;
+    } else {
+      requestData.source_account_id = account_id;
+    }
+
     if (description) {
       requestData.description = description;
     }
