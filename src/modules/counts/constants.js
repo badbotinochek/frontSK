@@ -37,4 +37,17 @@ export const formCounts = {
   modalEditRadioButtons: document.querySelectorAll(
     'input[name="modalEditRadioButtons"]'
   ),
+
+  modalEditAddUserFormAccount: document.getElementById(
+    "openModalAddUserButton"
+  ),
+
+  modalAddUserAccount: document.getElementById("modalAddUserAccount"),
+  modalAddUserButton: document.querySelector(".addUserButton"),
+  modalAddUserCloseButton: document.querySelector(".closeModalAddUser"),
+
+  modalAddUserInputIdUser: document.getElementById("idUser"),
+  modalAccount: document.getElementById("modalAccount"),
+  aprove_delete: document.getElementById("deleteBtn"),
+  cancel: document.getElementById("closeBtn"),
 };

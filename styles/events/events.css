@@ -131,7 +131,7 @@
   height: 40px;
   border: 1px solid #e4e7ed;
   padding: 0 0 0 13px;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .inputEventName:focus {
@@ -141,7 +141,7 @@
 .dateTime {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .dateTime input[type="date"] {
@@ -155,7 +155,7 @@
 }
 
 .descriptionEvent {
-  margin-top: 20px;
+  margin-top: 5px;
   width: 420px;
   height: 128px;
   outline: none;

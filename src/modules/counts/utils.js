@@ -3,6 +3,8 @@ import {
   getAllMyAccountsApi,
   createAccountApi,
   updateAccountApi,
+  addUserAccountApi,
+  deleteUserAccountApi,
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 
@@ -150,7 +152,7 @@ function fillModalWithData(id, name, description, state) {
   saveOriginalValues(name, description, state);
 }
 
-function fillModalEditWithData(id, name, description, state) {
+function fillModalEditWithData(id, name, description, state, users) {
   const radioButtons = document.querySelectorAll(
     'input[name="modalEditRadioButtons"]'
   );
@@ -173,6 +175,32 @@ function fillModalEditWithData(id, name, description, state) {
 
   formCounts.modalEditInputIdAccount.value = id;
   formCounts.modalEditInputNameAccount.value = name;
+
+  const tableBody = document.querySelector(".tableContainerAccount tbody");
+  tableBody.innerHTML = "";
+
+  console.log(users);
+  users.forEach((user) => {
+    const newRow = document.createElement("tr");
+    newRow.dataset.userId = user.id;
+    newRow.innerHTML = `
+        <td >${user.id}</td>
+        <td>${user.name}</td>
+        <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-user-id="${user.id}">
+      `;
+
+    tableBody.appendChild(newRow);
+  });
+
+  const deleteIcons = document.querySelectorAll(".iconDelete");
+  deleteIcons.forEach((icon) => {
+    icon.addEventListener("click", () => {
+      const userAccountId = icon.getAttribute("data-user-id");
+      localStorage.setItem("userAccountId", userAccountId);
+      localStorage.setItem("accountId", id);
+      formCounts.modalAccount.showModal();
+    });
+  });
 
   saveOriginalValues(name, description, state);
   checkForChanges();
@@ -210,24 +238,52 @@ export async function getAllMyAccounts() {
       }
 
       const newRow = document.createElement("tr");
-      newRow.innerHTML = `
-              <td>${account.id}</td>
-              <td>${account.name}</td>
-              <td>${formattedcreatedDate}</td>
-              <td>${account.user.name}</td>
-              <td>${state}</td>
-              <td>
-                    <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEditAccount" data-account-id="${account.id}">
-              </td>`;
+      const userId = localStorage.getItem("user_id");
 
-      // newRow.addEventListener("click", function () {
-      //   const idCountEdit = account.id;
-      //   const nameCount = account.name;
-      //   const descriptionCount = account.description;
-      //   const state = account.is_blocked;
+      if (parseInt(account.user.id, 10) === parseInt(userId, 10)) {
+        newRow.innerHTML = `
+        <td>${account.id}</td>
+        <td>${account.name}</td>
+        <td>${formattedcreatedDate}</td>
+        <td>${account.user.name}</td>
+        <td>${state}</td>
+        <td>
+        
+         <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEditAccount" data-account-id="${account.id}">
+        </td>`;
+      } else {
+        newRow.innerHTML = `
+        <td>${account.id}</td>
+        <td>${account.name}</td>
+        <td>${formattedcreatedDate}</td>
+        <td>${account.user.name}</td>
+        <td>${state}</td>
+        <td>
+        </td>`;
+      }
 
-      // fillModalWithData(idCountEdit, nameCount, descriptionCount, state);
-      // });
+      // if (parseInt(account.user.id, 10) === parseInt(userId, 10)) {
+      //   newRow.innerHTML = `
+      //   <td>${account.id}</td>
+      //   <td>${account.name}</td>
+      //   <td>${formattedcreatedDate}</td>
+      //   <td>${account.user.name}</td>
+      //   <td>${state}</td>
+      //   <td>
+      //    <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+      //    <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEditAccount" data-account-id="${account.id}">
+      //   </td>`;
+      // } else {
+      //   newRow.innerHTML = `
+      //   <td>${account.id}</td>
+      //   <td>${account.name}</td>
+      //   <td>${formattedcreatedDate}</td>
+      //   <td>${account.user.name}</td>
+      //   <td>${state}</td>
+      //   <td>
+      //    <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+      //   </td>`;
+      // }
 
       tbody.appendChild(newRow);
     });
@@ -242,17 +298,27 @@ export async function getAllMyAccounts() {
           (account) => account.id == idAccountEdit
         );
 
+        console.log(accountData);
         if (accountData) {
           const idCountEdit = accountData.id;
           const nameCount = accountData.name;
           const descriptionCount = accountData.description;
           const state = accountData.is_blocked;
+
+          const users = accountData.admitted_users.map((admitted_users) => {
+            return {
+              id: admitted_users.id,
+              name: admitted_users.name,
+            };
+          });
+
           localStorage.setItem("account", idCountEdit);
           fillModalEditWithData(
             idCountEdit,
             nameCount,
             descriptionCount,
-            state
+            state,
+            users
           );
         }
 
@@ -375,4 +441,121 @@ export async function createAccount() {
       formCounts.modalCreateCreateButtonAccount.classList.remove("disable");
     }, 10000);
   }
+}
+
+export function clearModalAddUser() {
+  formCounts.modalAddUserInputIdUser.value = "";
+}
+
+export function showModalAddUser() {
+  formCounts.modalEditFormAccount.close();
+  clearModalAddUser();
+  formCounts.modalAddUserButton.classList.add("disable");
+  formCounts.modalAddUserAccount.showModal();
+}
+
+export function closeModalAddUser() {
+  formCounts.modalEditFormAccount.showModal();
+
+  formCounts.modalAddUserAccount.close();
+}
+
+export function addUser() {}
+
+export function validateAndCleanInput(value) {
+  // Удаляем все символы, кроме цифр
+  value = value.replace(/\D/g, "");
+
+  // Удаляем ведущие нули, если они есть
+  value = value.replace(/^0+/, "");
+
+  if (value.length > 13) {
+    value = value.slice(0, 13);
+  }
+
+  return value;
+}
+
+export function checkCreateAddUserForm() {
+  if (formCounts.modalAddUserInputIdUser.value) {
+    formCounts.modalAddUserButton.classList.remove("disable");
+  } else {
+    formCounts.modalAddUserButton.classList.add("disable");
+  }
+}
+
+export async function addUserAccount() {
+  // Получаем данные из модального окна
+
+  let buttonClicked = false;
+  formCounts.modalAddUserButton.classList.add("disable");
+  buttonClicked = true;
+
+  const userId = localStorage.getItem("user_id");
+  const newUserId = formCounts.modalAddUserInputIdUser.value;
+  const account_id = formCounts.modalEditInputIdAccount.value;
+
+  // Проверяем, чтобы user_id не повторялся в таблице
+  const tableBody = document.querySelector(".tableContainerAccount tbody");
+
+  const existingUser = tableBody.querySelector(
+    `tr[data-user-id="${newUserId}"]`
+  );
+
+  if (existingUser) {
+    const errorMessage = `Пользователь с таким ID уже имеет доступ к счету`;
+    createToast("error", errorMessage);
+    return;
+  }
+
+  if (userId == newUserId) {
+    const errorMessage = `Себя нельзя добавлять в счет`;
+    createToast("error", errorMessage);
+    return;
+  }
+
+  const accessToken = localStorage.getItem("access_token");
+
+  try {
+    console.log(232);
+    const response = await addUserAccountApi(
+      account_id,
+      newUserId,
+      accessToken
+    );
+
+    const successMessage = `Пользователю предоставлен доступ к счету`;
+    createToast("success", successMessage);
+    getAllMyAccounts();
+    formCounts.modalAddUserAccount.close();
+    formCounts.modalEditFormAccount.close();
+  } catch (error) {
+    setTimeout(() => {
+      formCounts.modalAddUserButton.classList.remove("disable");
+      buttonClicked = false;
+    }, 1000);
+  }
+}
+
+export function handleClick() {
+  formCounts.modalAccount.close();
+}
+
+export async function deleteTransactions() {
+  const access_token = localStorage.getItem("access_token");
+  const userAccountId = localStorage.getItem("userAccountId");
+  const accountId = localStorage.getItem("accountId");
+
+  try {
+    const response = await deleteUserAccountApi(
+      accountId,
+      userAccountId,
+      access_token
+    );
+    getAllMyAccounts();
+    handleClick();
+    formCounts.modalEditFormAccount.close();
+    const successMessage = `Доступ заблокирован к счету для пользователя`;
+    createToast("success", successMessage);
+  } catch (error) {}
 }

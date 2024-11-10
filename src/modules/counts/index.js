@@ -10,8 +10,17 @@ import {
   updateAccount,
   checkCreateForm,
   createAccount,
+  showModalAddUser,
+  addUser,
+  closeModalAddUser,
+  validateAndCleanInput,
+  checkCreateAddUserForm,
+  addUserAccount,
+  handleClick,
+  deleteTransactions,
 } from "./utils.js";
 import { formCounts } from "./constants.js";
+import { createToast } from "../notifications/index.js";
 
 document.addEventListener("DOMContentLoaded", function (e) {
   checkAndUpdateToken();
@@ -93,4 +102,33 @@ function hidePreloader() {
 // Скрытие прелоадера после полной загрузки страницы
 window.addEventListener("load", () => {
   hidePreloader();
+
+  formCounts.modalEditAddUserFormAccount.addEventListener(
+    "click",
+    showModalAddUser
+  );
+
+  formCounts.modalAddUserButton.addEventListener("click", addUser);
+
+  formCounts.modalAddUserCloseButton.addEventListener(
+    "click",
+    closeModalAddUser
+  );
+
+  formCounts.modalAddUserInputIdUser.addEventListener("input", () => {
+    const input = document.getElementById("idUser");
+    input.value = validateAndCleanInput(input.value);
+  });
+
+  formCounts.modalAddUserInputIdUser.addEventListener(
+    "input",
+    checkCreateAddUserForm
+  );
+
+  // Добавляем обработчик события click
+  formCounts.modalAddUserButton.addEventListener("click", addUserAccount);
+
+  formCounts.cancel.addEventListener("click", handleClick);
+
+  formCounts.aprove_delete.addEventListener("click", deleteTransactions);
 });

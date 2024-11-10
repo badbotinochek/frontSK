@@ -590,3 +590,46 @@ export async function updateAccountApi(
     throw error;
   }
 }
+
+export async function addUserAccountApi(account_id, user_id, access_token) {
+  try {
+    const response = await fetch(
+      BASE_URL + `v1/accounts/${account_id}/addUser?user_id=${user_id}`,
+
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteUserAccountApi(account_id, user_id, access_token) {
+  try {
+    const response = await fetch(
+      BASE_URL + `v1/accounts/${account_id}/deleteUser/${user_id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Ошибка аутентификации");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
