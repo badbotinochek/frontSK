@@ -1023,7 +1023,6 @@ export function customTextArea() {
 
 export function exit() {
   localStorage.clear();
-  console.log(2434);
   window.location.href = "/pages/auth/index.html";
 }
 
