@@ -941,7 +941,7 @@ export function redirectToAuth() {
 
 export function exit() {
   localStorage.clear();
-  window.location.href = "../auth/index.html";
+  window.location.href = "/pages/auth/index.html";
 }
 
 const MIN_PRELOADER_DURATION = 1000; // Минимальная продолжительность в миллисекундах (1 секунда)
