@@ -61,7 +61,7 @@ export async function loginUser() {
     }, 1000);
 
     if (loginData.refresh_token) {
-      localStorage.setItem("user_id", loginData.user_id);
+      localStorage.setItem("user_id", loginData.user.id);
       localStorage.setItem("user_name", loginData.user.name);
       await refreshAccessToken(loginData.refresh_token);
     }

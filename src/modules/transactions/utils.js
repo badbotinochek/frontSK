@@ -194,6 +194,7 @@ export async function getTransactions(offset = 0, append = false) {
       offset,
       access_token
     );
+    console.log(responseData);
     const tbody = document.querySelector("tbody");
     // Проверка, есть ли данные
     const label = document.getElementById("infoTransactionsLabel");
@@ -828,7 +829,6 @@ export function checkForChanges() {
     sum: document.getElementById("sumTransaction").value,
     description: document.getElementById("descriptionTran").value,
   };
-  console.log(currentValues);
   const hasChanges = Object.keys(originalValues).some(
     (key) => originalValues[key] !== currentValues[key]
   );

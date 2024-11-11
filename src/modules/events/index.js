@@ -26,7 +26,11 @@ import { formEvent } from "./constants.js";
 document.addEventListener("DOMContentLoaded", function () {
   redirectToAuth();
   const userId = localStorage.getItem("user_id");
-  formEvent.userIdElement.textContent = userId;
+  const userIdElement = document.getElementById("user_id");
+  userIdElement.textContent = userId;
+  userIdElement.title = `ID пользователя: ${userId}`;
+  const userName = localStorage.getItem("user_name");
+  formEvent.userIdElement.textContent = userName;
 
   sidebar();
 

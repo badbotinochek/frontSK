@@ -51,7 +51,11 @@ document.addEventListener("DOMContentLoaded", function (e) {
   redirectToAuth();
 
   const userId = localStorage.getItem("user_id");
-  formTransactions.userIdElement.textContent = userId;
+  const userIdElement = document.getElementById("user_id");
+  userIdElement.textContent = userId;
+  userIdElement.title = `ID пользователя: ${userId}`;
+  const userName = localStorage.getItem("user_name");
+  formTransactions.userIdElement.textContent = userName;
 
   // Проверяем, что все поля, которые нужны для получения транзакций заполнены
   checkForm();

@@ -26,6 +26,6 @@ export const formEvent = {
   addParticipantShowButton: document.getElementById("addParticipantShowButton"),
   closeModalShowEvent: document.getElementById("closeModalShowEvent"),
 
-  userIdElement: document.getElementById("userId"),
+  userIdElement: document.getElementById("user_id"),
   exit: document.getElementById("exist"),
 };
