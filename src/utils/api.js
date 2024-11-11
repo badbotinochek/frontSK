@@ -1,4 +1,4 @@
-const BASE_URL = "https://bsikpg.duckdns.org/api/";
+const BASE_URL = "https://sweetcash.org/api/";
 
 export async function register(name, email, phone, password) {
   try {
