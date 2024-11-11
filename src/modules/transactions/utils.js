@@ -1023,7 +1023,7 @@ export function customTextArea() {
 
 export function exit() {
   localStorage.clear();
-  window.location.href = "../../pages/auth/index.html";
+  window.location.href = "/pages/auth/index.html";
 }
 
 export function toggleDropdown(event) {
