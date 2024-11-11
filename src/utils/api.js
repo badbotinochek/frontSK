@@ -63,9 +63,8 @@ export async function refreshAccessToken(refreshToken) {
       localStorage.setItem("access_token", data.token);
       localStorage.setItem("refresh_token", data.refresh_token);
       localStorage.setItem("expire_at", data.expire_at);
-      console.log("End date is greater than start date.");
+
       window.location.href = "../../pages/transactions/index.html";
-      console.log(data);
     }
   } catch (error) {
     throw error;
@@ -97,6 +96,8 @@ export async function getAllMyEvents(access_token) {
     console.error("Ошибка при выполнении запроса:", error);
   }
 }
+
+// Transactions
 
 export async function getTransacionsForEvent(
   start_date,
@@ -144,27 +145,6 @@ export async function deleteTransaction(transactionId, access_token) {
         Authorization: `Bearer ${access_token}`,
       },
     });
-    if (!response.ok) {
-      throw new Error("Ошибка при выполнении запроса");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Произошла ошибка при удалении транзакции:", error);
-  }
-}
-
-export async function getCategoryTransaction() {
-  const access_token = localStorage.getItem("access_token");
-
-  try {
-    const response = await fetch(BASE_URL + "v1/transactions/categories", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access_token}`,
-      },
-    });
-
     if (!response.ok) {
       throw new Error("Ошибка при выполнении запроса");
     }
@@ -259,6 +239,27 @@ export async function updateTransactionApi(
     return await response.json();
   } catch (error) {
     throw error;
+  }
+}
+
+export async function getCategoryTransaction() {
+  const access_token = localStorage.getItem("access_token");
+
+  try {
+    const response = await fetch(BASE_URL + "v1/transactions/categories", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Ошибка при выполнении запроса");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Произошла ошибка при удалении транзакции:", error);
   }
 }
 

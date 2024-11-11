@@ -28,9 +28,11 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   getAllMyAccounts();
   const userId = localStorage.getItem("user_id");
-
-  formCounts.userIdElement.textContent = userId;
-  console.log(formCounts.userIdElement.textContent);
+  const userIdElement = document.getElementById("user_id");
+  userIdElement.textContent = userId;
+  userIdElement.title = `ID пользователя: ${userId}`;
+  const userName = localStorage.getItem("user_name");
+  formCounts.userIdElement.textContent = userName;
 
   // Обработчик для сайдбара
   sidebar();

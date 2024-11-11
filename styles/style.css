@@ -354,17 +354,54 @@ input[type="date"].error {
   border: 1px solid var(--error);
 }
 
-.user-id-label,
+/* .user-id-label,
 #user_id {
   position: absolute;
   right: 3cap;
   display: flex;
   align-items: center;
   top: 30px;
+  color: #5b5b5b;
 }
 
 .user-id-label {
-  margin-right: 15px;
+  margin-right: 35px;
+} */
+
+.user-info-container {
+  position: absolute;
+  top: 30px; /* Расстояние от верхнего края экрана */
+  right: 20px; /* Расстояние от правого края экрана */
+  display: flex;
+  align-items: center;
+  color: #5b5b5b;
+}
+
+.user-id-label {
+  display: inline-block;
+  color: #5b5b5b;
+  margin-right: 8px; /* Отступ между лейблом и ID */
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+#user_id {
+  display: inline-block;
+  color: #5b5b5b;
+  max-width: 70px; /* Ограничение ширины для ID */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Троеточие, если текст длиннее ширины */
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+@media (max-width: 1350px) {
+  .user-info-container {
+    position: static; /* Отключаем абсолютное позиционирование */
+    margin-top: 10px; /* Отступ сверху */
+    justify-content: center; /* Центрируем блок */
+  }
 }
 
 #transactionsLabel {

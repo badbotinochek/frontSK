@@ -179,7 +179,6 @@ function fillModalEditWithData(id, name, description, state, users) {
   const tableBody = document.querySelector(".tableContainerAccount tbody");
   tableBody.innerHTML = "";
 
-  console.log(users);
   users.forEach((user) => {
     const newRow = document.createElement("tr");
     newRow.dataset.userId = user.id;
@@ -298,7 +297,6 @@ export async function getAllMyAccounts() {
           (account) => account.id == idAccountEdit
         );
 
-        console.log(accountData);
         if (accountData) {
           const idCountEdit = accountData.id;
           const nameCount = accountData.name;
@@ -517,7 +515,6 @@ export async function addUserAccount() {
   const accessToken = localStorage.getItem("access_token");
 
   try {
-    console.log(232);
     const response = await addUserAccountApi(
       account_id,
       newUserId,

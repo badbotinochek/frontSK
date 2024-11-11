@@ -268,8 +268,6 @@ function saveOriginalValues(id, name, start, end, description, participants) {
     description,
     participants: participants.map((p) => ({ id: p.id, role: p.role })),
   };
-  console.log("originalEventData");
-  console.log(originalEventData);
 }
 
 // Функция для проверки изменений
@@ -291,8 +289,6 @@ export function checkForChanges() {
       role: row.dataset.role,
     };
   });
-
-  // console.log(originalEventData);
 
   const hasChanged =
     originalEventData.name !== name ||
@@ -453,7 +449,6 @@ export async function getMyInvitation() {
           setTimeout(getMyEvents, 1000);
 
           setTimeout(getMyEvents, 1000);
-          console.log("Подтвердить");
         } catch (error) {
           console.error("Произошла ошибка при подтверждении события:", error);
           alert("Произошла ошибка при подтверждении события.");
@@ -469,8 +464,6 @@ export async function getMyInvitation() {
         const access_token = localStorage.getItem("access_token");
         try {
           const response = await eventRejectApi(eventId, access_token);
-
-          console.log("Отклонить");
         } catch (error) {
           console.error("Произошла ошибка при отклонении события:", error);
           alert("Произошла ошибка при отклонении события.");
@@ -882,8 +875,6 @@ export async function editEvent() {
     });
 
     createToast("success", successMessage);
-    console.log("Я тут", originalEventData.participants);
-    console.log("Я тут", participants);
 
     if (originalEventData.participants.length !== participants.length) {
       const table = document.querySelector("#modalEvent .customTable");
