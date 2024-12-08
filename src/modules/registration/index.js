@@ -74,7 +74,5 @@ window.onload = function () {
   }
 
   // Скрытие прелоадера после полной загрузки страницы
-  window.addEventListener("load", () => {
-    hidePreloader();
-  });
+  hidePreloader();
 };

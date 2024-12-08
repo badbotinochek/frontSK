@@ -7,9 +7,14 @@ export function checkForm() {
   const email = formAuth.email.value;
   const password = formAuth.password.value;
   if (email && password) {
-    formAuth.button.classList.remove("disable");
+    formAuth.button.classList.remove("disabled");
+    formAuth.button.removeAttribute("data-tooltip");
   } else {
-    formAuth.button.classList.add("disable");
+    formAuth.button.classList.add("disabled");
+    formAuth.button.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
   }
 }
 
@@ -37,7 +42,7 @@ export async function loginUser() {
   if (buttonClicked) {
     return;
   }
-  formAuth.button.classList.add("disable");
+  formAuth.button.classList.add("disabled");
   buttonClicked = true;
   formAuth.button.disabled = true;
   const email = formAuth.email.value;
@@ -45,7 +50,7 @@ export async function loginUser() {
 
   if (!EmailValidator.validate(email)) {
     formAuth.email.classList.add("email-error");
-    formAuth.button.classList.add("disable");
+    formAuth.button.classList.add("disabled");
     formAuth.error.classList.add("view");
     formAuth.button.disabled = false;
     buttonClicked = false;
@@ -57,7 +62,7 @@ export async function loginUser() {
     setTimeout(() => {
       formAuth.button.disabled = false;
       buttonClicked = false;
-      formAuth.button.classList.remove("disable");
+      formAuth.button.classList.remove("disabled");
     }, 1000);
 
     if (loginData.refresh_token) {
@@ -68,7 +73,7 @@ export async function loginUser() {
   } catch (error) {
     if (error.message === "Ошибка аутентификации") {
       console.log(error);
-      formAuth.button.classList.remove("disable");
+      formAuth.button.classList.remove("disabled");
       const errorMessage = "Неверный логин или пароль.";
       formAuth.email.classList.add("email-error");
       formAuth.password.classList.add("password-error");
@@ -76,7 +81,7 @@ export async function loginUser() {
     }
     setTimeout(() => {
       formAuth.button.disabled = false;
-      formAuth.button.classList.remove("disable");
+      formAuth.button.classList.remove("disabled");
       buttonClicked = false;
     }, 100);
   }

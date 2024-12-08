@@ -3,7 +3,7 @@ import {
   deleteTransaction,
   getTransacionsForEvent,
   getAllMyEvents,
-  getCategoryTransaction,
+  getCategoryTransactionApi,
   createTransactionApi,
   updateTransactionApi,
   refreshAccessToken,
@@ -13,103 +13,198 @@ import {
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
+import { formTemplates } from "./templates.js";
 
-let cachedCategories = null;
-let cachedActiveAccounts = null;
+let cachedActiveAccounts = 0;
+let cachedCategories = [];
+let testCategories = 0;
 const idToNameMap = {};
-
 let countTr = 0;
 let countTransac = 0;
+let originalValues = {};
+let currentOpenDropdown = null;
 
+export function clearTransactionPage() {
+  formTransactions.inputEvent.value = "";
+  localStorage.removeItem("event");
+  localStorage.removeItem("eventRole");
+}
+
+// Функции для работы поле выбора мероприятий
+async function getEvent() {
+  const token = localStorage.getItem("access_token");
+  try {
+    const events = await getAllMyEvents(token);
+    const user_id = parseInt(localStorage.getItem("user_id"), 10);
+
+    const userEvents = [];
+    events.forEach((event) => {
+      const user = event.participants.find(
+        (participant) => participant.user_id === user_id
+      );
+
+      if (user) {
+        userEvents.push({
+          event_name: event.name,
+          event_id: event.id,
+          user_role: user.role,
+        });
+      }
+    });
+
+    return userEvents;
+  } catch (error) {
+    console.error("Ошибка при получении событий:", error);
+    return [];
+  }
+}
+
+function populateEventOptions(events) {
+  eventOptions.innerHTML = "";
+  if (events.length === 0) {
+    eventOptions.classList.add("empty");
+    eventOptions.innerHTML = `
+    <div class="emptyMessage">
+      <span>Мероприятий нет. <a href="https://sweetcash.org/pages/events/index.html" class="createLink">Создай</a></span>
+    </div>
+    `;
+  } else {
+    events.forEach((event) => {
+      var lista = eventOptions;
+      var listItem = document.createElement("li");
+      listItem.textContent = event.event_name;
+      listItem.setAttribute("data-id", event.event_id);
+      listItem.setAttribute("data-role", event.user_role);
+      lista.appendChild(listItem);
+    });
+  }
+}
+
+export async function fillEventDirectory() {
+  let events = await getEvent();
+  populateEventOptions(events);
+
+  const list = formTransactions.eventOption;
+  const input = formTransactions.inputEvent;
+  const emptyMessageElement = list.querySelector(".emptyMessage");
+  if (emptyMessageElement) {
+    // Если элемент с классом emptyMessage найден, прекращаем выполнение цикла
+    console.warn("Empty message detected. Event listeners not added.");
+    return;
+  }
+  for (let i = 0; i < list.children.length; i++) {
+    list?.children[i].addEventListener("click", (e) => {
+      const selectedId = list.children[i].getAttribute("data-id");
+      const selectedIdEvent = list.children[i].getAttribute("data-role");
+      const selectedValue = list.children[i].innerHTML;
+      input.value = selectedValue;
+      localStorage.setItem("event", selectedId);
+      localStorage.setItem("eventRole", selectedIdEvent);
+
+      checkForm();
+    });
+  }
+}
+
+// Функции для кеширования данных
+export async function getActiveAccounts() {
+  try {
+    const access_token = localStorage.getItem("access_token");
+    const activeAccounts = await getAllMyAccountsApi(access_token, false);
+    cachedActiveAccounts = activeAccounts;
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+export async function getAllCategory() {
+  try {
+    const allCategories = await getCategoryTransactionApi();
+    allCategories.forEach((item) => {
+      idToNameMap[item.id] = item.name;
+      if (item.sub_categories && item.sub_categories.length > 0) {
+        item.sub_categories.forEach((subCategory) => {
+          idToNameMap[subCategory.id] = subCategory.name;
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+// Функции для заполнения периода мероприятий по умолчанию
+export function fillCurrentDate() {
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  );
+  const formattedFirstDay = formatDate(firstDayOfMonth);
+  formTransactions.startDateEvent.value = formattedFirstDay;
+  const lastDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0
+  );
+  const formattedLastDay = formatDate(lastDayOfMonth);
+  formTransactions.endDateEvent.value = formattedLastDay;
+}
+
+// Функции для проверки заполненности полей на страницы для активации кнопок
 export function checkForm() {
-  const start_date = formTransactions.start_date
-    ? formTransactions.start_date.value
+  const start_date = formTransactions.startDateEvent
+    ? formTransactions.startDateEvent.value
     : "";
-  const end_date = formTransactions.end_date
-    ? formTransactions.end_date.value
+  const end_date = formTransactions.endDateEvent
+    ? formTransactions.endDateEvent.value
     : "";
-  const input_event = formTransactions.input_event
-    ? formTransactions.input_event.value
+  const input_event = formTransactions.inputEvent
+    ? formTransactions.inputEvent.value
     : "";
 
   if (start_date && end_date && input_event) {
+    formTransactions.buttonOpenModalExpense.classList.remove("disable");
+    formTransactions.buttonOpenModalIncome.classList.remove("disable");
+    formTransactions.buttonOpenModalTransaction.classList.remove("disable");
     formTransactions.getTransactionButton.classList.remove("disable");
   } else {
     formTransactions.getTransactionButton.classList.add("disable");
   }
-}
-
-export function checkEvent() {
-  const input_event = formTransactions.input_event
-    ? formTransactions.input_event.value
-    : "";
-
   if (input_event) {
-    formTransactions.create_transaction.classList.remove("disable");
-    formTransactions.buttonScanQr.classList.remove("disable");
+    formTransactions.buttonOpenModalExpense.classList.remove("disable");
+    formTransactions.buttonOpenModalIncome.classList.remove("disable");
+    formTransactions.buttonOpenModalTransaction.classList.remove("disable");
   } else {
-    formTransactions.create_transaction.classList.add("disable");
-    formTransactions.buttonScanQr.classList.add("disable");
+    formTransactions.buttonOpenModalExpense.classList.add("disable");
+    formTransactions.buttonOpenModalIncome.classList.add("disable");
+    formTransactions.buttonOpenModalTransaction.classList.add("disable");
   }
 }
 
+// Нужно расширить для закрытия всех окон на странице
 export function handleClick() {
   formTransactions.modalElement.close();
-  clearModalData();
-}
-
-export function handleClickTra() {
-  formTransactions.modalElementTr.close();
-  clearModalData();
-}
-
-export function handleClickTraShow() {
-  formTransactions.showModalElementTr.close();
-}
-
-export function createTransaction() {
-  clearModalData();
-  var buttonEdit = document.getElementById("changeTra");
-  buttonEdit.classList.add("Off");
-  var buttonCreate = document.getElementById("createTra");
-  buttonCreate.classList.remove("Off");
-  buttonCreate.classList.add("disable");
-  getCategory();
-  formTransactions.modalElementTr.showModal();
-}
-
-export async function deleteTransactions() {
-  const access_token = localStorage.getItem("access_token");
-  const transactionId = localStorage.getItem("transactionId");
-  try {
-    const response = await deleteTransaction(transactionId, access_token);
-
-    handleClick();
-    const successMessage = `Транзакция успешно удалена`;
-    createToast("success", successMessage);
-    setTimeout(getTransactions, 10);
-  } catch (error) {}
-}
-
-export function deleteSErrorBorder() {
-  formTransactions.start_date.classList.remove("error");
-}
-
-export function deleteEErrorBorder() {
-  formTransactions.end_date.classList.remove("error");
 }
 
 export function getCountTransactions() {
   var screenHeight = window.innerHeight;
-
   var countTransaction = (screenHeight - 157) / 49 - 1;
   let intNumber = Math.floor(countTransaction);
   return intNumber;
 }
 
 export async function getTransactionsForPaginations(pagination) {
-  const start_date = new Date(formTransactions.start_date.value);
-  const end_date = new Date(formTransactions.end_date.value);
+  const start_date = new Date(formTransactions.startDateEvent.value);
+  const end_date = new Date(formTransactions.endDateEvent.value);
 
   const formattedStartDate =
     start_date.toISOString().slice(0, 10) + "T00:00:00Z";
@@ -159,8 +254,8 @@ export async function getTransactions(offset = 0, append = false) {
   formTransactions.getTransactionButton.classList.add("disable");
 
   try {
-    const start_date = new Date(formTransactions.start_date.value);
-    const end_date = new Date(formTransactions.end_date.value);
+    const start_date = new Date(formTransactions.startDateEvent.value);
+    const end_date = new Date(formTransactions.endDateEvent.value);
     const formattedStartDate =
       start_date.toISOString().slice(0, 10) + "T00:00:00Z";
     const formattedEndDate = end_date.toISOString().slice(0, 10) + "T23:59:59Z";
@@ -174,17 +269,17 @@ export async function getTransactions(offset = 0, append = false) {
       const errorMessage = `Дата окончания мероприятия не может быть меньше даты начала мероприятия`;
       createToast("error", errorMessage);
       formTransactions.getTransactionButton.classList.add("disable");
-      formTransactions.start_date.classList.add("error");
-      formTransactions.end_date.classList.add("error");
+      formTransactions.startDateEvent.classList.add("error");
+      formTransactions.endDateEvent.classList.add("error");
       return;
     }
 
-    formTransactions.start_date.classList.remove("error");
-    formTransactions.end_date.classList.remove("error");
+    formTransactions.startDateEvent.classList.remove("error");
+    formTransactions.endDateEvent.classList.remove("error");
 
     getTransactionsForPaginations(false);
 
-    const responseCat = getCategoryTransaction();
+    const responseCat = getCategoryTransactionApi();
 
     const responseData = await getTransacionsForEvent(
       formattedStartDate,
@@ -194,7 +289,7 @@ export async function getTransactions(offset = 0, append = false) {
       offset,
       access_token
     );
-    console.log(responseData);
+
     const tbody = document.querySelector("tbody");
     // Проверка, есть ли данные
     const label = document.getElementById("infoTransactionsLabel");
@@ -276,34 +371,34 @@ export async function getTransactions(offset = 0, append = false) {
       let rowHTML = ``;
       if (type === "Доход") {
         rowHTML = `
-          <td>${transaction.number}</td>
-          <td>${formattedTime}</td>
-          <td>${type}</td>
-          <td>${categoryTran}</td>
-          <td style="color: green"> +${transaction.amount} руб</td>
-          <td>${user}</td>
-          <td>${account}</td>
-          ${
-            receipt_id
-              ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
-              : `<td class="receipt">${receipt_id}</td>`
-          }
-        `;
+    <td>${transaction.number}</td>
+    <td>${formattedTime}</td>
+    <td>${type}</td>
+    <td>${categoryTran}</td>
+    <td style="color: green"> +${transaction.amount} руб</td>
+    <td>${user}</td>
+    <td>${account}</td>
+    ${
+      receipt_id
+        ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
+        : `<td class="receipt">${receipt_id}</td>`
+    }
+  `;
       } else {
         rowHTML = `
-          <td>${transaction.number}</td>
-          <td>${formattedTime}</td>
-          <td>${type}</td>
-          <td>${categoryTran}</td>
-          <td style="color: red"> -${transaction.amount} руб</td>
-          <td>${user}</td>
-          <td>${account}</td>
-          ${
-            receipt_id
-              ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
-              : `<td class="receipt">${receipt_id}</td>`
-          }
-        `;
+    <td>${transaction.number}</td>
+    <td>${formattedTime}</td>
+    <td>${type}</td>
+    <td>${categoryTran}</td>
+    <td style="color: red"> -${transaction.amount} руб</td>
+    <td>${user}</td>
+    <td>${account}</td>
+    ${
+      receipt_id
+        ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
+        : `<td class="receipt">${receipt_id}</td>`
+    }
+  `;
       }
 
       if (
@@ -312,23 +407,23 @@ export async function getTransactions(offset = 0, append = false) {
           transaction.user_id === parseInt(localStorage.getItem("user_id"), 10))
       ) {
         rowHTML += `
-          <td>
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
-            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
-            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
-          </td>`;
+    <td>
+      <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+      <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
+      <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
+    </td>`;
       } else if (eventRole === "Partner") {
         rowHTML += `
-          <td>
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
-            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
-            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
-          </td>`;
+    <td>
+      <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+      <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
+      <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
+    </td>`;
       } else {
         rowHTML += `
-          <td>
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
-          </td>`;
+    <td>
+      <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
+    </td>`;
       }
 
       newRow.innerHTML = rowHTML;
@@ -456,22 +551,22 @@ export async function getTransactions(offset = 0, append = false) {
 
     if (countTrTotal > 0) {
       rowHTML = `
-      <td data-name="Total"> Итого  </td>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-      <td style="padding-left: 35px; color: green"> +${countTrTotal} руб </td>
-      <td> </td>
-      <td> </td>`;
+<td data-name="Total"> Итого  </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td style="padding-left: 35px; color: green"> +${countTrTotal} руб </td>
+<td> </td>
+<td> </td>`;
     } else {
       rowHTML = `
-      <td data-name="Total"> Итого  </td>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-      <td style="padding-left: 35px; color: red">${countTrTotal} руб </td>
-      <td> </td>
-      <td> </td>`;
+<td data-name="Total"> Итого  </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td style="padding-left: 35px; color: red">${countTrTotal} руб </td>
+<td> </td>
+<td> </td>`;
     }
 
     const newRow = document.createElement("tr");
@@ -575,21 +670,21 @@ function generateReceiptHTML(receipt) {
     .map(
       (item, index) => `
 
-                <div class="sc-cTApHj fVRyQa">
-                  <div class="sc-cNKpQo bSevbG">
-                    <div class="sc-bBHHQT iVWrCP">${index + 1}.</div>
-                    <div class="sc-AjmZR juOfWY">
-                      <div>${item.name}</div>
-                    </div>
-                  </div>
-                  <div class="sc-jObXwK cBBNUN">${item.quantity}</div>
-                  <div class="sc-dPiKHq jtMGgR">
-                  ${(item.sum / 100).toLocaleString("ru-RU", {
-                    minimumFractionDigits: 2,
-                  })}</div>
-                </div>
+          <div class="sc-cTApHj fVRyQa">
+            <div class="sc-cNKpQo bSevbG">
+              <div class="sc-bBHHQT iVWrCP">${index + 1}.</div>
+              <div class="sc-AjmZR juOfWY">
+                <div>${item.name}</div>
+              </div>
+            </div>
+            <div class="sc-jObXwK cBBNUN">${item.quantity}</div>
+            <div class="sc-dPiKHq jtMGgR">
+            ${(item.sum / 100).toLocaleString("ru-RU", {
+              minimumFractionDigits: 2,
+            })}</div>
+          </div>
 
-  `
+`
     )
     .join("");
 
@@ -608,142 +703,142 @@ function generateReceiptHTML(receipt) {
 
   // Формируем HTML-код чека
   return `
-  <div>
-        <div
-          class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
-          data-reach-dialog-overlay=""
-        >
-          <div
-            aria-modal="true"
-            role="dialog"
-            tabindex="-1"
-            aria-label="receipt-details-modal"
-            class="sc-hGPAah hfwvPT"
-            data-reach-dialog-content=""
-          >
-            <div class="sc-dlVyqM fPYzXc">
-              <div id="receipt-container" class="sc-iNGGwv hsrLVo">
-                <div class="sc-cCcYRi kmLPwf">
-                
-                  <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
-                  <span
-                    class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
-                    title=""
-                    id="close-icon"
-                  >
-                    <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-                      <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
-                        fill="#4164E3"
-                      ></path>
-                    </svg>
-                  </span>
-                </div>
-                <span class="sc-caiKgP ipNIuR">Приход</span>
-                <div class="sc-cidCJl gHtjd">
-                  <div class="sc-iUKrWq kSLLaF">
-                    <div class="sc-iAKVOt klLDEA">
-                      <div class="sc-cNKpQo bSevbG">Предмет расчета</div>
-                      <div class="sc-jObXwK cBBNUN">Кол-во</div>
-                      <div class="sc-dPiKHq jtMGgR">Сумма, ₽</div>
-                    </div>
-                      <div class="sc-efQUeY eWLxTJ">
-                    ${itemsHTML}
-                      </div>
-                    </div>
-            </div>
-            <div class="sc-gSQGeZ iOAir">
-              <div class="sc-jeqYYF sc-eJwXpk frkNye jMA-dWh">
-                <div>Итог:</div>
-                <div>${(totalSum / 100).toLocaleString("ru-RU", {
-                  minimumFractionDigits: 2,
-                })} </div>
+<div>
+  <div
+    class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+    data-reach-dialog-overlay=""
+  >
+    <div
+      aria-modal="true"
+      role="dialog"
+      tabindex="-1"
+      aria-label="receipt-details-modal"
+      class="sc-hGPAah hfwvPT"
+      data-reach-dialog-content=""
+    >
+      <div class="sc-dlVyqM fPYzXc">
+        <div id="receipt-container" class="sc-iNGGwv hsrLVo">
+          <div class="sc-cCcYRi kmLPwf">
+          
+            <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+            <span
+              class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+              title=""
+              id="close-icon"
+            >
+              <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+                  fill="#4164E3"
+                ></path>
+              </svg>
+            </span>
+          </div>
+          <span class="sc-caiKgP ipNIuR">Приход</span>
+          <div class="sc-cidCJl gHtjd">
+            <div class="sc-iUKrWq kSLLaF">
+              <div class="sc-iAKVOt klLDEA">
+                <div class="sc-cNKpQo bSevbG">Предмет расчета</div>
+                <div class="sc-jObXwK cBBNUN">Кол-во</div>
+                <div class="sc-dPiKHq jtMGgR">Сумма, ₽</div>
               </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Наличные</div>
-                <div>${cashTotalSum} 
-                </div>
-              
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Безналичные</div>
-                <div>${(totalSum / 100).toLocaleString("ru-RU", {
-                  minimumFractionDigits: 2,
-                })} </div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Предоплата (аванс)</div>
-                <div>${creditSum}</div>
-              </div>
-            </div>
-            <div class="sc-gSQGeZ sc-lbhJmS iOAir gRgzMw">
-              <div class="sc-nVjpj jzhAMS">
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">ИНН</div>
-                  <div>${sellerInn}</div>
-                </div>
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">№ смены</div>
-                  <div>${shiftNumber}</div>
-                </div>
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">Чек №</div>
-                  <div>${requestNumber}</div>
+                <div class="sc-efQUeY eWLxTJ">
+              ${itemsHTML}
                 </div>
               </div>
-              <div class="sc-nVjpj jzhAMS">
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">№ АВТ</div>
-                  <div>${machineNumber}</div>
-                </div>
-         
-              </div>
-            </div>
-            <div class="sc-gSQGeZ iOAir2">
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Дата/Время</div>
-                <div>${formattedDate}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">ФД №:</div>
-                <div>${documentId}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">ФН:</div>
-                <div>${fiscalDriveNumber}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">РН ККТ:</div>
-                <div>${kktRegId}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">ФП:</div>
-                <div>${fiscalSign}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Кассир:</div>
-                <div class="sc-ehCIER jXeQeS">${operator}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Место расчетов:</div>
-                <div>${retailPlace}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Адрес расчетов:</div>
-                <div class="sc-ehCIER jXeQeS">
-                  ${retailPlaceAddress}
-                </div>
-              </div>
-            </div>
+      </div>
+      <div class="sc-gSQGeZ iOAir">
+        <div class="sc-jeqYYF sc-eJwXpk frkNye jMA-dWh">
+          <div>Итог:</div>
+          <div>${(totalSum / 100).toLocaleString("ru-RU", {
+            minimumFractionDigits: 2,
+          })} </div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Наличные</div>
+          <div>${cashTotalSum} 
+          </div>
+        
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Безналичные</div>
+          <div>${(totalSum / 100).toLocaleString("ru-RU", {
+            minimumFractionDigits: 2,
+          })} </div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Предоплата (аванс)</div>
+          <div>${creditSum}</div>
+        </div>
+      </div>
+      <div class="sc-gSQGeZ sc-lbhJmS iOAir gRgzMw">
+        <div class="sc-nVjpj jzhAMS">
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">ИНН</div>
+            <div>${sellerInn}</div>
+          </div>
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">№ смены</div>
+            <div>${shiftNumber}</div>
+          </div>
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">Чек №</div>
+            <div>${requestNumber}</div>
+          </div>
+        </div>
+        <div class="sc-nVjpj jzhAMS">
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">№ АВТ</div>
+            <div>${machineNumber}</div>
+          </div>
+    
+        </div>
+      </div>
+      <div class="sc-gSQGeZ iOAir2">
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Дата/Время</div>
+          <div>${formattedDate}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">ФД №:</div>
+          <div>${documentId}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">ФН:</div>
+          <div>${fiscalDriveNumber}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">РН ККТ:</div>
+          <div>${kktRegId}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">ФП:</div>
+          <div>${fiscalSign}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Кассир:</div>
+          <div class="sc-ehCIER jXeQeS">${operator}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Место расчетов:</div>
+          <div>${retailPlace}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Адрес расчетов:</div>
+          <div class="sc-ehCIER jXeQeS">
+            ${retailPlaceAddress}
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-  `;
+</div>
+</div>
+</div>
+`;
 }
 
 function addReceiptToHTML(receipt) {
@@ -761,48 +856,79 @@ function clearModalReceipt() {
   const container = document.getElementById("receipt-container");
   const receiptHTML = `<div>
 <div
-  class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
-  data-reach-dialog-overlay=""
+class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+data-reach-dialog-overlay=""
 >
-  <div
-    aria-modal="true"
-    role="dialog"
-    tabindex="-1"
-    aria-label="receipt-details-modal"
-    class="sc-hGPAah hfwvPT"
-    data-reach-dialog-content=""
-  >
-    <div class="sc-dlVyqM fPYzXc">
-      <div id="receipt-container" class="sc-iNGGwv hsrLVo">
-        <div class="sc-cCcYRi kmLPwf">
-          </span>
-          <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
-          <span
-            class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
-            title=""
-            id="close-icon"
-          >
-          <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
-              fill="#4164E3"
-            ></path>
-          </svg>
-          </span>
+<div
+aria-modal="true"
+role="dialog"
+tabindex="-1"
+aria-label="receipt-details-modal"
+class="sc-hGPAah hfwvPT"
+data-reach-dialog-content=""
+>
+<div class="sc-dlVyqM fPYzXc">
+<div id="receipt-container" class="sc-iNGGwv hsrLVo">
+  <div class="sc-cCcYRi kmLPwf">
+    </span>
+    <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+    <span
+      class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+      title=""
+      id="close-icon"
+    >
+    <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+        fill="#4164E3"
+      ></path>
+    </svg>
+    </span>
 
-        </div>
-          <span class="sc-caiKgP ipNIuR"> <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b' ></box-icon></span>
-        </div>
-    </div>
   </div>
+    <span class="sc-caiKgP ipNIuR"> <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b' ></box-icon></span>
+  </div>
+</div>
+</div>
 </div>
 </div>`;
   container.innerHTML = receiptHTML;
 }
 
-let originalValues = {};
+// ХЗ ЧЕ ТАКОЕ
+export function createTransaction() {
+  clearModalData();
+  var buttonEdit = document.getElementById("changeTra");
+  buttonEdit.classList.add("Off");
+  var buttonCreate = document.getElementById("createTra");
+  buttonCreate.classList.remove("Off");
+  buttonCreate.classList.add("disable");
+  getCategory();
+  formTransactions.modalElementTr.showModal();
+}
+// ХЗ ЧЕ ТАКОЕ
+export async function deleteTransactions() {
+  const access_token = localStorage.getItem("access_token");
+  const transactionId = localStorage.getItem("transactionId");
+  try {
+    const response = await deleteTransaction(transactionId, access_token);
+
+    handleClick();
+    const successMessage = `Транзакция успешно удалена`;
+    createToast("success", successMessage);
+    setTimeout(getTransactions, 10);
+  } catch (error) {}
+}
+// ХЗ ЧЕ ТАКОЕ
+export function deleteSErrorBorder() {
+  formTransactions.startDateEvent.classList.remove("error");
+}
+// ХЗ ЧЕ ТАКОЕ
+export function deleteEErrorBorder() {
+  formTransactions.endDateEvent.classList.remove("error");
+}
 
 function saveOriginalValues() {
   originalValues = {
@@ -902,7 +1028,6 @@ function formatDate(dateString) {
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
-
   return `${year}-${month}-${day}`;
 }
 
@@ -914,97 +1039,6 @@ function formatTime(timeString) {
   const seconds = date.getSeconds().toString().padStart(2, "0");
 
   return `${hours}:${minutes}`;
-}
-
-export async function getEvent() {
-  const token = localStorage.getItem("access_token");
-  try {
-    const events = await getAllMyEvents(token);
-    const user_id = parseInt(localStorage.getItem("user_id"), 10);
-
-    events.forEach((event) => {
-      const eventId = event.id;
-      const eventName = event.name;
-      const participants = event.participants;
-      const user = participants.find(
-        (participant) => participant.user_id === user_id
-      );
-      const userRole = user.role;
-
-      var lista = document.querySelector(".option");
-      var listItem = document.createElement("li");
-
-      listItem.textContent = eventName;
-      listItem.setAttribute("data-id", eventId);
-      listItem.setAttribute("data-role", userRole);
-      lista.appendChild(listItem);
-    });
-
-    // Вызываем функцию foo() после добавления элементов списка
-    foo();
-  } catch (error) {}
-}
-
-const foo = () => {
-  const list = document.querySelector(".option");
-  const input = document.querySelector(".text-box");
-
-  for (let i = 0; i < list.children.length; i++) {
-    list?.children[i].addEventListener("click", (e) => {
-      const selectedId = list.children[i].getAttribute("data-id");
-      const selectedIdEvent = list.children[i].getAttribute("data-role");
-      const selectedValue = list.children[i].innerHTML;
-
-      input.value = selectedValue;
-      localStorage.setItem("event", selectedId);
-      localStorage.setItem("eventRole", selectedIdEvent);
-
-      checkForm();
-      checkEvent();
-    });
-  }
-};
-
-export function sidebar() {
-  const sidebar = document.querySelector(".sidebar");
-  sidebar.addEventListener("mouseenter", function () {
-    this.classList.remove("close");
-  });
-
-  sidebar.addEventListener("mouseleave", function () {
-    this.classList.add("close");
-  });
-}
-
-export function getDate() {
-  // Функция для получения даты в формате YYYY-MM-DD
-  function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
-  // Получаем текущую дату
-  const currentDate = new Date();
-
-  // Устанавливаем первый день текущего месяца
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1
-  );
-  const formattedFirstDay = formatDate(firstDayOfMonth);
-  document.getElementById("start-date").value = formattedFirstDay;
-
-  // Устанавливаем последний день текущего месяца
-  const lastDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0
-  );
-  const formattedLastDay = formatDate(lastDayOfMonth);
-  document.getElementById("end-date").value = formattedLastDay;
 }
 
 export function changeStyleBorder() {
@@ -1019,24 +1053,6 @@ export function customTextArea() {
   this.style.borderColor = ""; // Вернуть стандартный цвет границы
   // Возвращаем плейсхолдер
   this.setAttribute("placeholder", "Введите описание к транзакции");
-}
-
-export function exit() {
-  localStorage.clear();
-  window.location.href = "/pages/auth/index.html";
-}
-
-export function toggleDropdown(event) {
-  formTransactions.dropdown.classList.toggle("active");
-  formTransactions.dropdown2.classList.remove("active");
-  event.stopPropagation();
-}
-
-export function closeDropdown(event) {
-  if (!formTransactions.option.contains(event.target)) {
-    formTransactions.dropdown.classList.remove("active");
-    formTransactions.dropdown2.classList.remove("active");
-  }
 }
 
 export function toggleDropdownCat(event) {
@@ -1103,143 +1119,13 @@ export function onPhoneKeyDown(e) {
   }
 }
 
-export async function getAllCategory() {
-  try {
-    const allCategories = await getCategoryTransaction();
-
-    allCategories.forEach((item) => {
-      idToNameMap[item.id] = item.name;
-
-      if (item.sub_categories && item.sub_categories.length > 0) {
-        // Проход по подкатегориям
-        item.sub_categories.forEach((subCategory) => {
-          idToNameMap[subCategory.id] = subCategory.name;
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
-}
-
-function createCategoryTree(categories, parentElement) {
-  // Находим элемент input с классом "categoryBox"
-  const inputElement = document.querySelector(".categoryBox");
-
-  // Создаем контейнер для дерева категорий
-  const treeContainer = document.createElement("div");
-  treeContainer.classList.add("category-tree");
-  parentElement.appendChild(treeContainer);
-
-  // Функция для рекурсивного создания дерева
-  function createTree(categories, container) {
-    categories.forEach((category) => {
-      const categoryId = category.id;
-      const categoryName = category.name;
-
-      // Создаем элемент списка
-      const listItem = document.createElement("li");
-      listItem.setAttribute("data-id", categoryId);
-      listItem.setAttribute("data-name", categoryName); // Сохраняем имя категории
-
-      // Создаем элемент span для отображения имени категории
-      const span = document.createElement("span");
-      span.textContent = categoryName;
-
-      // Добавляем элемент span в элемент списка
-      listItem.appendChild(span);
-
-      // Если у категории есть подкатегории, создаем вложенный список
-      if (category.sub_categories && category.sub_categories.length > 0) {
-        const subList = document.createElement("ul");
-        subList.hidden = true; // Изначально скрываем подкатегории
-        listItem.appendChild(subList);
-        createTree(category.sub_categories, subList);
-
-        // Добавляем span для развертывания/свертывания подкатегорий
-        const toggleSpan = document.createElement("span");
-        toggleSpan.classList.add("toggle", "plus");
-
-        listItem.insertBefore(toggleSpan, span);
-      } else {
-        const toggleSpan = document.createElement("span");
-        toggleSpan.classList.add("toggle", "minus");
-        listItem.insertBefore(toggleSpan, span);
-      }
-
-      // Добавляем элемент списка в контейнер
-      container.appendChild(listItem);
-    });
-  }
-
-  // Создаем дерево категорий
-  createTree(categories, treeContainer);
-
-  // Обработчик кликов на контейнер дерева
-  treeContainer.addEventListener("click", function (event) {
-    const target = event.target;
-
-    // Если клик на элемент с классом toggle
-    if (target.classList.contains("toggle")) {
-      event.stopPropagation(); // Предотвращаем всплытие события
-
-      const listItem = target.parentNode;
-      const subList = listItem.querySelector("ul");
-
-      if (subList) {
-        // Переключаем видимость подкатегорий
-        subList.hidden = !subList.hidden;
-
-        // Обновляем класс и текст toggleSpan
-        if (subList.hidden) {
-          target.classList.remove("minus");
-          target.classList.add("plus");
-        } else {
-          target.classList.remove("plus");
-          target.classList.add("minus");
-        }
-      }
-    }
-    // Если клик на <li> или <span> (с именем категории)
-    else if (target.tagName === "SPAN" || target.tagName === "LI") {
-      // Определяем элемент <li>, на который был произведен клик
-      const listItem = target.tagName === "SPAN" ? target.parentNode : target;
-      inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
-
-      localStorage.setItem("cat_transaction", listItem.getAttribute("data-id"));
-      formTransactions.dropdown1.classList.remove("active");
-
-      event.stopPropagation();
-      checkForChanges();
-    }
-  });
-}
-
 export async function getCategory() {
   try {
-    const categories = await getCategoryTransaction();
+    const categories = await getCategoryTransactionApi();
     cachedCategories = categories;
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
   }
-}
-
-export function renderCategoryTree(type) {
-  const filteredCategories = cachedCategories.filter(
-    (category) => category.type === type
-  );
-
-  const lista = document.getElementById("optionCat");
-  lista.innerHTML = "";
-
-  // Создание корневого элемента UL
-  const rootUl = document.createElement("ul");
-  rootUl.classList.add("tree");
-  rootUl.id = "tree";
-  lista.appendChild(rootUl);
-
-  // Создание дерева категорий
-  createCategoryTree(filteredCategories, rootUl);
 }
 
 export function checkCreateTranForm() {
@@ -1452,147 +1338,20 @@ export function checkEditTranForm() {
   });
 }
 
-export async function checkAndUpdateToken() {
-  const expireAt = localStorage.getItem("expire_at");
-  if (!expireAt) return;
-
-  const expireTime = new Date(expireAt).getTime();
-  const currentTime = Date.now();
-  const timeLeft = expireTime - currentTime;
-
-  if (timeLeft <= 2 * 60 * 10000) {
-    // 2 минуты в миллисекундах
-    try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      await refreshAccessToken(refreshToken);
-    } catch (error) {
-      setTimeout(() => {
-        checkAndUpdateToken();
-      }, 60 * 1000); // Повторить попытку через 1 минуту
-    }
-  } else if (timeLeft > 2 * 60 * 1000) {
-    setTimeout(checkAndUpdateToken, timeLeft - 2 * 60 * 1000); // Запланировать обновление за 2 минуты до истечения
-  }
-}
-
-export function redirectToAuth() {
-  const access_token = localStorage.getItem("access_token");
-  if (!access_token) {
-    window.location.href = "../../pages/auth/index.html";
-  }
-}
-
-function validateQrCode(message) {
-  const regex =
-    /^t=\w{1,}&s=[a-zA-Z0-9.]{1,}&fn=\w{1,}&i=\w{1,}&fp=\w{1,}&n=\w{1,}$/;
-  return regex.test(message);
-}
-
-async function onScanSuccess(decodedText, decodedResult) {
-  // handle the scanned code as you like, for example:
-
-  const access_token = localStorage.getItem("access_token");
-  const event_id = localStorage.getItem("event");
-
-  html5QrcodeScanner
-    .clear()
-    .then((ignore) => {
-      // QR Code scanning is stopped.
-    })
-    .catch((err) => {
-      // Stop failed, handle it.
-    });
-
-  if (!validateQrCode(decodedText)) {
-    alert("Это не QR код");
-    formTransactions.modalElementScan.close();
-    formTransactions.buttonScanQr.classList.remove("disable");
-    formTransactions.buttonScanQr.disabled = false;
-  } else {
-  }
-
-  try {
-    const response = await createReceiptApi(
-      event_id,
-      decodedText,
-      access_token
-    );
-  } catch (error) {
-  } finally {
-    formTransactions.buttonScanQr.classList.remove("disable");
-    formTransactions.buttonScanQr.disabled = false;
-    formTransactions.modalElementScan.close();
-  }
-}
-
-function onScanFailure(error) {
-  // handle scan failure, usually better to ignore and keep scanning.
-  // for example:
-  console.warn(`Code scan error = ${error}`);
-}
-
-let html5QrcodeScanner = new Html5QrcodeScanner(
-  "reader",
-  { fps: 50, qrbox: { width: 250, height: 250 } },
-  /* verbose= */ false
-);
-
-export function openQrScanner() {
-  formTransactions.buttonScanQr.disabled = true;
-  formTransactions.buttonScanQr.classList.add("disable");
-  formTransactions.modalElementScan.showModal();
-
-  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-}
-
 const MIN_PRELOADER_DURATION = 1000; // Минимальная продолжительность в миллисекундах (1 секунда)
 
-export function hidePreloader() {
-  const preloader = document.getElementById("preloader");
-  if (preloader) {
-    // Устанавливаем текущее время и время, когда прелоадер должен исчезнуть
-    const startTime = new Date().getTime();
-    const hideTime = startTime + MIN_PRELOADER_DURATION;
-
-    // Функция для скрытия прелоадера
-    function removePreloader() {
-      preloader.style.opacity = "0"; // Плавное исчезновение
-      setTimeout(() => {
-        preloader.style.display = "none"; // Полное удаление с экрана
-      }, 500); // Время плавного исчезновения
-    }
-
-    // Определяем текущее время и вычисляем оставшееся время
-    const currentTime = new Date().getTime();
-    const delay = Math.max(0, hideTime - currentTime);
-
-    // Устанавливаем таймер на минимальное время или задержку до текущего времени
-    setTimeout(removePreloader, delay);
-  }
-}
-
-export async function getActiveAccounts() {
-  try {
-    const access_token = localStorage.getItem("access_token");
-    const activeAccounts = await getAllMyAccountsApi(access_token, false);
-    cachedActiveAccounts = activeAccounts;
-
-    renderAccount();
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
-}
-
 export function toggleDropdownAcc(event) {
-  formTransactions.dropdownAcc.classList.toggle("active");
+  const modalOptionAccount = document.querySelector(".modalDropdown");
+
+  modalOptionAccount.classList.toggle("active");
   event.stopPropagation();
   formTransactions.dropdown1.classList.remove("active");
 }
 
 export function renderAccount() {
-  const inputElement = document.querySelector(".accountBox");
+  const inputElement = document.querySelector(".modalAccountBox");
 
-  const lista = document.getElementById("optionAcc");
+  const lista = document.getElementById("modalOptionAccount");
   lista.innerHTML = "";
 
   const treeContainer = document.createElement("div");
@@ -1627,6 +1386,281 @@ export function renderAccount() {
       formTransactions.dropdown2.classList.remove("active");
 
       event.stopPropagation();
+    }
+  });
+}
+
+export function openDialog(type, mode, data = {}) {
+  // Устанавливаем шаблон формы
+  const modal = formTransactions.modalElement;
+  const dialogForm = document.getElementById("modalForm");
+  const dialogTitle = document.getElementById("modalTitle");
+
+  modal.className = `modal modal${type}`;
+
+  const titles = {
+    create: `Создать ${getTransactionType(type)}`,
+    edit: `Редактировать ${getTransactionType(type)}`,
+    view: `Просмотреть ${getTransactionType(type)}`,
+  };
+
+  dialogTitle.textContent = titles[mode] || "Диалог";
+
+  dialogForm.innerHTML = formTemplates[type];
+
+  if (data) {
+    fillForm(dialogForm, data);
+  }
+
+  // Настраиваем режим
+  // if (mode === "view") {
+  //   dialogSaveButton.classList.add("hidden"); // Прячем кнопку сохранения
+  //   dialogForm
+  //     .querySelectorAll("input, select")
+  //     .forEach((input) => input.setAttribute("disabled", "disabled"));
+  // } else {
+  //   dialogSaveButton.classList.remove("hidden"); // Показываем кнопку сохранения
+  //   dialogForm
+  //     .querySelectorAll("input, select")
+  //     .forEach((input) => input.removeAttribute("disabled"));
+  // }
+
+  // Показываем диалог
+
+  formTransactions.modalElement.showModal();
+}
+
+// Функция для получения типа транзакции
+function getTransactionType(type) {
+  const types = {
+    Expense: "расход",
+    Income: "доход",
+    Transaction: "перевод",
+  };
+
+  return types[type] || "неизвестно";
+}
+
+// Функция для заполнения формы данными
+function fillForm(form, data) {
+  Object.entries(data).forEach(([key, value]) => {
+    const input = form.querySelector(`[name="${key}"]`);
+    if (input) {
+      input.value = value;
+    }
+  });
+}
+
+export function toggleModalDropdown(dropdownId) {
+  const dropdown = document.getElementById(dropdownId);
+  const inputElement = dropdown.querySelector("input");
+  const optionsContainer = dropdown.querySelector(".modalOption");
+  const typeDropdown =
+    dropdownId === "modalDropdownAccount"
+      ? "dropdownAccount"
+      : "dropdownCategory";
+  const isActive = dropdown.classList.contains("active");
+
+  // Загрузка данных в зависимости от типа dropdown
+  if (typeDropdown === "dropdownAccount") {
+    fillAccountDirectory(optionsContainer);
+  } else if (typeDropdown === "dropdownCategory") {
+    fillCategoryDirectory(optionsContainer);
+  }
+
+  toggleDropdownState(dropdown, isActive);
+
+  document.addEventListener("click", (event) =>
+    closeDropdownOnClick(event, dropdown, dropdownId)
+  );
+}
+
+// Функция для заполнения справочника значениями и установки значения в инпут
+function fillAccountDirectory(options) {
+  options = options;
+  options.innerHTML = "";
+  if (!cachedActiveAccounts || cachedActiveAccounts.length === 0) {
+    options.classList.add("empty");
+    options.innerHTML = `
+    <div class="emptyMessage">
+      <span> Нет активных счетов. <a href="https://sweetcash.org/pages/events/index.html" class="createLink">Создай</a></span>
+    </div>
+    `;
+  } else {
+    cachedActiveAccounts.forEach((cachedActiveAccount) => {
+      var lista = options;
+      var listItem = document.createElement("li");
+      listItem.textContent = cachedActiveAccount.name;
+      listItem.setAttribute("data-id", cachedActiveAccount.id);
+
+      listItem.addEventListener("click", () => {
+        const inputElement = document.getElementById("modalInputAccount");
+        inputElement.value = cachedActiveAccount.name;
+      });
+
+      lista.appendChild(listItem);
+    });
+  }
+}
+
+// Функция для заполнения справочника значениями и установки значения в инпут
+function fillCategoryDirectory(options) {
+  options.innerHTML = "";
+  if (!cachedCategories || cachedCategories.length === 0) {
+    options.classList.add("empty");
+    options.innerHTML = `
+                        <div class="emptyMessage">
+                          <span> Нет категорий. Обратитесь в поддержку</span>
+                        </div>
+                        `;
+  } else {
+    const type = document
+      .querySelector(".modal")
+      .classList.contains("modalExpense")
+      ? "Expense"
+      : "Income";
+    renderCategoryTree(options, type);
+  }
+}
+
+// Функция для управления состоянием "active"
+function toggleDropdownState(dropdown, isActive) {
+  if (isActive) {
+    dropdown.classList.remove("active");
+  } else {
+    if (currentOpenDropdown) {
+      currentOpenDropdown.classList.remove("active");
+    }
+    dropdown.classList.add("active");
+    currentOpenDropdown = dropdown;
+  }
+}
+
+// Функция для закрытия dropdown при клике вне его
+function closeDropdownOnClick(event, dropdown, dropdownId) {
+  if (!event.target.closest(`#${dropdownId}`)) {
+    dropdown.classList.remove("active");
+    currentOpenDropdown = null;
+    document.removeEventListener("click", (e) =>
+      closeDropdownOnClick(e, dropdown, dropdownId)
+    );
+  }
+}
+
+function renderCategoryTree(lista, type) {
+  const filteredCategories = cachedCategories.filter(
+    (category) => category.type === type
+  );
+  lista.innerHTML = "";
+  createCategoryTree(filteredCategories, lista);
+}
+
+function createCategoryTree(categories, parentElement) {
+  const inputElement = document.querySelector(".categoryBox");
+  const treeContainer = document.createElement("div");
+  treeContainer.classList.add("category-tree");
+  parentElement.appendChild(treeContainer);
+
+  // Функция для рекурсивного создания дерева
+  function createTree(categories, container) {
+    categories.forEach((category) => {
+      const categoryId = category.id;
+      const categoryName = category.name;
+
+      // Создаем элемент списка
+      const listItem = document.createElement("li");
+      listItem.setAttribute("data-id", categoryId);
+      listItem.setAttribute("data-name", categoryName); // Сохраняем имя категории
+
+      // Создаем элемент span для отображения имени категории
+      const span = document.createElement("span");
+      span.textContent = categoryName;
+
+      // Добавляем элемент span в элемент списка
+      listItem.appendChild(span);
+
+      // Если у категории есть подкатегории, создаем вложенный список
+      if (category.sub_categories && category.sub_categories.length > 0) {
+        const subList = document.createElement("ul");
+        subList.hidden = true; // Изначально скрываем подкатегории
+        listItem.appendChild(subList);
+        createTree(category.sub_categories, subList);
+
+        // Добавляем span для развертывания/свертывания подкатегорий
+        const toggleSpan = document.createElement("span");
+        toggleSpan.classList.add("toggle", "plus");
+
+        listItem.insertBefore(toggleSpan, span);
+      } else {
+        const toggleSpan = document.createElement("span");
+        toggleSpan.classList.add("toggle", "minus");
+        listItem.insertBefore(toggleSpan, span);
+      }
+
+      // Добавляем элемент списка в контейнер
+      container.appendChild(listItem);
+    });
+  }
+
+  // Создаем дерево категорий
+  createTree(categories, treeContainer);
+
+  // Обработчик кликов на контейнер дерева
+  treeContainer.addEventListener("click", function (event) {
+    const target = event.target;
+
+    // Получаем все элементы li внутри category-tree
+    const allListItems = document.querySelectorAll(".category-tree li");
+
+    // Добавляем обработчики событий для каждого li
+    allListItems.forEach((item) => {
+      item.addEventListener("mouseenter", () => {
+        // Убираем hover для всех вложенных элементов
+        const childItems = item.querySelectorAll("li");
+        childItems.forEach((child) => {
+          child.style.pointerEvents = "none"; // Блокируем hover на вложенных li
+        });
+      });
+
+      item.addEventListener("mouseleave", () => {
+        // Возвращаем hover для всех вложенных элементов
+        const childItems = item.querySelectorAll("li");
+        childItems.forEach((child) => {
+          child.style.pointerEvents = "auto"; // Включаем hover обратно для вложенных li
+        });
+      });
+    });
+
+    // Если клик на элемент с классом toggle
+    if (target.classList.contains("toggle")) {
+      event.stopPropagation(); // Предотвращаем всплытие события
+
+      const listItem = target.parentNode;
+      const subList = listItem.querySelector("ul");
+
+      if (subList) {
+        // Переключаем видимость подкатегорий
+        subList.hidden = !subList.hidden;
+
+        // Обновляем класс и текст toggleSpan
+        if (subList.hidden) {
+          target.classList.remove("minus");
+          target.classList.add("plus");
+        } else {
+          target.classList.remove("plus");
+          target.classList.add("minus");
+        }
+      }
+    }
+    // Если клик на <li> или <span> (с именем категории)
+    else if (target.tagName === "SPAN" || target.tagName === "LI") {
+      // Определяем элемент <li>, на который был произведен клик
+      const listItem = target.tagName === "SPAN" ? target.parentNode : target;
+      inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
+
+      localStorage.setItem("cat_transaction", listItem.getAttribute("data-id"));
+
+      checkForChanges();
     }
   });
 }

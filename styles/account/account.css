@@ -1,12 +1,90 @@
-.customTableAccount {
+.create-button,
+.get-button {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 93px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+/* ===== Информация о пользователе ===== */
+
+.user-info-container {
+  position: absolute;
+  top: 30px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  color: #5b5b5b;
+}
+
+.user-id-label {
+  display: inline-block;
+  color: #5b5b5b;
+  margin-right: 8px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+#user_id {
+  display: inline-block;
+  color: #5b5b5b;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.custom-table {
   height: 48px;
   overflow: auto;
   border: 1px solid #dddddd;
+  width: 95%;
   table-layout: fixed;
-  min-width: 420px;
+  min-width: 900px;
   border-collapse: collapse;
+  margin-left: 100px;
   margin-top: 10px;
   user-select: none;
+}
+
+th,
+td {
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+  padding: 10px 40px;
+  text-align: left;
+  height: 48px;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: #909399;
+  z-index: 100;
+  background-color: #faf8f8;
+}
+
+td img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  text-align: center;
+}
+
+td img:hover {
+  filter: brightness(1%);
+}
+
+.smallRow {
+  width: 170px;
+}
+
+.wrapper > div {
+  margin-right: 20px;
 }
 
 .modalAccount .createButton {

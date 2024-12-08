@@ -10,14 +10,25 @@ export function redirectAuth() {
 export function checkFormPasswordREcovery() {
   const email = formPasswordRecovery.email.value;
   if (email) {
-    formPasswordRecovery.recoveryPasswordButton.classList.remove("disable");
+    formPasswordRecovery.recoveryPasswordButton.classList.remove("disabled");
+    formPasswordRecovery.recoveryPasswordButton.removeAttribute("data-tooltip");
   } else {
-    formPasswordRecovery.recoveryPasswordButton.classList.add("disable");
+    formPasswordRecovery.recoveryPasswordButton.classList.add("disabled");
+    formPasswordRecovery.recoveryPasswordButton.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
   }
 }
 
 export async function recoveryPassword() {
   let buttonClicked = false;
+  if (
+    formPasswordRecovery.recoveryPasswordButton.classList.contains("disabled")
+  ) {
+    return;
+  }
+
   if (formPasswordRecovery.email.classList.contains("email-error")) {
     formPasswordRecovery.email.classList.remove("email-error");
   }
@@ -25,14 +36,14 @@ export async function recoveryPassword() {
   if (buttonClicked) {
     return;
   }
-  formPasswordRecovery.recoveryPasswordButton.classList.add("disable");
+  formPasswordRecovery.recoveryPasswordButton.classList.add("disabled");
   buttonClicked = true;
   formPasswordRecovery.recoveryPasswordButton.disabled = true;
   const email = formPasswordRecovery.email.value;
 
   if (!EmailValidator.validate(email)) {
     formPasswordRecovery.email.classList.add("email-error");
-    formPasswordRecovery.recoveryPasswordButton.classList.add("disable");
+    formPasswordRecovery.recoveryPasswordButton.classList.add("disabled");
     formPasswordRecovery.errorTextEmail.classList.add("view");
     formPasswordRecovery.recoveryPasswordButton.disabled = false;
     buttonClicked = false;
@@ -44,7 +55,7 @@ export async function recoveryPassword() {
     setTimeout(() => {
       formPasswordRecovery.recoveryPasswordButton.disabled = false;
       buttonClicked = false;
-      formPasswordRecovery.recoveryPasswordButton.classList.remove("disable");
+      formPasswordRecovery.recoveryPasswordButton.classList.remove("disabled");
     }, 1000);
     console.log(response.message);
     if (response.message === "Ok") {
@@ -59,11 +70,11 @@ export async function recoveryPassword() {
   } catch (error) {
     const errorMessage = "Аккаунт с таким адресом почты не найден";
     createToast("error", errorMessage);
-    formPasswordRecovery.recoveryPasswordButton.classList.remove("disable");
+    formPasswordRecovery.recoveryPasswordButton.classList.remove("disabled");
   }
   setTimeout(() => {
     formPasswordRecovery.recoveryPasswordButton.disabled = false;
-    formPasswordRecovery.recoveryPasswordButton.classList.remove("disable");
+    formPasswordRecovery.recoveryPasswordButton.classList.remove("disabled");
     buttonClicked = false;
   }, 100);
 }

@@ -18,183 +18,188 @@
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     <link rel="stylesheet" href="../../../styles/style.css" />
     <link rel="stylesheet" href="../../../styles/receipt.css" />
+    <link rel="stylesheet" href="../../../styles/transactions/transaction_style.css" />
     <style>
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100000;
+        background: #ffffff;
+        backface-visibility: hidden;
+        & > div {
+          display: block;
+          position: relative;
+          left: 50%;
+          top: 50%;
+          width: 150px;
+          height: 150px;
+          margin: -75px 0 0 -75px;
+          border-radius: 50%;
+          border: 3px solid transparent;
+          border-top-color: #3006c7;
+          backface-visibility: hidden;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          animation: spin 2s linear infinite; 
+          &:before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #553ae9;
+            -webkit-animation: spin 3s linear infinite; 
+            animation: spin 3s linear infinite; 
+          }
+          &:after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: rgb(87, 87, 92);
+            animation: spin 1.5s linear infinite; 
+          }
+        }
 
-#preloader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 100000;
-  background: #ffffff;
-  backface-visibility: hidden;
-  & > div {
-    display: block;
-    position: relative;
-    left: 50%;
-    top: 50%;
-    width: 150px;
-    height: 150px;
-    margin: -75px 0 0 -75px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    border-top-color: #e85656;
-    backface-visibility: hidden;
-    transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-    animation: spin 2s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
-    &:before {
-      content: "";
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      right: 5px;
-      bottom: 5px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      border-top-color: #e0180c;
-      -webkit-animation: spin 3s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
-      animation: spin 3s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
-    }
-    &:after {
-      content: "";
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      right: 15px;
-      bottom: 15px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      border-top-color: rgb(224, 150, 14);
-      animation: spin 1.5s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
-    }
-  }
+        .loader {
+          font-size: 12px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+      }
+    </style>
+</head>
 
-  .loader {
-    font-size: 12px; /* Размер лоудера */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Центрируем по высоте */
-  }
-}
-  
-  
-</style>
-  
-  
-  </head>
   <body>
-
     <div id="preloader">
       <div></div>
     </div>
-    <nav class="sidebar close">
+
+    <nav class="sidebar">
       <header>
-          <div class="image-text">
-            <span class="image">
-              <img src="../../src/modules/auth/asserts/apple-touch-icon.png" alt="logo">
-            </span> 
-          
-          <div class="text header-text">
-            <span class="name">Sweet Cash</span>
-          </div>
+        <div class="image-text" >
+          <span class="image">
+            <img src="../../src/modules/auth/asserts/apple-touch-icon.png" alt="logo">
+          </span> 
         </div>
       </header>
       <div class="menu-bar">
         <div class="menu">
           <ul class="menu-links">
-            <li class="nav-link", id="tr">
-              <a href="#">
-                <i class="bx bx-dollar icon", id="dollar"></i>
-                <span class="text nav-text", id="transaction">Транзакции</span>
-              </a>
+            <li class="nav-link" data-tooltip="Транзакции">
+              <i class="bx bx-transfer-alt bx-flip-vertical icon activeTab" id="transactions"></i>
             </li>
-            <li class="nav-link">
-              <a href="../../pages/events/index.html">
-                <i class="bx bx-calendar-event icon", id="event"></i>
-                <span class="text nav-text">Мероприятия</span>
-              </a>
+            <li class="nav-link" data-tooltip="Долги">
+              <i class='bx bx-bomb icon' id="debts"></i>
             </li>
-            <li class="nav-link">
-              <a href="../../pages/count/index.html">
-                <i class='bx bx-detail icon', id="count"></i>
-                <span class="text nav-text">Счета</span>
-              </a>
+            <li class="nav-link" data-tooltip="Аналитика">
+              <i class='bx bx-line-chart icon' id="reports"></i>
             </li>
-            <li class="nav-link"> 
-                <a href="#">
-                  <i class="bx bx-file icon", id="file"></i>
-                  <span class="text nav-text">Чеки</span>
-                </a>
+            <li class="nav-link" data-tooltip="Мероприятия">
+                <i class="bx bx-calendar icon" id="events"></i>
             </li>
-            <li class="nav-link"> 
-              <a href="#">
-                <i class="bx bx-bell icon", id="bell"></i>
-                <span class="text nav-text">Уведомление</span>
-              </a>
+            <li class="nav-link" data-tooltip="Счета">
+              <i class='bx bx-wallet icon' id="accounts"></i>
+            </li>
+            <li class="nav-link" data-tooltip="Уведомления"> 
+              <i class="bx bx-bell icon" id="notifications"></i>
             </li>
           </ul>
-        </div>
-      </li>
-      <li class="nav-link2" >
-        <a href="#" id="exist">
-          <i class="bx bx-log-out icon" ></i>
-          <span class="text nav-text">Выход</span>
-        </a>
+      </div>
+      <li class="nav-link" data-tooltip="Выход">
+          <i class="bx bx-log-out icon" id="exist"></i>
       </li>
       </div>
     </nav>
     
+    <div id="tooltip" class="tooltip">
+      <span id="tooltipText"></span>
+    </div>
+
     <div class="wrapper"> 
-        <div class="dropdown">
-          <input type="text" class="text-box" placeholder="Выберете мероприятие">
-          <div class="option"></div>
+        <div id="eventDropdown" class="dropdown">
+          <input
+          id="eventInput"
+          type="text"
+          class="dropdownInput"
+          placeholder="Выберите мероприятие"
+          readonly
+        />
+          <img
+            class="select_shevron"
+            src="../../src/modules/transactions/asserts/chevron-down-regular-36.png"
+            alt="Chevron"
+          />
+        <div id="eventOptions" class="dropdownOptions"></div>
         </div>
+
         <div><label for="period">Период:</label></div>
-        <div><input type="date" id="start-date"></div>
-          <div><input type="date" id="end-date"></div>
-          <div><button type="submit" value="send" id="get-event" class="get-button">
-            Показать транзакции
-          </button></div>
-          <div><button type="submit" value="send" id="create-submit" class="create-button ">
-            Создать
-          </button></div>
-          <div><button type="submit" value="send" id="button_scan_qr" class="create-button ">
-            Отсканировать QR код
-          </button></div>
+        <div><input type="date" id="startDate"></div>
+        <div><input type="date" id="endDate"></div>
+          
+        <div><button id="buttonOpenModalExpense" class="buttonOpenModal disable" data-type="Expense" data-mode="create" >
+          Создать расход
+        </button></div>
+      
+        <div><button id="buttonOpenModalIncome" class="buttonOpenModal disable" data-type="Income" data-mode="create" >
+          Создать доход
+        </button></div>
+
+        <div><button id="buttonOpenModalTransaction" class="buttonOpenModal disable" data-type="Transaction" data-mode="create" >
+          Создать перевод
+        </button></div>
+
+        <div><button id="getAllTransaction" class="buttonGetAllTransaction disable"  >
+          Показать транзакции
+        </button></div>
+
           <div class="user-info-container">
             <label class="user-id-label" id="userLabel">Пользователь:</label>
-            <span id="user_id" title=""></span>
+            <span id="user_id"></span>
           </div>
     </div>
-    <label id = 'transactionsLabel' >Транзакции </label>
+
+    <label id = 'transactionsLabel'>Транзакции </label>
     <div class="table-container">
       <table class="custom-table">
         <thead>
           <tr>
-            <th class="smallRow" >Номер</th>
+            <th class="numberTransaction">Номер</th>
             <th>Дата</th>
             <th>Тип</th>
             <th>Категория</th>
             <th>Сумма</th>
             <th>Создатель</th>
             <th>Счет</th>
-            <th class="smallRow">Чек</th>
-            <th class="smallRow" >Действия</th>
+            <th class="receiptTransaction">Чек</th>
+            <th class="actionsTransaction">Действия</th>
           </tr>
         </thead>
         <tbody>
         </tbody>
       </table>
     </div>
+    
     <label id = 'infoTransactionsLabel' class="disable">Нет транзакций </label>
     <label id ='more' class="dataBlockMore disable" >Еще </label>
 
+    <div id="tooltip" class="tooltip" style="display: none;">
+      <span id="tooltip-text"></span>
+    </div>
 
-
-    <dialog id = "modal" class="modal">
+    <dialog id = "modal12" class="modal12">
       <h2 class="modal-title">Подтверждение</h2>
           <p>Выполнить действие?</p>
           <div class="buttonsMod">
@@ -203,7 +208,7 @@
         </div>
     </dialog>
     
-    <dialog id = "modalTransaction" class="modalTr">
+    <dialog id = "modalTransactionTEST" class="modalTr">
       <label>Номер </label>
       <div >
         <input id="InputId" class="inputBox" disabled placeholder="Номер транзакции будет присвоен системой">
@@ -318,15 +323,7 @@
         </a>
       </div>
     </dialog>
-
-    
      
-    <dialog id = "scanner-form" >
-       
-        <div id="reader" width="50px"></div>
-      </div>
-    </dialog>
-
     <dialog id = "receipt-details" >
     <div data-focus-lock-disabled="false">
       <div>
@@ -370,16 +367,19 @@
         </div>
       </div>
     </div>
- 
-  </dialog>
+    </dialog>
 
- 
+    <dialog class="modal">
+    <div class="modalContent">
+      <h2 id="modalTitle"></h2>
+        <form id="modalForm">
+            <!-- Содержимое формы будет добавляться динамически -->
+        </form>
+    </div>
+    </dialog>
 
-
-  
     <ul class="ul notifications">
-      <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script type="module" src="../../src/modules/transactions/index.js"></script>
-    
+
   </body>
 </html>

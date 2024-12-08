@@ -1,0 +1,192 @@
+/* Стили страницы регистрации */
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+}
+
+.registrationContainer h2 {
+  font-size: 20px;
+}
+
+.registrationContainer {
+  width: 310px;
+  height: 446px;
+  border: 1px solid #606266;
+  border-radius: 5px;
+  padding: 19px 25px 19px 25px;
+  text-align: center;
+}
+
+.registrationContainer input {
+  width: 253px;
+  padding: 10px;
+  height: 32px;
+  border: 1px solid #606266;
+  border-radius: 4px;
+  margin-top: 31px;
+}
+
+#InputName::placeholder {
+  font-size: 15px;
+}
+
+#InputMobile::placeholder {
+  font-size: 15px;
+}
+
+#InputEmail::placeholder {
+  font-size: 15px;
+}
+
+/* #InputPassword::placeholder {
+    font-size: 15px;
+  } */
+
+input.active:focus,
+textarea.active:focus {
+  border: 1px solid #409eff;
+}
+
+#InputEmailReg.emailError,
+#InputMobile.mobileError,
+#InputPassword.passwordError,
+#InputPasswordRepeat.passwordError {
+  border: 1px solid var(--error);
+}
+
+.textPasswordErrorRepeat {
+  color: var(--error);
+  font-size: 10px;
+  position: absolute;
+  display: none;
+}
+
+.textPasswordErrorRepeat.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+/* .textPasswordError1 {
+    color: var(--error);
+    position: absolute;
+    font-size: 10px;
+    text-align: left;
+    margin-top: 1px;
+    width: 253px;
+    margin-left: 3px;
+    display: block;
+  } */
+
+.textPasswordError2 {
+  color: var(--error);
+  font-size: 10px;
+  position: absolute;
+  display: none;
+  width: 253px;
+  text-align: left;
+}
+
+.textPasswordError2.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+.textPasswordError {
+  color: var(--error);
+  font-size: 10px;
+  position: absolute;
+  display: none;
+  width: 253px;
+  text-align: left;
+}
+
+.textPasswordError.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+  width: 253px;
+}
+
+.textEmailError {
+  color: var(--error);
+  padding-right: 80px;
+  font-size: 10px;
+  position: absolute;
+  display: none;
+}
+
+.textEmailError.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+.textMobileError {
+  color: var(--error);
+  padding-right: 80px;
+  font-size: 10px;
+  position: absolute;
+  display: none;
+}
+
+.textMobileError.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+/* .auth-container input[type="password"] {
+    margin-top: 36px;
+  } */
+
+.registrationButtons {
+  display: flex;
+  justify-content: space-between;
+  height: 32px;
+  margin-top: 36px;
+}
+
+.registrationButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 124px;
+  border-radius: 4px;
+  cursor: pointer;
+  transform: translateX(3px);
+  border: 3px solid transparent;
+}
+
+.registrationButton:hover {
+  background-color: #2f86e4;
+}
+
+.registrationButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.cancellButton {
+  background: #82848a;
+  color: #fff;
+  width: 94px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  border: 3px solid transparent;
+}
+
+.cancellButton:hover {
+  background-color: #7b7c81;
+}

@@ -23,21 +23,29 @@ import {
 import { createToast } from "../notifications/index.js";
 import { formEvent } from "./constants.js";
 
+import {
+  handleTooltipMouseEnter,
+  handleTooltipMouseLeave,
+  displayUsername,
+  handleNavClick,
+} from "../other_functions/shared_functions.js";
+
 document.addEventListener("DOMContentLoaded", function () {
   redirectToAuth();
-  const userId = localStorage.getItem("user_id");
-  const userIdElement = document.getElementById("user_id");
-  userIdElement.textContent = userId;
-  userIdElement.title = `ID пользователя: ${userId}`;
-  const userName = localStorage.getItem("user_name");
-  formEvent.userIdElement.textContent = userName;
-
-  sidebar();
-
+  displayUsername();
   getMyEvents();
-
   getMyInvitation();
   getForeignInvitation();
+
+  // Обработчики для отображению тултипов
+  document.addEventListener("mouseenter", handleTooltipMouseEnter, true);
+  document.addEventListener("mouseleave", handleTooltipMouseLeave, true);
+
+  document
+    .querySelectorAll(".menu-links .nav-link, .nav-link[data-tooltip='Выход']")
+    .forEach((link) => {
+      link.addEventListener("click", handleNavClick);
+    });
 
   // setTimeout(getForeignInvitation, 100);
 

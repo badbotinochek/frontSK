@@ -242,7 +242,7 @@ export async function updateTransactionApi(
   }
 }
 
-export async function getCategoryTransaction() {
+export async function getCategoryTransactionApi() {
   const access_token = localStorage.getItem("access_token");
 
   try {

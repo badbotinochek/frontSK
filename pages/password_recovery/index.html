@@ -38,7 +38,6 @@
                 placeholder="Адрес электронной почты"
                 id="inputEmailRecovery"
                 name="email"
-                required 
                 onfocus="this.className='active'" 
                 onblur="this.className=''"
               />
@@ -46,7 +45,7 @@
           </div>
   
           <div class="buttons">
-              <button type="submit" value="send" id="RecoveryPasswordButton" class="signup-button disable " >
+              <button type="submit" value="send" id="RecoveryPasswordButton" class="signup-button disabled " data-tooltip="Введите адрес электронной почты">
                 Отправить
               </button>
               <button type="submit" id="RedirectAuthButton" class="cancellButton">
@@ -58,6 +57,10 @@
       </div>
     </div>
     
+    <div id="tooltip" class="tooltip">
+      <span id="tooltipText"></span>
+    </div>
+
     <ul class="ul notifications">
     <script type="module" src="../../src/modules/password_recovery/index.js"></script>
   </body>

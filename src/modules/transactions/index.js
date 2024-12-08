@@ -1,140 +1,187 @@
 import {
   checkForm,
   handleClick,
-  handleClickTra,
+  fillEventDirectory,
   createTransaction,
   deleteTransactions,
   getTransactions,
-  getEvent,
-  sidebar,
-  getDate,
+  fillCurrentDate,
   changeStyleBorder,
   customTextArea,
-  exit,
-  toggleDropdown,
-  closeDropdown,
   onSumInput,
   onPhoneKeyDown,
   getCategory,
   toggleDropdownCat,
-  checkEvent,
   checkCreateTranForm,
   createNewTransaction,
   checkForChanges,
   deleteSErrorBorder,
   deleteEErrorBorder,
-  checkAndUpdateToken,
-  handleClickTraShow,
-  redirectToAuth,
   getCountRowsTable,
   updateTransaction,
   getAllCategory,
   closeDropdownTransaction,
-  openQrScanner,
-  hidePreloader,
-  renderCategoryTree,
+  // renderCategoryTree,
   getActiveAccounts,
   toggleDropdownAcc,
+  openDialog,
+  clearTransactionPage,
+  toggleModalDropdown,
 } from "./utils.js";
 
 import { formTransactions } from "./constants.js";
-
-// // Скрытие прелоадера после полной загрузки страницы
-// window.addEventListener("load", () => {
-
-// });
+import {
+  redirectToAuth,
+  checkAndUpdateToken,
+  displayUsername,
+  handleTooltipMouseEnter,
+  handleTooltipMouseLeave,
+  toggleDropdown,
+  toggleDropdown1,
+  handleNavClick,
+  hidePreloader,
+} from "../other_functions/shared_functions.js";
 
 document.addEventListener("DOMContentLoaded", function (e) {
+  // Предварительная загрузка данных
   checkAndUpdateToken();
+  redirectToAuth();
+  clearTransactionPage();
+  fillEventDirectory();
+  displayUsername();
   getActiveAccounts();
   getAllCategory();
-  redirectToAuth();
+  fillCurrentDate();
+  getCategory();
 
-  const userId = localStorage.getItem("user_id");
-  const userIdElement = document.getElementById("user_id");
-  userIdElement.textContent = userId;
-  userIdElement.title = `ID пользователя: ${userId}`;
-  const userName = localStorage.getItem("user_name");
-  formTransactions.userIdElement.textContent = userName;
+  // Обработчики для отображению тултипов
+  document.addEventListener("mouseenter", handleTooltipMouseEnter, true);
+  document.addEventListener("mouseleave", handleTooltipMouseLeave, true);
 
-  // Проверяем, что все поля, которые нужны для получения транзакций заполнены
-  checkForm();
-  checkEvent();
-  formTransactions.start_date.addEventListener("input", checkForm);
-  formTransactions.end_date.addEventListener("input", checkForm);
-  // Проблема: работает только после перезагрузки страницы - не работает!
-  formTransactions.input_event.addEventListener("input", checkForm);
-  formTransactions.input_event.addEventListener("input", checkEvent);
+  // Обработчики для переходов по страницам на sidebar
+  document
+    .querySelectorAll(".menu-links .nav-link, .nav-link[data-tooltip='Выход']")
+    .forEach((link) => {
+      link.addEventListener("click", handleNavClick);
+    });
 
-  // Обработчики для закрытия модального окна
-  formTransactions.cancel.addEventListener("click", handleClick);
-  formTransactions.cancelTra.addEventListener("click", handleClickTra);
-  // Обработчики для открытия модального окна
-  // formTransactions.create_transaction.addEventListener("click", getCategory);
+  // Обработчики для работы navbar
+  formTransactions.eventDropdown.addEventListener("click", toggleDropdown);
+  formTransactions.startDateEvent.addEventListener("change", checkForm);
+  formTransactions.endDateEvent.addEventListener("change", checkForm);
 
-  formTransactions.create_transaction.addEventListener(
-    "click",
-    createTransaction
-  );
+  document.querySelectorAll(".buttonOpenModal").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const type = event.target.dataset.type;
+      const mode = event.target.dataset.mode;
 
-  formTransactions.editTransactionButton.addEventListener(
-    "click",
-    updateTransaction
-  );
-
-  formTransactions.showCancelTra.addEventListener("click", handleClickTraShow);
-
-  formTransactions.start_date.addEventListener("click", deleteSErrorBorder);
-  formTransactions.end_date.addEventListener("click", deleteEErrorBorder);
-
-  formTransactions.end_date.addEventListener("change", function () {
-    formTransactions.getTransactionButton.classList.remove("disable");
+      openDialog(type, mode, mode !== "create");
+    });
   });
-
-  formTransactions.start_date.addEventListener("change", function () {
-    formTransactions.getTransactionButton.classList.remove("disable");
-  });
-
-  // Обработчики для потверждения удаления транзакции
-  formTransactions.aprove_delete.addEventListener("click", deleteTransactions);
-
   formTransactions.getTransactionButton.addEventListener("click", () =>
     getTransactions()
   );
 
-  formTransactions.labelMoreTransaction.addEventListener("click", () => {
-    const offset = getCountRowsTable();
-    getTransactions(offset, true);
+  // Обработчики для диалоговых окон
+  // document.addEventListener("click", (event) => {
+  //   if (event.target.matches(".button-class")) {
+  //     // Действия при нажатии на кнопку
+  //     console.log("Кнопка нажата");
+  //   }
+
+  //   if (event.target.matches(".modalDropdown input")) {
+  //     // Открытие выпадающего списка
+  //     console.log("Открытие выпадающего списка");
+  //   }
+  // });
+
+  // document.getElementById("modalForm").addEventListener("click", (event) => {
+  //   const target = event.target;
+
+  //   // Ищем ближайший элемент с классом modalDropdown
+  //   const dropdownTrigger = target.closest(".modalDropdown");
+
+  //   if (dropdownTrigger) {
+  //     const dropdownId = dropdownTrigger.id;
+  //     if (dropdownId == "modalDropdownAccount") {
+  //       // Находим вложенный элемент с классом modalOption
+  //       const optionElement = dropdownTrigger.querySelector(".modalOption");
+  //       const optionId = optionElement ? optionElement.id : null;
+  //       const inputElement =
+  //         dropdownTrigger.querySelector("#modalInputAccount");
+  //       const inputId = inputElement ? inputElement.id : null;
+  //       const typeDropdown = "dropdownAccount";
+  //       toggleModalDropdown(
+  //         dropdownId,
+  //         optionId,
+  //         inputId,
+  //         dropdownTrigger,
+  //         typeDropdown
+  //       );
+  //     } else if (dropdownId == "modalDropdownCategory") {
+  //       // Находим вложенный элемент с классом modalOption
+  //       const optionElement = dropdownTrigger.querySelector(".modalOption");
+  //       const optionId = optionElement ? optionElement.id : null;
+  //       const inputElement = dropdownTrigger.querySelector(
+  //         "#modalDropdownCategory"
+  //       );
+  //       const inputId = inputElement ? inputElement.id : null;
+  //       const typeDropdown = "dropdownCategory";
+
+  //       toggleModalDropdown(
+  //         dropdownId,
+  //         optionId,
+  //         inputId,
+  //         dropdownTrigger,
+  //         typeDropdown
+  //       );
+  //     }
+
+  //     // Передаем ID dropdown, option и input
+  //   }
+  // });
+
+  document.getElementById("modalForm").addEventListener("click", (event) => {
+    const target = event.target;
+    const dropdownTrigger = target.closest(".modalDropdown");
+
+    if (dropdownTrigger) {
+      const dropdownId = dropdownTrigger.id;
+      toggleModalDropdown(dropdownId);
+    }
   });
 
-  getEvent();
+  formTransactions.cancel.addEventListener("click", handleClick);
 
-  // Обработчик для сайдбара
-  sidebar();
+  // if (target.closest("#modalDropdownAccount")) {
+  //   const dropdownElement = document.getElementById("modalDropdownAccount");
+  //   toggleDropdown1(dropdownElement);
+  //   event.stopPropagation();
+  //   // Ваш код здесь
+  // }
 
-  //Функциональность для заполнения периода по умолчанию
-  getDate();
+  // if (target.closest("#modalDropdownCategory")) {
+  //   const dropdownElement = document.getElementById("modalDropdownCategory");
+  //   toggleDropdown1(dropdownElement);
+  //   event.stopPropagation();
+  // }
 
-  //  обработчик события при фокусировке на элементе
+  // formTransactions.dropdownCat.addEventListener("click", toggleDropdownCat);
+  // document.addEventListener("click", (event) => {
+  //   if (event.target.closest("#modalDropdownAccount")) {
+  //     toggleDropdownAcc(event);
+  //   }
+  // });
+  // // document.addEventListener("click", (event) => {
+  // //   if (event.target.closest("#modalAccountBox")) {
+  // //     toggleDropdownAcc(event);
+  // //   }
+  // // });
 
-  //  обработчик события при потере фокуса элементом
-  formTransactions.descriptionTextarea.addEventListener("blur", customTextArea);
-
-  //  обработчик события нажатия на кнопку "выход"
-  formTransactions.exit.addEventListener("click", exit);
-
-  formTransactions.dropdown.addEventListener("click", toggleDropdown);
-  formTransactions.dropdownCat.addEventListener("click", toggleDropdownCat);
-
-  formTransactions.dropdownAcc.addEventListener("click", toggleDropdownAcc);
-
-  document.addEventListener("click", closeDropdown);
-
-  document.addEventListener("click", closeDropdownTransaction);
-
+  // document.addEventListener("click", closeDropdown);
+  // document.addEventListener("click", closeDropdownTransaction);
   formTransactions.sumTransaction.addEventListener("input", onSumInput);
   formTransactions.sumTransaction.addEventListener("keydown", onPhoneKeyDown);
-
   formTransactions.dateTransaction.addEventListener(
     "input",
     checkCreateTranForm
@@ -151,7 +198,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
     "input",
     checkCreateTranForm
   );
-  formTransactions.accountBox.addEventListener("input", checkCreateTranForm);
 
   const radioButtons = document.querySelectorAll(
     "input[name='typeTransaction']"
@@ -159,37 +205,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
   radioButtons.forEach((getTransactionButton) => {
     getTransactionButton.addEventListener("change", checkCreateTranForm);
   });
-
   formTransactions.createTra.addEventListener("click", createNewTransaction);
-
   formTransactions.row.addEventListener("click", checkCreateTranForm);
-
-  // var table = document.querySelector(".custom-table tbody");
-  // if (table) {
-  //   table.addEventListener("click", function (event) {
-  //     console.log(table);
-
-  //     var target = event.target;
-  //     if (target.tagName === "TD") {
-  //       var selectedRow = target.parentNode;
-  //       // Удаляем класс selected-row у всех строк таблицы
-  //       var allRows = table.querySelectorAll("tr");
-  //       allRows.forEach(function (row) {
-  //         row.classList.remove("selected-row");
-  //       });
-  //       // Добавляем класс selected-row только к выбранной строке
-  //       selectedRow.classList.add("selected-row");
-  //       // Получаем номер транзакции
-  //       var transactionNumber = selectedRow.cells[0].innerText;
-  //       console.log("Выбрана транзакция с номером:", transactionNumber);
-  //     }
-  //   });
-  // }
-
-  formTransactions.modalElementTr.addEventListener("change", checkForChanges);
-
-  checkAndUpdateToken();
-
   const treeContainer = document.querySelector(".dropdown1 .option1");
   const inputElement = document.querySelector(".categoryBox");
 
@@ -205,7 +222,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
       target.classList.add("highlight");
     }
   });
-
   treeContainer.addEventListener("mouseout", (event) => {
     let target = event.target;
 
@@ -218,7 +234,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
       target.classList.remove("highlight");
     }
   });
-
   treeContainer.addEventListener("click", (event) => {
     let target = event.target;
 
@@ -232,8 +247,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
     }
   });
 
-  formTransactions.buttonScanQr.addEventListener("click", openQrScanner);
-
   document.addEventListener("click", function (event) {
     const target = event.target.closest("#close-icon"); // Проверяем, кликнули ли по иконке закрытия
     if (target) {
@@ -241,14 +254,38 @@ document.addEventListener("DOMContentLoaded", function (e) {
     }
   });
 
-  hidePreloader();
+  // radioButtons.forEach((radioButton) => {
+  //   radioButton.addEventListener("change", () => {
+  //     const selectedType = document.querySelector(
+  //       "input[name='typeTransaction']:checked"
+  //     ).value;
+  //     renderCategoryTree(selectedType);
+  //   });
+  // });
 
-  radioButtons.forEach((radioButton) => {
-    radioButton.addEventListener("change", () => {
-      const selectedType = document.querySelector(
-        "input[name='typeTransaction']:checked"
-      ).value;
-      renderCategoryTree(selectedType); // Обновляем дерево категорий при изменении радиокнопки
-    });
+  // Обработчики работы с таблицей
+  formTransactions.editTransactionButton.addEventListener(
+    "click",
+    updateTransaction
+  );
+
+  formTransactions.aprove_delete.addEventListener("click", deleteTransactions);
+  formTransactions.labelMoreTransaction.addEventListener("click", () => {
+    const offset = getCountRowsTable();
+    getTransactions(offset, true);
   });
+
+  // хз че такое
+
+  formTransactions.startDateEvent.addEventListener("click", deleteSErrorBorder);
+  formTransactions.endDateEvent.addEventListener("click", deleteEErrorBorder);
+  // formTransactions.endDateEvent.addEventListener("change", function () {
+  //   formTransactions.getTransactionButton.classList.remove("disable");
+  // });
+  // formTransactions.startDateEvent.addEventListener("change", function () {
+  //   formTransactions.getTransactionButton.classList.remove("disable");
+  // });
+  formTransactions.descriptionTextarea.addEventListener("blur", customTextArea);
+
+  hidePreloader();
 });

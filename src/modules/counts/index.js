@@ -22,17 +22,29 @@ import {
 import { formCounts } from "./constants.js";
 import { createToast } from "../notifications/index.js";
 
+import {
+  handleTooltipMouseEnter,
+  handleTooltipMouseLeave,
+  displayUsername,
+  handleNavClick,
+} from "../other_functions/shared_functions.js";
+
 document.addEventListener("DOMContentLoaded", function (e) {
   checkAndUpdateToken();
   redirectToAuth();
 
   getAllMyAccounts();
-  const userId = localStorage.getItem("user_id");
-  const userIdElement = document.getElementById("user_id");
-  userIdElement.textContent = userId;
-  userIdElement.title = `ID пользователя: ${userId}`;
-  const userName = localStorage.getItem("user_name");
-  formCounts.userIdElement.textContent = userName;
+  displayUsername();
+
+  // Обработчики для отображению тултипов
+  document.addEventListener("mouseenter", handleTooltipMouseEnter, true);
+  document.addEventListener("mouseleave", handleTooltipMouseLeave, true);
+
+  document
+    .querySelectorAll(".menu-links .nav-link, .nav-link[data-tooltip='Выход']")
+    .forEach((link) => {
+      link.addEventListener("click", handleNavClick);
+    });
 
   // Обработчик для сайдбара
   sidebar();
