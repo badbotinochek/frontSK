@@ -7,6 +7,7 @@ import {
   removeEmailErrorStyle,
 } from "./utils.js";
 import {
+  hidePreloader,
   handleTooltipMouseEnter,
   handleTooltipMouseLeave,
 } from "../other_functions/shared_functions.js";
@@ -32,4 +33,5 @@ window.onload = function () {
   );
 
   formPasswordRecovery.email.addEventListener("focus", removeEmailErrorStyle);
+  hidePreloader();
 };

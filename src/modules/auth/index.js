@@ -32,7 +32,13 @@ window.onload = function () {
   formAuth.email.addEventListener("focus", removeErrorStyle);
   formAuth.password.addEventListener("input", checkForm);
   formAuth.rememberMeCheckbox.addEventListener("change", addRememberMe);
-  formAuth.button.addEventListener("click", loginUser);
+  formAuth.button.addEventListener("click", (e) => {
+    if (formAuth.button.classList.contains("disabled")) {
+      e.preventDefault();
+      return;
+    }
+    loginUser();
+  });
   // formAuth.registrationButton.addEventListener("click", redirectToRegistration);
 
   formAuth.eyecon.addEventListener("click", hidepassword);

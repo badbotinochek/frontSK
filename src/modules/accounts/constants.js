@@ -1,6 +1,7 @@
-export const formCounts = {
-  exit: document.getElementById("exist"),
-  userIdElement: document.getElementById("user_id"),
+export const formAccounts = {
+  buttonsOpenModal: document.querySelector(".buttonOpenModal"),
+  closeModal: document.getElementById("closeModal"),
+  modalElement: document.querySelector(".modal"),
 
   openModalCreateAccountButton: document.getElementById(
     "openModalCreateAccountButton"

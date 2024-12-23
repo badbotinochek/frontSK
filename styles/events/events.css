@@ -1,51 +1,24 @@
-.create-button,
-.get-button {
-  background-color: #3a8ee6;
+/* ===== Navbar ===== */
+.wrapper > div {
+  margin-right: 20px;
+}
+
+.buttonOpenModal {
+  background-color: var(--primary-button-color);
   color: #fff;
-  width: 93px;
+  width: 94px;
   height: 40px;
   border-radius: 4px;
   cursor: pointer;
   border: 3px solid transparent;
+  font-size: 15px;
 }
 
-/* ===== Информация о пользователе ===== */
-
-.user-info-container {
-  position: absolute;
-  top: 30px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  color: #5b5b5b;
+.buttonOpenModal:hover {
+  background-color: var(--primary-button-color-hover);
 }
 
-.user-id-label {
-  display: inline-block;
-  color: #5b5b5b;
-  margin-right: 8px;
-  font-weight: bold;
-  vertical-align: middle;
-}
-
-#user_id {
-  display: inline-block;
-  color: #5b5b5b;
-  max-width: 70px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-  cursor: pointer;
-}
-
-@media (max-width: 408px) {
-  .user-info-container {
-    position: static;
-    margin-top: 10px;
-    justify-content: center;
-  }
-}
+/* ===== Таблица ===== */
 
 .custom-table {
   height: 48px;
@@ -65,14 +38,13 @@ td {
   border-top: 1px solid #dddddd;
   border-bottom: 1px solid #dddddd;
   padding: 10px 40px;
-  text-align: left;
+  text-align: center;
   height: 48px;
 }
 thead th {
   position: sticky;
   top: 0;
   color: #909399;
-  z-index: 100;
   background-color: #faf8f8;
 }
 
@@ -91,15 +63,12 @@ td img:hover {
   width: 170px;
 }
 
-.wrapper > div {
-  margin-right: 20px;
-}
-
 .tabs {
   display: flex;
   flex-wrap: wrap;
   padding-left: 90px;
 }
+
 .input {
   position: absolute;
   opacity: 0;
@@ -122,6 +91,7 @@ td img:hover {
 .input:focus + .label {
   background: #fff;
 }
+
 .input:checked + .label {
   color: #00349c;
 }
@@ -130,12 +100,15 @@ td img:hover {
     width: auto;
   }
 }
+
 .panel {
   display: none;
   padding-bottom: 30px;
   background: #fff;
-  border: 1px solid #e4e7ed;
+  border: none;
+  border-top: 1px solid #e4e7ed;
 }
+
 @media (min-width: 600px) {
   .panel {
     order: 99;
@@ -151,49 +124,240 @@ td img:hover {
   width: 98%;
 }
 
-.icon#bx-file {
-  color: var(--primary-color);
+/* ===== Общие стили для модальных окон Мероприятие ===== */
+
+.modalLabel {
+  margin-top: 25px;
+  color: #303131;
+  font-size: 19px;
 }
 
-#event {
-  color: var(--primary-color);
+.modalInput {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
 }
 
-.icon#dollar {
-  color: var(--primary-color);
+.modalInput::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
 }
 
-.nav-text#transaction {
+.dateEndEventLabel {
+  margin-left: 100px;
+}
+
+.dateTime {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 15px;
+}
+
+input[type="date"] {
+  padding: 12px 20px;
+  height: 40px;
+  width: 150px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 5px;
+  font-family: "Noto Sans SC";
+  font-size: 15px;
+}
+
+input:focus,
+input[type="date"]:focus {
+  border: 1px solid var(--border-selected);
+  outline: none;
+}
+
+.modalDescription {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+}
+
+.modalDescription::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+textarea.modalDescription:focus {
+  border: 1px solid var(--border-selected);
+  outline: none;
+}
+
+.modal .buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: left;
+}
+
+.modal .createButton {
+  background-color: var(--primary-button-color);
   color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
 }
 
-.icon#dollar {
+.modal .createButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.modal .createButton.disable {
+  background-color: var(--primary-button-color-disable);
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.createButton.Off {
+  display: none;
+}
+
+.modal .editButton {
+  background-color: var(--primary-button-color);
   color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
 }
 
-.sidebar li#tr:hover a {
-  background-color: transparent !important;
+.modal .editButton.disable {
+  pointer-events: none;
+  background-color: var(--primary-button-color-disable);
+  opacity: 0.5;
 }
+
+.modal .editButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.modal .viewButton {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modal .viewButton.disable {
+  pointer-events: none;
+  background-color: var(--primary-button-color-disable);
+  opacity: 0.5;
+}
+
+.modal .viewButton :hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.closeDialogButton {
+  background: #82848a;
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  height: 40px;
+  border: none;
+  margin-left: 20px;
+  font-size: 16px;
+}
+
+.modal .closeDialogButton {
+  background-color: var(--secondary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.modal .closeDialogButton:hover {
+  background-color: var(--secondary-button-color-hover);
+}
+
+.modalInput.disabled {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.modalDescription.disabled {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+input[type="date"].disabled {
+  background-color: #f5f5f5;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===== Стили для модального окна Мероприятие===== */
 
 .modalEvent {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 460px;
-  height: 761px;
-  /* height: 804px; */
+  width: 400px;
+  /* height: 505px; */
+  height: auto;
   user-select: text;
-  visibility: visible;
   overflow: auto;
-  background: #fff;
   display: block;
   box-shadow: 0 0 0 100vmax #00000038;
   opacity: 0;
-  visibility: hidden;
   border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   user-select: none;
+  padding: 0 20px 20px 20px;
+  background: #fff;
 }
 
 .modalEvent[open] {
@@ -201,393 +365,113 @@ td img:hover {
   visibility: visible;
 }
 
-.modalEvent::backdrop {
-  background: #00000000;
-}
-
-.modalEvent {
-  padding: 20px;
-  color: #303133;
-  text-align: left;
-}
-
-#eventId {
-  background: #f5f7fa;
-}
-
-.modalEvent .label {
-  color: #606266;
-  text-align: left;
+.modalEvent #modalMainTitle {
   margin-top: 20px;
+  color: #0e013f;
+  font-size: 28px;
 }
 
-.modalEvent .inputEventName {
-  background: #ffffff;
-  width: 420px;
-  border-radius: 5px;
-  height: 40px;
-  border: 1px solid #e4e7ed;
-  padding: 0 0 0 13px;
-  margin-top: 5px;
-}
+/* ===== Стили для модального окна Участник===== */
 
-.inputEventName:focus {
-  border-color: #409eff;
-}
-
-.dateTime {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-}
-
-.dateTime input[type="date"] {
-  font-size: 15px; /* Размер текста */
-  padding: 12px 20px;
-}
-
-#dateTr {
-  width: 195px;
-  height: 40px;
-}
-
-.descriptionEvent {
-  margin-top: 5px;
-  width: 420px;
-  height: 128px;
-  outline: none;
-  -moz-appearance: none;
-  border: 1px solid #e4e7ed;
-  border-radius: 5px;
-  resize: none;
-  padding: 0 0 0 13px;
-  scrollbar-width: thin; /* Firefox: делает полосу прокрутки тоньше */
-  scrollbar-color: #888 #f1f1f1; /* Firefox: цвет ползунка и дорожки */
-  font-size: 15px;
-  color: #606266;
-}
-
-.modalEvent .createButton {
-  background-color: #3a8ee6;
-  color: #fff;
-  width: 97px;
-  height: 40px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 3px solid transparent;
-}
-
-.modalEvent .createButton:hover {
-  background-color: #2f86e4;
-}
-
-.modalEvent .buttons1 {
-  margin-top: 20px;
-}
-
-.modalEvent table {
-  margin-left: 0px;
-  margin-top: 20px;
-  table-layout: fixed;
-  width: 100%;
-}
-
-.tableContainer {
-  max-height: 150px; /* Установите максимальную высоту контейнера */
-  overflow-y: auto;
-  overflow-x: hidden;
-  width: 100%; /* Убедитесь, что контейнер занимает всю ширину */
-  scrollbar-width: thin; /* Firefox: делает полосу прокрутки тоньше */
-  scrollbar-color: #888 #f1f1f1; /* Firefox: цвет ползунка и дорожки */
-}
-
-.customTable {
-  width: 100%;
-  height: 42px;
-  border: 1px solid #dddddd;
-  table-layout: fixed;
-  min-width: 420px;
-  border-collapse: collapse;
-  margin-top: 20px;
-  user-select: none;
-}
-
-.customTable th,
-.customTable td {
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
-  padding: 10px 40px;
-  text-align: left;
-  height: 42px;
-  margin-top: 20px;
-}
-.customTable thead th {
-  position: sticky;
-  top: 0;
-  color: #909399;
-  z-index: 100;
-  background-color: #faf8f8;
-}
-*/ .customTable td img:hover {
-  filter: brightness(80%);
-}
-
-.modalEvent .buttons {
-  margin-top: 20px;
-  display: flex;
-  justify-content: left;
-}
-
-#createModalEventButton {
-  background-color: #3a8ee6;
-  color: #fff;
-  width: 97px;
-  height: 40px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 3px solid transparent;
-}
-
-#createModalEventButton:hover {
-  background-color: #2f86e4;
-}
-
-#createModalEventButton.disable {
-  pointer-events: none;
-  background-color: #409eff;
-  opacity: 0.5;
-}
-
-#closeModalEvent {
-  background: #82848a;
-  color: #fff;
-  width: 97px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 3px;
-  height: 40px;
-  border: none;
-  margin-left: 20px;
-}
-
-#closeModalEvent:hover {
-  background-color: #7b7c81;
-}
-
-.modalParticipant {
+.modalAddParticipant {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 400px;
-  height: 264px;
+  height: 695px;
   user-select: text;
-  visibility: visible;
   overflow: auto;
-  background: #fff;
   display: block;
   box-shadow: 0 0 0 100vmax #00000038;
   opacity: 0;
   visibility: hidden;
   border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   user-select: none;
+  padding: 0 20px 20px 20px;
+  background: #fff;
+  z-index: 1000;
 }
 
-.modalParticipant[open] {
+.modalAddParticipant[open] {
   opacity: 1;
   visibility: visible;
 }
 
-.modalParticipant::backdrop {
-  background: #00000000;
-}
-
-.modalParticipant {
-  padding: 20px;
-  color: #303133;
-  text-align: left;
-}
-
-.modalParticipant .label {
-  color: #606266;
-  text-align: left;
+.modalAddParticipant #modalTitle {
   margin-top: 20px;
+  color: #852020;
+  font-size: 30px;
 }
 
-.modalParticipant .label {
-  color: #606266;
-  font-size: 15px;
-}
+/* ===== Таблица в моадльном окне ===== */
 
-.labelIdUser {
-  margin-top: 0px;
-  color: #606266;
-  font-size: 15px;
-}
-
-#idUser {
+.tableContainerParticipant {
+  margin-top: 5px;
   width: 360px;
-  padding: 10px;
-  height: 32px;
-  border: 1px solid #faf8f8;
-  border-radius: 4px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: calc(40px + 40px * 3);
 }
 
-#idUser:focus {
-  border-color: #409eff;
+.customTableParticipant {
+  height: auto;
+  width: 100%;
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  table-layout: fixed;
+  user-select: none;
+  table-layout: fixed;
 }
 
-.modalParticipant .inputEventName {
-  background: #ffffff;
-  width: 420px;
-  border-radius: 5px;
+.tableContainerParticipant th,
+.tableContainerParticipant td {
+  border-top: 1px solid #e4e7ed;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 5px 5px;
+  text-align: center;
   height: 40px;
-  border: 1px solid #e4e7ed;
-  padding: 0 0 0 13px;
-  margin-top: 20px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: var(--sidebar-icon);
+  background-color: #faf8f8;
+  text-align: center;
 }
 
-.radioPar {
-  margin-top: 20px;
-}
-
-.buttonsParticipant {
-  display: flex;
-  height: 32px;
-  margin-top: 30px;
-}
-
-.createParticipantButton {
-  background-color: #3a8ee6;
-  color: #fff;
-  width: 97px;
-  height: 40px;
-  border-radius: 4px;
+td img {
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  border: 3px solid transparent;
+  text-align: center;
 }
 
-.createParticipantButton:hover {
-  background-color: #2f86e4;
+td img:hover {
+  filter: brightness(1%);
 }
 
-#createParticipantButton.disable {
-  pointer-events: none;
-  background-color: #409eff;
-  opacity: 0.5;
+.numberTransaction {
+  width: 170px;
 }
 
-.closeModalParticipant {
-  background: #82848a;
-  color: #fff;
-  width: 97px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 3px;
-  height: 40px;
-  border: none;
-  margin-left: 20px;
+.receiptTransaction {
+  width: 80px;
 }
 
-.closeModalParticipant:hover {
-  background-color: #7b7c81;
+.actionsTransaction {
+  width: 120px;
 }
 
-#eventLabel {
-  display: inline-block;
-  margin-left: 20px;
+.customTableAccount th.smallRow {
+  width: 90px;
+}
+
+.noAdmittedUsersLabel {
+  text-align: center;
   margin-top: 10px;
   font-size: 16px;
-  user-select: none;
-}
-
-.editEventButton {
-  background-color: #3a8ee6;
-  color: #fff;
-  width: 97px;
-  height: 40px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 3px solid transparent;
-}
-
-.editEventButton.disable {
-  pointer-events: none;
-  background-color: #409eff;
-  opacity: 0.5;
-}
-
-.editEventButton.Off {
-  display: none;
-}
-
-.modalEvent .modalEventButton.Off {
-  display: none;
-}
-
-.modalEvent {
-  font-size: 15px;
-  color: #606266;
-}
-
-.star {
-  margin-left: -3px;
-  color: #fc0000;
-}
-
-.inputEventName {
-  font-size: 15px;
-  color: #606266;
-}
-
-.descriptionShowEvent {
-  margin-top: 20px;
-  width: 420px;
-  height: 128px;
-  outline: none;
-  -moz-appearance: none;
-  border: 1px solid #e4e7ed;
-  border-radius: 5px;
-  resize: none;
-  padding: 0 0 0 13px;
-  scrollbar-width: thin; /* Firefox: делает полосу прокрутки тоньше */
-  scrollbar-color: #888 #f1f1f1; /* Firefox: цвет ползунка и дорожки */
-  font-size: 15px;
-  color: #606266;
-  user-select: none;
-}
-
-#closeModalShowEvent {
-  background: #82848a;
-  color: #fff;
-  width: 97px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 3px;
-  height: 40px;
-  border: none;
-  margin-left: 20px;
-}
-
-#closeModalShowEvent:hover {
-  background-color: #7b7c81;
-}
-
-.userIdLabel,
-#userId {
-  position: absolute;
-  right: 30px;
-  display: flex;
-  align-items: center;
-  top: 30px;
-}
-
-.userIdLabel {
-  margin-right: 15px;
-}
-
-.inputBox::placeholder {
-  color: #424242;
-  opacity: 1;
 }

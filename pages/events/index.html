@@ -127,12 +127,17 @@
     </nav>
 
     <div class="wrapper"> 
-          <div><button type="submit" value="send" id="createEventButton" class="buttonGetInformations">
-            Создать мероприятие
-          </button></div>
-          <div class="user-info-container">
-            <label class="user-id-label" id="userLabel">Пользователь:</label>
-            <span id="user_id"></span>
+          <div>
+            <button 
+              class="buttonOpenModal"           
+              data-entity="event" 
+              data-mode="create">
+              Создать мероприятие
+          </button>
+        </div>
+          <div class="userInfoContainer">
+            <label class="userIdLabel" id="userLabel">Пользователь:</label>
+            <span id="userId" data-tooltip-position="bottom"></span>
           </div>
     </div>
 
@@ -205,8 +210,8 @@
       <span id="tooltipText"></span>
     </div>
 
-
-    <dialog id = "modalEvent" class="modalEvent">
+  
+    <!-- <dialog id = "modalEvent" class="modalEvent">
       <label>Номер</label> 
       <div >
         <input id="eventId" class="inputBox" disabled placeholder="Номер мерпориятия будет присвоен системой" >
@@ -341,7 +346,31 @@
         </button>
         </a>
       </div>
-    </dialog>
+    </dialog> -->
+
+
+
+    <div id="mainModal" class="modal modalEvent">
+      <div class="modalMainContent">
+        <h2 id="modalMainTitle">Заголовок</h2>
+        <form id="modalMainForm">
+          <!-- Ваши поля формы -->
+        </form>
+
+      </div>
+    </div>
+
+    <div id="minorModal" class="modal modalAddParticipant">
+      <div class="modalMinorContent">
+        <h2 id="modalTitle">Заголовок</h2>
+        <form id="minorModalForm">
+          <!-- Ваши поля формы -->
+        </form>
+
+      </div>
+    </div>
+
+
 
     <ul class="ul notifications">
 

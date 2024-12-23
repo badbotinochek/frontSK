@@ -1,0 +1,298 @@
+/* ===== Navbar ===== */
+.wrapper > div {
+  margin-right: 20px;
+}
+
+.buttonOpenModal {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 94px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 15px;
+}
+
+#buttonOpenModalCredit {
+  background-color: #8f1c1cc4;
+}
+
+#buttonOpenModalCredit:hover {
+  background-color: #8f1c1ca6;
+}
+
+#buttonOpenModalDebt {
+  background-color: #368b15c2;
+}
+
+#buttonOpenModalDebt:hover {
+  background-color: #368b15a9;
+}
+
+/* ===== Таблица ===== */
+
+.table-container {
+  margin-left: 110px;
+  margin-right: 20px;
+  margin-top: 10px;
+  overflow-x: auto;
+  width: calc(100% - 130px);
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.custom-table {
+  height: auto;
+  width: 100%;
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  table-layout: fixed;
+  user-select: none;
+  table-layout: fixed;
+}
+
+th,
+td {
+  border-top: 1px solid #e4e7ed;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 5px 5px;
+  text-align: center;
+  height: 48px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: var(--sidebar-icon);
+  background-color: #faf8f8;
+  text-align: center;
+}
+
+td img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  text-align: center;
+}
+
+td img:hover {
+  filter: brightness(1%);
+}
+
+.number {
+  width: 90px;
+}
+
+.smallRow {
+  width: 80px;
+}
+
+.largeRow {
+  width: 120px;
+}
+
+/* ===== Лейблы ===== */
+
+#debtsLabel {
+  display: inline-block;
+  margin-left: 110px;
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+/* ===== Диалоговое окно ===== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 30px;
+}
+
+/* ===== Общие стили для модальных окон Транзакций ===== */
+
+.modalLabel {
+  margin-top: 21px;
+  color: #303131;
+  font-size: 17px;
+}
+
+.modalInput {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+.modalInput::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalInput.disabled {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.modalDescription {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+}
+
+.modalDescription::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalDescription.disabled {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+input:focus,
+input[type="date"]:focus,
+.modalDescription:focus {
+  border: 1px solid var(--border-selected);
+  outline: none;
+}
+
+.modal .buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: left;
+}
+
+.modal .createButton,
+.modal .viewButton {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modal .createButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.modal .createButton.disable {
+  background-color: var(--primary-button-color-disable);
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.modal .viewButton.disable {
+  background-color: var(--primary-button-color-disable);
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.modal .editButton {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modal .editButton.disable {
+  pointer-events: none;
+  background-color: var(--primary-button-color-disable);
+  opacity: 0.5;
+}
+
+.modal .editButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.closeDialogButton {
+  background: #82848a;
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  height: 40px;
+  border: none;
+  margin-left: 20px;
+  font-size: 16px;
+}
+
+.modal .closeDialogButton {
+  background-color: var(--secondary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.modal .closeDialogButton:hover {
+  background-color: var(--secondary-button-color-hover);
+}
+
+/* ===== Стили для модального окна Доход ===== */
+
+.modalDebit #modalTitle {
+  color: #0f521f;
+  font-size: 30px;
+}
+
+/* ===== Стили для модального окна Расход===== */
+
+.modalCredit #modalTitle {
+  color: #852020;
+  font-size: 30px;
+}

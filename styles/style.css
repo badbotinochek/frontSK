@@ -140,18 +140,68 @@ header .image-text .header-text {
   color: #00349c;
 }
 
+/* ===== Информация о пользователе ===== */
+
+.userInfoContainer {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  color: #5b5b5b;
+}
+
+.userIdLabel {
+  display: inline-block;
+  color: #5b5b5b;
+  margin-right: 8px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+#userId {
+  display: inline-block;
+  color: #5b5b5b;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+@media (max-width: 410px) {
+  .userInfoContainer {
+    position: static;
+    margin-top: 10px;
+    justify-content: center;
+  }
+}
+
 /* Стиль подсказки */
 .tooltip {
   position: absolute;
-  background-color: #faf8f8;
+  background-color: #ffffff;
   color: #303131;
-  padding: 5px;
-  border-radius: 5px;
+  padding: 3px 10px;
+  border-radius: 8px;
   font-size: 16px;
   display: none;
-  white-space: nowrap;
-  border: 1px solid #e4e7ed;
+  white-space: normal;
+  border: 1px solid #dcdcdc;
   z-index: 10000;
+  max-width: 220px;
+  line-height: 1.5;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0;
+  transform: translateY(5px);
+  text-align: left;
+}
+
+.tooltip.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .sidebar .icon {
@@ -477,6 +527,7 @@ p {
 }
 
 /* Стили уведомлений */
+/* Стили уведомлений */
 .notifications {
   position: fixed;
   top: 30px;
@@ -599,7 +650,7 @@ p {
 .toast i:last-child {
   color: #aeb0d7;
   cursor: pointer;
-  font-size: 2rem;
+  font-size: 1.4rem;
 }
 
 .toast i:last-child:hover {

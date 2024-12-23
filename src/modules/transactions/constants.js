@@ -1,5 +1,3 @@
-import { formTemplates } from "./templates.js";
-
 export const formTransactions = {
   /* Переменные для sidebar */
   sidebar: document.querySelector(".sidebar"),
@@ -34,7 +32,8 @@ export const formTransactions = {
 
   option1: document.querySelector(".option1"),
   dropdown1: document.querySelector(".dropdown1"),
-  sumTransactionInput: document.getElementById("sumTransaction"),
+
+  sumTransactionInput: document.getElementById("inputAmountExpense"),
 
   dropdownCat: document.getElementById("dropdownCat"),
 
@@ -52,7 +51,9 @@ export const formTransactions = {
   catTransaction: document.querySelector(".categoryBox"),
   sumTransaction: document.getElementById("sumTransaction"),
   description: document.getElementById("descriptionTran"),
-  createTra: document.getElementById("createTra"),
+
+  buttonCreateExpense: document.getElementById("buttonCreateExpense"),
+
   editTransactionButton: document.getElementById("changeTra"),
   row: document.querySelector(".custom-table tbody"),
   radioButtons: document.querySelectorAll('input[name="typeTransaction"]'),

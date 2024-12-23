@@ -1,151 +1,222 @@
-.create-button,
-.get-button {
-  background-color: #3a8ee6;
-  color: #fff;
-  width: 93px;
-  height: 40px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 3px solid transparent;
-}
-
-/* ===== Информация о пользователе ===== */
-
-.user-info-container {
-  position: absolute;
-  top: 30px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  color: #5b5b5b;
-}
-
-.user-id-label {
-  display: inline-block;
-  color: #5b5b5b;
-  margin-right: 8px;
-  font-weight: bold;
-  vertical-align: middle;
-}
-
-#user_id {
-  display: inline-block;
-  color: #5b5b5b;
-  max-width: 70px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-  cursor: pointer;
-}
-
-.custom-table {
-  height: 48px;
-  overflow: auto;
-  border: 1px solid #dddddd;
-  width: 95%;
-  table-layout: fixed;
-  min-width: 900px;
-  border-collapse: collapse;
-  margin-left: 100px;
-  margin-top: 10px;
-  user-select: none;
-}
-
-th,
-td {
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
-  padding: 10px 40px;
-  text-align: left;
-  height: 48px;
-}
-thead th {
-  position: sticky;
-  top: 0;
-  color: #909399;
-  z-index: 100;
-  background-color: #faf8f8;
-}
-
-td img {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  text-align: center;
-}
-
-td img:hover {
-  filter: brightness(1%);
-}
-
-.smallRow {
-  width: 170px;
-}
-
+/* ===== Navbar ===== */
 .wrapper > div {
   margin-right: 20px;
 }
 
-.modalAccount .createButton {
-  background-color: #3a8ee6;
+.buttonOpenModal {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 94px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 15px;
+}
+
+.buttonOpenModal:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+/* ===== Диалоговое окно ===== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 30px;
+}
+
+/* ===== Диалоговое окно ===== */
+.additionalModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  width: 350px;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.additionalModal .modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 30px;
+}
+
+/* ===== Общие стили для модальных окон Транзакций ===== */
+
+.modalLabel {
+  margin-top: 21px;
+  color: #303131;
+  font-size: 17px;
+}
+
+.modalInput {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+.modalInput::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalInput.disabled {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.modalDescription {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+}
+
+.modalDescription::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalDescription.disabled {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+input:focus,
+input[type="date"]:focus,
+.modalDescription:focus {
+  border: 1px solid var(--border-selected);
+  outline: none;
+}
+
+.modal .buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: left;
+}
+
+.modal .createButton,
+.modal .viewButton {
+  background-color: var(--primary-button-color);
   color: #fff;
   width: 97px;
   height: 40px;
   border-radius: 4px;
   cursor: pointer;
   border: 3px solid transparent;
-  margin-top: 20px;
+  font-size: 16px;
 }
 
-.modalAccount .createButton:hover {
-  background-color: #2f86e4;
+.modal .createButton:hover {
+  background-color: var(--primary-button-color-hover);
 }
 
-.modalParticipant {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 400px;
-  height: 170px;
-  user-select: text;
-  visibility: visible;
-  overflow: auto;
-  background: #fff;
-  display: block;
-  box-shadow: 0 0 0 100vmax #00000038;
-  opacity: 0;
-  visibility: hidden;
+.modal .createButton.disable {
+  background-color: var(--primary-button-color-disable);
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.modal .viewButton.disable {
+  background-color: var(--primary-button-color-disable);
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.modal .editButton {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modal .editButton.disable {
+  pointer-events: none;
+  background-color: var(--primary-button-color-disable);
+  opacity: 0.5;
+}
+
+.modal .editButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.closeDialogButton {
+  background: #82848a;
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  height: 40px;
   border: none;
-  border-radius: 6px;
-  user-select: none;
+  margin-left: 20px;
+  font-size: 16px;
 }
 
-.modalParticipant[open] {
-  opacity: 1;
-  visibility: visible;
+.modal .closeDialogButton {
+  background-color: var(--secondary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
 }
 
-.modalParticipant::backdrop {
-  background: #00000000;
-}
-
-.modalParticipant {
-  padding: 20px;
-  color: #303133;
-  text-align: left;
-}
-
-.modalParticipant .label {
-  color: #606266;
-  text-align: left;
-  margin-top: 20px;
-}
-
-.modalParticipant .label {
-  color: #606266;
-  font-size: 15px;
+.modal .closeDialogButton:hover {
+  background-color: var(--secondary-button-color-hover);
 }
 
 #idUser {
@@ -210,10 +281,6 @@ td img:hover {
   cursor: pointer;
 }
 
-.customTableAccount th.smallRow {
-  width: 1px;
-}
-
 #event {
   color: var(--primary-color);
 }
@@ -226,20 +293,131 @@ td img:hover {
   color: var(--light);
 }
 
-/* th,
+.modalDropdown {
+  position: relative;
+  width: 350px;
+  margin-top: 5px;
+}
+
+.modalDropdown input {
+  position: relative;
+  background: #ffffff;
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  cursor: pointer;
+  outline: none;
+  font-size: 16px;
+}
+
+.modalDropdown input::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalOption {
+  background: #ffffff;
+  position: absolute;
+  width: 360px;
+  top: 50px;
+  border: 1px solid var(--border);
+  list-style: none;
+  border-radius: 5px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  max-height: 125px;
+  min-height: 85px;
+  display: none;
+  z-index: 2;
+}
+
+.modalDropdown.active .modalOption {
+  display: block;
+}
+
+.modalDropdown .modalOption {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modalDropdown .modalOption li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  background: transparent;
+  list-style-type: none;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.modalDropdown .modalOption li:hover {
+  background: #f5f7fa;
+  border-radius: 5px;
+}
+
+.modalSelectShevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.modalDropdown.active .modalSelectShevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* ===== Таблица ===== */
+
+.table-container {
+  margin-left: 110px;
+  margin-right: 20px;
+  margin-top: 10px;
+  overflow-x: auto;
+  width: calc(100% - 130px);
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.custom-table {
+  height: auto;
+  width: 100%;
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  table-layout: fixed;
+  user-select: none;
+  table-layout: fixed;
+}
+
+th,
 td {
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
-  padding: 10px 40px;
-  text-align: left;
+  border-top: 1px solid #e4e7ed;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 10px 10px;
+  text-align: center;
   height: 48px;
+  word-wrap: break-word;
+  white-space: normal;
 }
 thead th {
   position: sticky;
   top: 0;
-  color: #909399;
-  z-index: 100;
+  color: var(--sidebar-icon);
   background-color: #faf8f8;
+  text-align: center;
 }
 
 td img {
@@ -250,23 +428,97 @@ td img {
 }
 
 td img:hover {
-  filter: brightness(80%);
+  filter: brightness(1%);
 }
 
-.smallRow {
+.numberTransaction {
   width: 170px;
 }
 
-.dataBlockMore {
-  display: inline-block;
-  margin-left: 80px;
-  margin-top: 10px;
-  font-size: 16px;
-  cursor: pointer;
-  position: relative;
-  color: #06c;
+.receiptTransaction {
+  width: 80px;
 }
 
-.dataBlockMore.disable {
-  display: none;
-} */
+.actionsTransaction {
+  width: 120px;
+}
+
+/* ===== Лейблы ===== */
+
+#nameTable {
+  display: inline-block;
+  margin-left: 110px;
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+/* ===== Таблица в моадльном окне ===== */
+
+.tableContainerAccount {
+  margin-top: 5px;
+  width: 360px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: calc(40px + 40px * 3);
+}
+
+.customTableAccount {
+  height: auto;
+  width: 100%;
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  table-layout: fixed;
+  user-select: none;
+  table-layout: fixed;
+}
+
+.tableContainerAccount th,
+.tableContainerAccount td {
+  border-top: 1px solid #e4e7ed;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 5px 5px;
+  text-align: center;
+  height: 40px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: var(--sidebar-icon);
+  background-color: #faf8f8;
+  text-align: center;
+}
+
+td img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  text-align: center;
+}
+
+td img:hover {
+  filter: brightness(1%);
+}
+
+.numberTransaction {
+  width: 170px;
+}
+
+.receiptTransaction {
+  width: 80px;
+}
+
+.actionsTransaction {
+  width: 120px;
+}
+
+.customTableAccount th.smallRow {
+  width: 90px;
+}
+
+.noAdmittedUsersLabel {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 16px;
+}

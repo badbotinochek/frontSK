@@ -149,25 +149,48 @@
         <div><input type="date" id="startDate"></div>
         <div><input type="date" id="endDate"></div>
           
-        <div><button id="buttonOpenModalExpense" class="buttonOpenModal disable" data-type="Expense" data-mode="create" >
+        <div>
+          <button 
+          id="buttonOpenModalExpense" 
+          class="buttonOpenModal disable" 
+          data-type="Expense" 
+          data-tooltip-position="bottom" 
+          data-tooltip="Выберите мероприятие">
           Создать расход
         </button></div>
       
-        <div><button id="buttonOpenModalIncome" class="buttonOpenModal disable" data-type="Income" data-mode="create" >
+        <div>
+          <button 
+          id="buttonOpenModalIncome" 
+          class="buttonOpenModal disable" 
+          data-type="Income" 
+          data-tooltip-position="bottom" 
+          data-tooltip="Выберите мероприятие">
           Создать доход
         </button></div>
 
-        <div><button id="buttonOpenModalTransaction" class="buttonOpenModal disable" data-type="Transaction" data-mode="create" >
+        <div>
+          <button 
+          id="buttonOpenModalTransaction" 
+          class="buttonOpenModal disable" 
+          data-type="Transfer" 
+          data-tooltip-position="bottom" 
+          data-tooltip="Выберите мероприятие">
           Создать перевод
         </button></div>
 
-        <div><button id="getAllTransaction" class="buttonGetAllTransaction disable"  >
+        <div>
+          <button 
+          id="getAllTransaction" 
+          class="buttonGetAllTransaction disable" 
+          data-tooltip-position="bottom" 
+          data-tooltip="Выберите мероприятие и период">
           Показать транзакции
         </button></div>
 
-          <div class="user-info-container">
-            <label class="user-id-label" id="userLabel">Пользователь:</label>
-            <span id="user_id"></span>
+          <div class="userInfoContainer">
+            <label class="userIdLabel" id="userLabel">Пользователь:</label>
+            <span data-tooltip-position="bottom" id="userId" ></span>
           </div>
     </div>
 
@@ -199,131 +222,7 @@
       <span id="tooltip-text"></span>
     </div>
 
-    <dialog id = "modal12" class="modal12">
-      <h2 class="modal-title">Подтверждение</h2>
-          <p>Выполнить действие?</p>
-          <div class="buttonsMod">
-          <button class="deleteBtn" id="deleteBtn">Да</button>
-          <button class="closeBtn" id="closeBtn">Нет</button>
-        </div>
-    </dialog>
-    
-    <dialog id = "modalTransactionTEST" class="modalTr">
-      <label>Номер </label>
-      <div >
-        <input id="InputId" class="inputBox" disabled placeholder="Номер транзакции будет присвоен системой">
-      </div>
-      <div class ="label ">
-        <label>Дата</label> 
-        <label class ="star">*</label>  
-        <label class ="time">Время</label>
-      </div>
-      <div class ="dateTime">
-        <div><input type="date" id="dateTr"></div>
-        <div><input type="time" id="timeTr"></div>
-      </div>
-      <div class ="label ">
-        <label>Счет</label>
-        <label class ="star">*</label>
-      </div>
-      <div class ="dropdown2" id="dropdownAcc">
-        <input type="text"  class="accountBox" placeholder="Выберете счет" readonly>
-        <div class="option2" id="optionAcc">
-        </div>
-      </div>
-      <div class ="label ">
-        <label>Тип</label>
-        <label class ="star">*</label>
-      </div>
-      <div class ="radio">
-        <input class="custom-radio" name="typeTransaction" type="radio" id="radio-1" value="Expense"> 
-        <label for="radio-1" style="margin-right: 162px">Расход</label>
-
-        <input class="custom-radio" name="typeTransaction" type="radio" id="radio-2" value="Income"> 
-        <label for="radio-2">Доход</label>
-      </div>
-      <div class ="label ">
-        <label>Категория</label>
-        <label class ="star">*</label>
-      </div>
-      <div class ="dropdown1" id="dropdownCat">
-        <input type="text"  class="categoryBox" placeholder="Выберете категорию" readonly>
-        <div class="option1" id="optionCat">
-        </div>
-      </div>
-      <div class ="label ">
-        <label>Сумма</label>
-        <label class ="star">*</label>
-      </div>
-      <div >
-        <input id="sumTransaction" class="inputBox" placeholder="Введите сумму транзакции"/>
-      </div>
-      <div class ="label "><label>Описание</label></div>
-      <div>
-        <textarea class ="description" name="description" id="descriptionTran" placeholder="Введите описание к транзакции"></textarea>
-      </div>
-      <div class="buttons">
-        <button type="submit" value="send" id="changeTra" class="editButton disable Off " >
-          Изменить
-        </button>
-        <button type="submit" value="send" id="createTra" class="createButton disable" >
-          Создать
-        </button>
-        <button type="button" id="closeBtnTra" class="closeButton">
-          Отмена
-        </button>
-        </a>
-      </div>
-    </dialog>
-
-    <dialog id = "ShowModalTransaction" class="modalTr">
-      <label>Номер </label>
-      <div >
-        <input id="ShowInputId" class="inputBox" disabled/>
-      </div>
-      <div class ="label "></div><label>Дата</label>
-      <label class ="timeShow">Время</label>
-      <div class ="dateTime">
-        <div><input type="date" id="ShowdateTr" disabled></div>
-        <div><input type="time" id="ShowtimeTr" disabled></div>
-      </div>
-      <div class ="label"><label>Счет</label></div>
-      <div >
-        <input id="showAccountTransaction" class="inputBox" disabled>
-      </div>
-      <div class ="label "><label>Тип</label></div>
-      <div class ="radio">
-        <input class="custom-radio" name="showTypeTransaction" type="radio" id="Showradio-1" value="Expense"> 
-        <label for="radio-1" style="margin-right: 162px">Расход</label>
-
-        <input class="custom-radio" name="showTypeTransaction" type="radio" id="Showradio-2" value="Income"> 
-        <label for="radio-2">Доход</label>
-      </div>
-      <div class ="label"><label>Категория</label></div>
-      <div class ="dropdown" id="ShowdropdownCat">
-        <input type="text" id="showCatTran" class="categoryBox" placeholder="Введите название категории" readonly disabled>
-        </div>
-      </div>
-      <div class ="label "><label>Сумма</label></div>
-      <div >
-        <input id="ShowsumTransaction" class="inputBox" placeholder="Введите сумму транзакции" disabled>
-      </div>
-      <div class ="label "><label>Описание</label></div>
-      <div>
-        <textarea class ="description" name="description" id="ShowdescriptionTran" placeholder="Введите описание к транзакции" disabled></textarea>
-      </div>
-      <div class ="label "><label>Чек</label></div>
-      <div class="buttons">
-        <button type="submit" value="send" id="ShowchangeTra" class="editButton disable" >
-          Изменить
-        </button>
-        <button type="button" id="showCloseBtnTra" class="closeButton">
-          Отмена
-        </button>
-        </a>
-      </div>
-    </dialog>
-     
+  
     <dialog id = "receipt-details" >
     <div data-focus-lock-disabled="false">
       <div>
@@ -369,17 +268,23 @@
     </div>
     </dialog>
 
-    <dialog class="modal">
-    <div class="modalContent">
-      <h2 id="modalTitle"></h2>
+    <div id="modal" class="modal">
+      <div class="modalContent">
+        <h2 id="modalTitle">Заголовок</h2>
         <form id="modalForm">
-            <!-- Содержимое формы будет добавляться динамически -->
+          <!-- Ваши поля формы -->
         </form>
+      </div>
     </div>
-    </dialog>
 
     <ul class="ul notifications">
     <script type="module" src="../../src/modules/transactions/index.js"></script>
 
   </body>
 </html>
+
+
+
+
+
+

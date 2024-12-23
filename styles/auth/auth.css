@@ -10,13 +10,13 @@
   width: 288px;
   height: 350px;
   border: 1px solid var(--border);
-  border-radius: 15px;
+  border-radius: 30px;
   padding: 19px 25px 29px 25px;
   text-align: center;
 }
 
 .auth-container h2 {
-  font-size: 20px;
+  font-size: 25px;
   margin-bottom: 28px;
 }
 
