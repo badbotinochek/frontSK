@@ -1,9 +1,9 @@
 import { formTransactions } from "./constants.js";
 import {
+  getAllMyEventsApi,
   deleteTransaction,
   getTransacionsForEvent,
-  getAllMyEvents,
-  getCategoryTransaction,
+  getCategoryTransactionApi,
   createTransactionApi,
   updateTransactionApi,
   refreshAccessToken,
@@ -13,104 +13,235 @@ import {
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
+import { templateElements } from "./templates.js";
 
-let cachedCategories = null;
-let cachedActiveAccounts = null;
+let cachedActiveAccounts = 0;
+let cachedCategories = [];
+let testCategories = 0;
 const idToNameMap = {};
-
 let countTr = 0;
 let countTransac = 0;
+let originalTransactionValues = {};
+let currentOpenDropdown = null;
 
+// Очищаем localStorage при перезагрузке страницы
+export function clearTransactionPage() {
+  formTransactions.inputEvent.value = "";
+  localStorage.removeItem("event");
+  localStorage.removeItem("eventRole");
+}
+
+// Сохраняем категории для дальнейшего использования
+export async function getCategory() {
+  try {
+    const categories = await getCategoryTransactionApi();
+    cachedCategories = categories;
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+// Функции для работы поле выбора мероприятий
+async function getEvent() {
+  const token = localStorage.getItem("access_token");
+  try {
+    const events = await getAllMyEventsApi(token);
+    const user_id = parseInt(localStorage.getItem("user_id"), 10);
+
+    const userEvents = [];
+    events.forEach((event) => {
+      const user = event.participants.find(
+        (participant) => participant.user_id === user_id
+      );
+
+      if (user) {
+        userEvents.push({
+          event_name: event.name,
+          event_id: event.id,
+          user_role: user.role,
+        });
+      }
+    });
+
+    return userEvents;
+  } catch (error) {
+    console.error("Ошибка при получении событий:", error);
+    return [];
+  }
+}
+
+// Функции для работы поле выбора мероприятий
+export async function fillEventDirectory() {
+  let events = await getEvent();
+  populateEventOptions(events);
+
+  const list = formTransactions.eventOption;
+  const input = formTransactions.inputEvent;
+  const emptyMessageElement = list.querySelector(".emptyMessage");
+  if (emptyMessageElement) {
+    // Если элемент с классом emptyMessage найден, прекращаем выполнение цикла
+    console.warn("Empty message detected. Event listeners not added.");
+    return;
+  }
+  for (let i = 0; i < list.children.length; i++) {
+    list?.children[i].addEventListener("click", (e) => {
+      const selectedId = list.children[i].getAttribute("data-id");
+      const selectedIdEvent = list.children[i].getAttribute("data-role");
+      const selectedValue = list.children[i].innerHTML;
+      input.value = selectedValue;
+      localStorage.setItem("event", selectedId);
+      localStorage.setItem("eventRole", selectedIdEvent);
+
+      checkForm();
+    });
+  }
+}
+
+// Заполнение справочника
+function populateEventOptions(events) {
+  eventOptions.innerHTML = "";
+  if (events.length === 0) {
+    eventOptions.classList.add("empty");
+    eventOptions.innerHTML = `
+    <div class="emptyMessage">
+      <span>Мероприятий нет. <a href="https://sweetcash.org/pages/events/index.html" class="createLink">Создай</a></span>
+    </div>
+    `;
+  } else {
+    events.forEach((event) => {
+      var lista = eventOptions;
+      var listItem = document.createElement("li");
+      listItem.textContent = event.event_name;
+      listItem.setAttribute("data-id", event.event_id);
+      listItem.setAttribute("data-role", event.user_role);
+      lista.appendChild(listItem);
+    });
+  }
+}
+
+// Функции для кеширования данных
+export async function getActiveAccounts() {
+  try {
+    const access_token = localStorage.getItem("access_token");
+    const activeAccounts = await getAllMyAccountsApi(access_token, false);
+    cachedActiveAccounts = activeAccounts;
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+export async function getAllCategory() {
+  try {
+    const allCategories = await getCategoryTransactionApi();
+    allCategories.forEach((item) => {
+      idToNameMap[item.id] = item.name;
+      if (item.sub_categories && item.sub_categories.length > 0) {
+        item.sub_categories.forEach((subCategory) => {
+          idToNameMap[subCategory.id] = subCategory.name;
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
+
+// Функции для заполнения периода мероприятий по умолчанию
+export function fillCurrentDate() {
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  );
+  const formattedFirstDay = formatDate(firstDayOfMonth);
+  formTransactions.startDateEvent.value = formattedFirstDay;
+  const lastDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0
+  );
+  const formattedLastDay = formatDate(lastDayOfMonth);
+  formTransactions.endDateEvent.value = formattedLastDay;
+}
+
+// Функции для проверки заполненности полей на страницы для активации кнопок
 export function checkForm() {
-  const start_date = formTransactions.start_date
-    ? formTransactions.start_date.value
+  const start_date = formTransactions.startDateEvent
+    ? formTransactions.startDateEvent.value
     : "";
-  const end_date = formTransactions.end_date
-    ? formTransactions.end_date.value
+  const end_date = formTransactions.endDateEvent
+    ? formTransactions.endDateEvent.value
     : "";
-  const input_event = formTransactions.input_event
-    ? formTransactions.input_event.value
+  const input_event = formTransactions.inputEvent
+    ? formTransactions.inputEvent.value
     : "";
 
   if (start_date && end_date && input_event) {
+    formTransactions.buttonOpenModalExpense.classList.remove("disable");
+    formTransactions.buttonOpenModalIncome.classList.remove("disable");
+    formTransactions.buttonOpenModalTransaction.classList.remove("disable");
     formTransactions.getTransactionButton.classList.remove("disable");
+    formTransactions.buttonOpenModalExpense.removeAttribute("data-tooltip");
+    formTransactions.buttonOpenModalIncome.removeAttribute("data-tooltip");
+    formTransactions.buttonOpenModalTransaction.removeAttribute("data-tooltip");
+    formTransactions.getTransactionButton.removeAttribute("data-tooltip");
   } else {
     formTransactions.getTransactionButton.classList.add("disable");
+    formTransactions.getTransactionButton.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
   }
-}
-
-export function checkEvent() {
-  const input_event = formTransactions.input_event
-    ? formTransactions.input_event.value
-    : "";
-
   if (input_event) {
-    formTransactions.create_transaction.classList.remove("disable");
-    formTransactions.buttonScanQr.classList.remove("disable");
+    formTransactions.buttonOpenModalExpense.classList.remove("disable");
+    formTransactions.buttonOpenModalIncome.classList.remove("disable");
+    formTransactions.buttonOpenModalTransaction.classList.remove("disable");
+    formTransactions.buttonOpenModalExpense.removeAttribute("data-tooltip");
+    formTransactions.buttonOpenModalIncome.removeAttribute("data-tooltip");
+    formTransactions.buttonOpenModalTransaction.removeAttribute("data-tooltip");
   } else {
-    formTransactions.create_transaction.classList.add("disable");
-    formTransactions.buttonScanQr.classList.add("disable");
+    formTransactions.buttonOpenModalExpense.classList.add("disable");
+    formTransactions.buttonOpenModalIncome.classList.add("disable");
+    formTransactions.buttonOpenModalTransaction.classList.add("disable");
+    formTransactions.buttonOpenModalExpense.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
+    formTransactions.buttonOpenModalIncome.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
+    formTransactions.buttonOpenModalTransaction.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
   }
 }
 
-export function handleClick() {
-  formTransactions.modalElement.close();
-  clearModalData();
-}
-
-export function handleClickTra() {
-  formTransactions.modalElementTr.close();
-  clearModalData();
-}
-
-export function handleClickTraShow() {
-  formTransactions.showModalElementTr.close();
-}
-
-export function createTransaction() {
-  clearModalData();
-  var buttonEdit = document.getElementById("changeTra");
-  buttonEdit.classList.add("Off");
-  var buttonCreate = document.getElementById("createTra");
-  buttonCreate.classList.remove("Off");
-  buttonCreate.classList.add("disable");
-  getCategory();
-  formTransactions.modalElementTr.showModal();
-}
-
-export async function deleteTransactions() {
-  const access_token = localStorage.getItem("access_token");
-  const transactionId = localStorage.getItem("transactionId");
-  try {
-    const response = await deleteTransaction(transactionId, access_token);
-
-    handleClick();
-    const successMessage = `Транзакция успешно удалена`;
-    createToast("success", successMessage);
-    setTimeout(getTransactions, 10);
-  } catch (error) {}
-}
-
-export function deleteSErrorBorder() {
-  formTransactions.start_date.classList.remove("error");
-}
-
-export function deleteEErrorBorder() {
-  formTransactions.end_date.classList.remove("error");
+// универсальная функция закрытия всех окон на странице
+export function handleCancelTransaction() {
+  const modalForm = document.querySelector(".modal");
+  modalForm.close();
 }
 
 export function getCountTransactions() {
   var screenHeight = window.innerHeight;
-
   var countTransaction = (screenHeight - 157) / 49 - 1;
   let intNumber = Math.floor(countTransaction);
   return intNumber;
 }
 
 export async function getTransactionsForPaginations(pagination) {
-  const start_date = new Date(formTransactions.start_date.value);
-  const end_date = new Date(formTransactions.end_date.value);
-
+  const start_date = new Date(formTransactions.startDateEvent.value);
+  const end_date = new Date(formTransactions.endDateEvent.value);
   const formattedStartDate =
     start_date.toISOString().slice(0, 10) + "T00:00:00Z";
   const formattedEndDate = end_date.toISOString().slice(0, 10) + "T23:59:59Z";
@@ -151,41 +282,61 @@ export function getCountRowsTable() {
   return rowCount;
 }
 
-export async function getTransactions(offset = 0, append = false) {
-  if (formTransactions.getTransactionButton.disabled) {
+export function deleteErrorBorder(event) {
+  const target = event.target;
+  if (target.classList.contains("error")) {
+    target.classList.remove("error");
+  }
+}
+
+// Вспомогательная функция для форматирования даты
+function formatDateTime(dateTime) {
+  const date = new Date(dateTime);
+  const day = ("0" + date.getDate()).slice(-2);
+  const month = ("0" + (date.getMonth() + 1)).slice(-2);
+  const year = date.getFullYear();
+  const hours = ("0" + date.getHours()).slice(-2);
+  const minutes = ("0" + date.getMinutes()).slice(-2);
+  const seconds = ("0" + date.getSeconds()).slice(-2);
+  return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+}
+
+// Вспомогательная функция для получения аккаунта
+function getAccount(transaction, type) {
+  let accountData;
+  if (type === "Income") {
+    accountData = transaction.target_account;
+  } else if (type === "Expense") {
+    accountData = transaction.source_account;
+  } else if (type === "Transfer") {
+    accountData = transaction.target_account;
+  }
+  return accountData?.name || accountData?.id || "?";
+}
+
+async function fetchTransactionsData(offset = 0) {
+  const start_date = new Date(formTransactions.startDateEvent.value);
+  const end_date = new Date(formTransactions.endDateEvent.value);
+  const formattedStartDate =
+    start_date.toISOString().slice(0, 10) + "T00:00:00Z";
+  const formattedEndDate = end_date.toISOString().slice(0, 10) + "T23:59:59Z";
+  const event_id = localStorage.getItem("event");
+  const limit = getCountTransactions();
+  const access_token = localStorage.getItem("access_token");
+
+  if (checkDate(formattedStartDate, formattedEndDate)) {
+  } else {
+    const errorMessage = `Дата окончания мероприятия не может быть меньше даты начала мероприятия`;
+    createToast("error", errorMessage);
+    formTransactions.getTransactionButton.classList.add("disable");
+    formTransactions.startDateEvent.classList.add("error");
+    formTransactions.endDateEvent.classList.add("error");
     return;
   }
-  formTransactions.getTransactionButton.disabled = true;
-  formTransactions.getTransactionButton.classList.add("disable");
+  formTransactions.startDateEvent.classList.remove("error");
+  formTransactions.endDateEvent.classList.remove("error");
 
   try {
-    const start_date = new Date(formTransactions.start_date.value);
-    const end_date = new Date(formTransactions.end_date.value);
-    const formattedStartDate =
-      start_date.toISOString().slice(0, 10) + "T00:00:00Z";
-    const formattedEndDate = end_date.toISOString().slice(0, 10) + "T23:59:59Z";
-    const event_id = localStorage.getItem("event");
-    const limit = getCountTransactions();
-    var offset = offset;
-    const access_token = localStorage.getItem("access_token");
-
-    if (checkDate(formattedStartDate, formattedEndDate)) {
-    } else {
-      const errorMessage = `Дата окончания мероприятия не может быть меньше даты начала мероприятия`;
-      createToast("error", errorMessage);
-      formTransactions.getTransactionButton.classList.add("disable");
-      formTransactions.start_date.classList.add("error");
-      formTransactions.end_date.classList.add("error");
-      return;
-    }
-
-    formTransactions.start_date.classList.remove("error");
-    formTransactions.end_date.classList.remove("error");
-
-    getTransactionsForPaginations(false);
-
-    const responseCat = getCategoryTransaction();
-
     const responseData = await getTransacionsForEvent(
       formattedStartDate,
       formattedEndDate,
@@ -194,268 +345,29 @@ export async function getTransactions(offset = 0, append = false) {
       offset,
       access_token
     );
-    console.log(responseData);
-    const tbody = document.querySelector("tbody");
-    // Проверка, есть ли данные
-    const label = document.getElementById("infoTransactionsLabel");
-    if (responseData.length === 0) {
-      label.classList.remove("disable");
-      tbody.innerHTML = "";
-      return;
-    } else {
-      label.classList.add("disable");
-    }
+    return responseData;
+  } catch (error) {
+    alert(error);
+    return null;
+  }
+}
 
-    if (!append) {
-      tbody.innerHTML = "";
-    }
+function calculateTotalRow(totalRow, countTr) {
+  let countTrValue = 0;
+  let rowHTML = "";
 
-    countTr = 0;
-    // Перебираем полученныеs данные и добавляем строки в таблицу
-    responseData.forEach((transaction) => {
-      const date = new Date(transaction.transaction_date);
-      const day = ("0" + date.getDate()).slice(-2);
-      const month = ("0" + (date.getMonth() + 1)).slice(-2);
-      const year = date.getFullYear();
-      const hours = ("0" + date.getHours()).slice(-2);
-      const minutes = ("0" + date.getMinutes()).slice(-2);
-      const seconds = ("0" + date.getSeconds()).slice(-2);
-      const formattedTime = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+  if (totalRow) {
+    let countTrCell = totalRow.cells[4];
+    countTrValue = parseFloat(
+      countTrCell.textContent.trim().replace(" руб", "")
+    );
+    totalRow.remove();
+  }
 
-      const categoryTran = idToNameMap[transaction.category_id];
+  let countTrTotal = countTrValue + countTr;
 
-      let type;
-      if (transaction.type === "Income") {
-        type = "Доход";
-        countTr += transaction.amount;
-      } else if (transaction.type === "Expense") {
-        type = "Расход";
-        countTr -= transaction.amount;
-      } else {
-        type = transaction.type;
-      }
-
-      const receipt_id = transaction.receipt_id || "";
-      let account;
-
-      if (transaction.type === "Income") {
-        if (!transaction.target_account) {
-          account = "?";
-        } else {
-          if (!transaction.target_account.name) {
-            account = transaction.target_account.id;
-          } else {
-            account = transaction.target_account.name;
-          }
-        }
-      } else if (transaction.type === "Expense") {
-        if (!transaction.source_account) {
-          account = "?";
-        } else {
-          if (!transaction.source_account.name) {
-            account = transaction.source_account.id;
-          } else {
-            account = transaction.source_account.name;
-          }
-        }
-      } else {
-        account = "yep";
-      }
-
-      const user_id = parseInt(localStorage.getItem("user_id"), 10);
-      let user;
-      if (transaction.user_id === user_id) {
-        user = "Вы";
-      } else {
-        user = transaction.user.name;
-      }
-
-      const newRow = document.createElement("tr");
-      const eventRole = localStorage.getItem("eventRole");
-
-      let rowHTML = ``;
-      if (type === "Доход") {
-        rowHTML = `
-          <td>${transaction.number}</td>
-          <td>${formattedTime}</td>
-          <td>${type}</td>
-          <td>${categoryTran}</td>
-          <td style="color: green"> +${transaction.amount} руб</td>
-          <td>${user}</td>
-          <td>${account}</td>
-          ${
-            receipt_id
-              ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
-              : `<td class="receipt">${receipt_id}</td>`
-          }
-        `;
-      } else {
-        rowHTML = `
-          <td>${transaction.number}</td>
-          <td>${formattedTime}</td>
-          <td>${type}</td>
-          <td>${categoryTran}</td>
-          <td style="color: red"> -${transaction.amount} руб</td>
-          <td>${user}</td>
-          <td>${account}</td>
-          ${
-            receipt_id
-              ? `<td class="receipt" data-id="${receipt_id}"><box-icon name='file' type='solid' color='#31bd2c' ></box-icon></td>`
-              : `<td class="receipt">${receipt_id}</td>`
-          }
-        `;
-      }
-
-      if (
-        eventRole === "Manager" ||
-        (eventRole === "Observer" &&
-          transaction.user_id === parseInt(localStorage.getItem("user_id"), 10))
-      ) {
-        rowHTML += `
-          <td>
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
-            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
-            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
-          </td>`;
-      } else if (eventRole === "Partner") {
-        rowHTML += `
-          <td>
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
-            <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit">
-            <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" alt="Иконка" class="iconDelete" data-transaction-id="${transaction.id}">
-          </td>`;
-      } else {
-        rowHTML += `
-          <td>
-            <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow">
-          </td>`;
-      }
-
-      newRow.innerHTML = rowHTML;
-      tbody.appendChild(newRow);
-
-      const receiptCells = document.querySelectorAll(".receipt");
-      receiptCells.forEach((receiptCell) => {
-        if (receiptCell.dataset.id && receiptCell.dataset.id.trim() !== "") {
-          // Устанавливаем cursor: pointer, если есть data-id
-          receiptCell.style.cursor = "pointer";
-
-          // Добавляем обработчик клика
-          receiptCell.addEventListener("click", function () {
-            const receipt_id = receiptCell.dataset.id;
-
-            // Если чек существует, показываем модальное окно
-            if (receipt_id) {
-              clearModalReceipt(); // Очистить данные из модалки (если нужно)
-              formTransactions.modalReceiptDetails.showModal(); // Показать модальное окно
-
-              // Загружаем чек с задержкой
-              setTimeout(function () {
-                getReceipt(receipt_id); // Получаем информацию о чеке
-              }, 1000);
-            }
-          });
-        }
-      });
-
-      const iconsDelete = document.querySelectorAll(".iconDelete");
-
-      iconsDelete.forEach(function (icon) {
-        icon.addEventListener("click", function () {
-          const transactionId = icon.getAttribute("data-transaction-id");
-          localStorage.setItem("transactionId", transactionId);
-
-          formTransactions.modalElement.showModal();
-        });
-      });
-
-      newRow.addEventListener("click", function () {
-        let account;
-
-        if (transaction.type === "Income") {
-          if (!transaction.target_account) {
-            account = "?";
-          } else {
-            if (!transaction.target_account.name) {
-              account = transaction.target_account.id;
-            } else {
-              account = transaction.target_account.name;
-            }
-          }
-        } else if (transaction.type === "Expense") {
-          if (!transaction.source_account) {
-            account = "?";
-          } else {
-            if (!transaction.source_account.name) {
-              account = transaction.source_account.id;
-            } else {
-              account = transaction.source_account.name;
-            }
-          }
-        } else {
-          account = "yep";
-        }
-        const categoryTransa = idToNameMap[transaction.category_id];
-
-        const idTransactionEdit = transaction.number;
-        const dateTransaction = transaction.transaction_date;
-        const timeTransaction = transaction.transaction_date;
-        const typeTransaction = transaction.type;
-        const categoryTransaction = categoryTransa;
-        const amountTransaction = transaction.amount;
-        const descriptionTransaction = transaction.description;
-
-        const formatterDate = formatDate(dateTransaction);
-        const formatterTime = formatTime(timeTransaction);
-
-        fillModalWithData(
-          idTransactionEdit,
-          formatterDate,
-          formatterTime,
-          account,
-          typeTransaction,
-          categoryTransaction,
-          amountTransaction,
-          descriptionTransaction
-        );
-
-        fillModaShowlWithData(
-          idTransactionEdit,
-          formatterDate,
-          formatterTime,
-          account,
-          typeTransaction,
-          categoryTransaction,
-          amountTransaction,
-          descriptionTransaction
-        );
-      });
-    });
-    let countTrValue = 0;
-
-    let table = document.querySelector(".custom-table");
-
-    // Ищем строку с ячейкой <td data-name="Total"> Итого </td>
-    let totalRow = table.querySelector('td[data-name="Total"]')?.parentElement;
-
-    if (totalRow) {
-      // Ищем ячейку с суммой (предполагаем, что она находится в 5-й ячейке)
-      let countTrCell = totalRow.cells[4];
-
-      // Извлекаем значение countTr
-      countTrValue = parseFloat(
-        countTrCell.textContent.trim().replace(" руб", "")
-      );
-
-      // Удаляем строку из таблицы
-      totalRow.remove();
-    }
-
-    let countTrTotal = countTrValue + countTr;
-    let rowHTML = ``;
-
-    if (countTrTotal > 0) {
-      rowHTML = `
+  if (countTrTotal > 0) {
+    rowHTML = `
       <td data-name="Total"> Итого  </td>
       <td> </td>
       <td> </td>
@@ -463,8 +375,8 @@ export async function getTransactions(offset = 0, append = false) {
       <td style="padding-left: 35px; color: green"> +${countTrTotal} руб </td>
       <td> </td>
       <td> </td>`;
-    } else {
-      rowHTML = `
+  } else if (countTrTotal < 0) {
+    rowHTML = `
       <td data-name="Total"> Итого  </td>
       <td> </td>
       <td> </td>
@@ -472,54 +384,941 @@ export async function getTransactions(offset = 0, append = false) {
       <td style="padding-left: 35px; color: red">${countTrTotal} руб </td>
       <td> </td>
       <td> </td>`;
+  } else {
+    rowHTML = `
+      <td data-name="Total"> Итого  </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td style="padding-left: 35px; color: black">${countTrTotal} руб </td>
+      <td> </td>
+      <td> </td>`;
+  }
+
+  return rowHTML;
+}
+
+export async function manageLogicTransactions(offset = 0, append = false) {
+  if (formTransactions.getTransactionButton.classList.contains("disable")) {
+    return;
+  }
+
+  try {
+    const responseData = await fetchTransactionsData(offset);
+
+    if (!responseData) {
+      console.warn("No response data received.");
+      return;
     }
 
-    const newRow = document.createElement("tr");
-
-    newRow.innerHTML = rowHTML;
-    tbody.appendChild(newRow);
-
-    const iconsEdit = document.querySelectorAll(".iconEdit");
-
-    iconsEdit.forEach(function (icon) {
-      icon.addEventListener("click", function () {
-        const eventId = icon.getAttribute("data-event-id");
-        var buttonEdit = document.getElementById("changeTra");
-        buttonEdit.classList.remove("Off");
-        var buttonCreate = document.getElementById("createTra");
-        buttonCreate.classList.add("Off");
-        getCategory();
-        modalTransaction.showModal();
-      });
-    });
-
-    const iconsShow = document.querySelectorAll(".iconShow");
-    iconsShow.forEach(function (icon) {
-      icon.addEventListener("click", function () {
-        const inputs = formTransactions.showModalElementTr.querySelectorAll(
-          "input, textarea, getTransactionButton"
-        );
-
-        formTransactions.showIdTransaction.style.background = "#f5f7fa";
-        formTransactions.showDateTransaction.style.background = "#f5f7fa";
-        formTransactions.showTimeTransaction.style.background = "#f5f7fa";
-        formTransactions.showAccountTransaction.style.background = "#f5f7fa";
-        formTransactions.showCatTransaction.style.background = "#f5f7fa";
-        formTransactions.showSumTransaction.style.background = "#f5f7fa";
-        formTransactions.showDescription.style.background = "#f5f7fa";
-
-        formTransactions.showModalElementTr.showModal();
-      });
-    });
-    if (append) {
-      getTransactionsForPaginations(true);
-    }
+    populateTableWithTransactions(responseData, offset, append);
+    // Добавляем обработчики событий
+    addListenersForIconsEdit(responseData);
+    addListenersForIconsShow(responseData);
+    addListenersForIconsDelete(responseData);
   } catch (error) {
-    alert(error);
+    formTransactions.getTransactionButton.classList.remove("disable");
   } finally {
     formTransactions.getTransactionButton.classList.remove("disable");
-    formTransactions.getTransactionButton.disabled = false;
   }
+}
+// Функция для навешивания обработчиков на иконку Редактирование счета
+function addListenersForIconsEdit(responseData) {
+  const iconsEdit = document.querySelectorAll(".iconEdit");
+  iconsEdit.forEach(function (icon) {
+    icon.addEventListener("click", function () {
+      const transactionId = parseInt(
+        icon.getAttribute("data-transaction-id"),
+        10
+      );
+      const transaction = responseData.find(
+        (transaction) => transaction.id === transactionId
+      );
+      const typeTransactions = transaction.type;
+      localStorage.setItem("transactionId", transactionId);
+      handleOpenMainModal(typeTransactions, "edit", transaction);
+    });
+  });
+}
+
+// Функция для навешивания обработчиков на иконку Просмотра счета
+function addListenersForIconsShow(responseData) {
+  const iconsShow = document.querySelectorAll(".iconShow");
+  iconsShow.forEach(function (icon) {
+    icon.addEventListener("click", function () {
+      const transactionId = parseInt(
+        icon.getAttribute("data-transaction-id"),
+        10
+      );
+      const transaction = responseData.find(
+        (transaction) => transaction.id === transactionId
+      );
+      const typeTransactions = transaction.type;
+
+      handleOpenMainModal(typeTransactions, "view", transaction);
+    });
+  });
+}
+
+function addListenersForIconsDelete(responseData) {
+  const iconsDelete = document.querySelectorAll(".iconDelete");
+  iconsDelete.forEach(function (icon) {
+    icon.addEventListener("click", function () {
+      const transactionId = parseInt(
+        icon.getAttribute("data-transaction-id"),
+        10
+      );
+      const transaction = responseData.find(
+        (transaction) => transaction.id === transactionId
+      );
+      const typeTransactions = transaction.type;
+      localStorage.setItem("transactionId", transactionId);
+      handleOpenMainModal(typeTransactions, "delete");
+    });
+  });
+}
+
+// Общая функция для управления диалогового окна "Просмотра/создания/редактирования счета"
+export function handleOpenMainModal(entity, mode, data) {
+  // Добавляем в диалог HTML
+  fillMainDialogWithHTML(entity, mode);
+
+  // Если measure передан, заполняем форму данными
+  if (data) {
+    fillEventDialogFields(entity, data);
+  }
+
+  // Добавляем класс disabled ко всем элементам для режима veiw и убираем placeholders
+  if (mode === "view") {
+    disableModalInputs();
+  }
+
+  // Устанавливаем на диалоговое окно обработчики
+  addEventListeners(mode);
+
+  // Отображаем диалоговое окно
+  openDialog();
+}
+
+// Единая функция, которая вставляет в диалоговое окно HTML
+function fillMainDialogWithHTML(entity, mode) {
+  const modal = formTransactions.modalElement;
+
+  // Очищаем текущее содержимое
+  modal.innerHTML = "";
+
+  // Присваиваем ID модального окна уникальное значение
+  if (mode == "delete") {
+    modal.id = `modalDelete${entity}`;
+  } else {
+    modal.id = `modal${entity}`;
+  }
+
+  // Создаём заголовок
+  const title = document.createElement("h2");
+  title.id = "modalTitle";
+
+  if (mode === "create") {
+    title.textContent = `Создание ${getTransactionType(entity)}`;
+  } else if (mode === "edit") {
+    title.textContent = `Редактирование ${getTransactionType(entity)}`;
+  } else if (mode === "view") {
+    title.textContent = `Просмотр ${getTransactionType(entity)}`;
+  } else if (mode === "delete") {
+    title.textContent = `Удаление ${getTransactionType(entity)}`;
+  } else {
+    title.textContent = "Неизвестный режим";
+  }
+
+  // Создаём форму
+  const form = document.createElement("form");
+  form.id = "modalForm";
+
+  // Формируем содержимое формы в зависимости от сущности и мода
+  let formHTML = "";
+
+  if (entity === "Expense") {
+    if (mode === "create") {
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountExpense;
+      formHTML += templateElements.sourceAccount;
+      formHTML += templateElements.category;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.create(entity);
+    } else if (mode === "edit") {
+      formHTML += templateElements.id;
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountExpense;
+      formHTML += templateElements.sourceAccount;
+      formHTML += templateElements.category;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.edit(entity);
+    } else if (mode === "view") {
+      formHTML += templateElements.id;
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountExpense;
+      formHTML += templateElements.sourceAccount;
+      formHTML += templateElements.category;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.view();
+    } else if (mode === "delete") {
+      formHTML += templateElements.text;
+      formHTML += templateElements.buttons.delete();
+    }
+  } else if (entity === "Income") {
+    if (mode === "create") {
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountIncome;
+      formHTML += templateElements.targetaccount;
+      formHTML += templateElements.category;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.create(entity);
+    } else if (mode === "edit") {
+      formHTML += templateElements.id;
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountIncome;
+      formHTML += templateElements.targetaccount;
+      formHTML += templateElements.category;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.edit(entity);
+    } else if (mode === "view") {
+      formHTML += templateElements.id;
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountIncome;
+      formHTML += templateElements.targetaccount;
+      formHTML += templateElements.category;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.view();
+    } else if (mode === "delete") {
+      formHTML += templateElements.text;
+      formHTML += templateElements.buttons.delete();
+    }
+  } else if (entity === "Transfer") {
+    if (mode === "create") {
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountTransfer;
+      formHTML += templateElements.transferFee;
+      formHTML += templateElements.sourceAccount;
+      formHTML += templateElements.targetaccount;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.create(entity);
+    } else if (mode === "edit") {
+      formHTML += templateElements.id;
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountTransfer;
+      formHTML += templateElements.transferFee;
+      formHTML += templateElements.sourceAccount;
+      formHTML += templateElements.targetaccount;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.edit(entity);
+    } else if (mode === "view") {
+      formHTML += templateElements.id;
+      formHTML += templateElements.date;
+      formHTML += templateElements.amountTransfer;
+      formHTML += templateElements.transferFee;
+      formHTML += templateElements.sourceAccount;
+      formHTML += templateElements.targetaccount;
+      formHTML += templateElements.description;
+      formHTML += templateElements.buttons.view();
+    } else if (mode === "delete") {
+      formHTML += templateElements.text;
+      formHTML += templateElements.buttons.delete();
+    }
+  }
+
+  // Устанавливаем содержимое формы
+  form.innerHTML = formHTML;
+
+  // Добавляем заголовок и форму в модальное окно
+  modal.appendChild(title);
+  modal.appendChild(form);
+
+  // Не знаю почему но в поле "Описание" при создании диалогового окна создается 3 пробела. Код ниже удаляет это
+  if (mode !== "delete") {
+    const textInput = document.getElementById("modalInputDescription");
+    const cleanedText = textInput.value.trim();
+    textInput.value = cleanedText;
+  }
+}
+// Функция для получения типа транзакции
+function getTransactionType(type) {
+  const types = {
+    Expense: "расхода",
+    Income: "дохода",
+    Transfer: "перевода",
+  };
+
+  return types[type] || "неизвестно";
+}
+
+// Функция для разделения даты и времени
+function splitDateTime(transactionDate) {
+  const dateTime = new Date(transactionDate);
+  const date = dateTime.toLocaleDateString("en-CA");
+  const time = dateTime.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return { date, time };
+}
+
+// Функция для получения имени категории
+function getCategoryNameById(categoryId, categories) {
+  categoryId = parseInt(categoryId);
+  for (let category of categories) {
+    if (category.id === categoryId) {
+      return category.name;
+    }
+    if (category.sub_categories && category.sub_categories.length > 0) {
+      const foundCategory = getCategoryNameById(
+        categoryId,
+        category.sub_categories
+      );
+      if (foundCategory) {
+        return foundCategory;
+      }
+    }
+  }
+
+  // Если категория не найдена, возвращаем null
+  return null;
+}
+
+function fillEventDialogFields(entity, data) {
+  originalTransactionValues = {};
+  if (entity == "Expense" || entity == "Income" || entity == "Transfer") {
+    // Уникальный идентификатор
+    const inputId = document.getElementById("inputId");
+    if (inputId) {
+      inputId.value = data.id || "";
+      originalTransactionValues["id"] = inputId.value; // Добавляем в объект
+    }
+    const { date, time } = splitDateTime(data.transaction_date);
+    // Дата транзакции
+    const dateTransaction = document.getElementById("dateTransaction");
+    if (dateTransaction) {
+      dateTransaction.value = date || "";
+      originalTransactionValues["transactionDate"] = dateTransaction.value; // Добавляем в объект
+    }
+    // Время транзакции
+    const timeTransaction = document.getElementById("timeTransaction");
+    if (timeTransaction) {
+      timeTransaction.value = time || "";
+      originalTransactionValues["transactionTime"] = timeTransaction.value; // Добавляем в объект
+    }
+    // Описание
+    const description = document.getElementById("modalInputDescription");
+    if (description) {
+      description.value = data.description || "";
+      originalTransactionValues["description"] = description.value; // Добавляем в объект
+    }
+    // Если entity = "Expense"
+    if (entity == "Expense") {
+      const categoryName = getCategoryNameById(
+        data.category_id,
+        cachedCategories
+      );
+      // Категория
+      const inputCategory = document.getElementById("modalInputCategoryId");
+      if (inputCategory) {
+        const categoryId = data.category_id || ""; // Берем ID категории из данных
+        inputCategory.value = categoryName || ""; // Устанавливаем отображаемое имя
+        inputCategory.dataset.categoryId = categoryId; // Добавляем ID в data-атрибут
+        originalTransactionValues["category"] = categoryId; // Добавляем ID в объект
+      }
+      // Сумма
+      const inputAmount = document.getElementById("inputAmountExpense");
+      if (inputAmount) {
+        inputAmount.value = data.amount || "";
+        originalTransactionValues["amount"] = inputAmount.value; // Добавляем в объект
+      }
+      // Счет списания
+      const inputSourceAccountId = document.getElementById(
+        "modalInputSourceAccountId"
+      );
+      if (inputSourceAccountId) {
+        const sourceAccountId = data.source_account.id || ""; // Берем ID счета из данных
+        inputSourceAccountId.value = data.source_account.name || ""; // Устанавливаем отображаемое имя
+        inputSourceAccountId.dataset.sourceAccountId = sourceAccountId; // Добавляем ID в data-атрибут
+        originalTransactionValues["sourceAccount"] = sourceAccountId; // Добавляем ID в объект
+      }
+    } else if (entity == "Income") {
+      const categoryName = getCategoryNameById(
+        data.category_id,
+        cachedCategories
+      );
+      // Категория
+      const inputCategory = document.getElementById("modalInputCategoryId");
+      if (inputCategory) {
+        const categoryId = data.category_id || ""; // Берем ID категории из данных
+        inputCategory.value = categoryName || ""; // Устанавливаем отображаемое имя
+        inputCategory.dataset.categoryId = categoryId; // Добавляем ID в data-атрибут
+        originalTransactionValues["category"] = categoryId; // Добавляем ID в объект
+      }
+      // Сумма зачисления
+      const inputAmount = document.getElementById("inputAmountIncome");
+      if (inputAmount) {
+        inputAmount.value = data.amount || "";
+        originalTransactionValues["amount"] = inputAmount.value; // Добавляем в объект
+      }
+      // Счет зачисления
+      const inputTargetAccountId = document.getElementById(
+        "modalInputTargetAccountId"
+      );
+      if (inputTargetAccountId) {
+        const targetAccountId = data.target_account.id || ""; // Берем ID счета из данных
+        inputTargetAccountId.value = data.target_account.name || ""; // Устанавливаем отображаемое имя
+        inputTargetAccountId.dataset.targetAccountId = targetAccountId; // Добавляем ID в data-атрибут
+        originalTransactionValues["targetAccount"] = targetAccountId; // Добавляем ID в объект
+      }
+    } else if (entity == "Transfer") {
+      // Сумма перевода
+      const inputAmount = document.getElementById("inputAmountTransfer");
+      if (inputAmount) {
+        inputAmount.value = data.amount || "";
+        originalTransactionValues["amount"] = inputAmount.value; // Добавляем в объект
+      }
+      // Счет списания
+      const inputSourceAccountId = document.getElementById(
+        "modalInputSourceAccountId"
+      );
+      if (inputSourceAccountId) {
+        const sourceAccountId = data.source_account.id || ""; // Берем ID счета из данных
+        inputSourceAccountId.value = data.source_account.name || ""; // Устанавливаем отображаемое имя
+        inputSourceAccountId.dataset.sourceAccountId = sourceAccountId; // Добавляем ID в data-атрибут
+        originalTransactionValues["sourceAccount"] = sourceAccountId; // Добавляем ID в объект
+      }
+      // Счет зачисления
+      const inputTargetAccountId = document.getElementById(
+        "modalInputTargetAccountId"
+      );
+      if (inputTargetAccountId) {
+        const targetAccountId = data.target_account.id || ""; // Берем ID счета из данных
+        inputTargetAccountId.value = data.target_account.name || ""; // Устанавливаем отображаемое имя
+        inputTargetAccountId.dataset.targetAccountId = targetAccountId; // Добавляем ID в data-атрибут
+        originalTransactionValues["targetAccount"] = targetAccountId; // Добавляем ID в объект
+      }
+    }
+  }
+}
+
+// Добавляем класс disabled ко всем элементам для режима veiw
+function disableModalInputs() {
+  const modal = formTransactions.modalElement;
+  const elements = modal.querySelectorAll(
+    "input, textarea, modalInputStatus , button"
+  );
+
+  elements.forEach((element) => {
+    if (element.classList.contains("closeDialogButton")) {
+      return;
+    } else {
+      element.classList.add("disabled");
+    }
+  });
+}
+
+// Основная функция для добавления обработчиков событий для диалоговых окон
+function addEventListeners(mode) {
+  const modal = formTransactions.modalElement;
+  const closeButton = document.querySelector(".closeDialogButton");
+  const form = document.getElementById("modalForm");
+
+  // Обработчик кликов по форме
+  document.getElementById("modalForm").addEventListener("click", (event) => {
+    // В зависимости от режима выполняем соответствующие действия
+    if (mode === "create") {
+      handleCreateMode(event, modal);
+    } else if (mode === "edit") {
+      handleEditMode(event, modal);
+    } else if (mode === "view") {
+      handleViewMode(event, modal);
+    } else if (mode === "delete") {
+      handleDeleteMode(event, modal);
+    }
+  });
+
+  // Универсальные обработчики для всех диалоговых окон
+  form.addEventListener("focusin", handleFocusIn);
+  form.addEventListener("focusout", handleFocusOut);
+  closeButton.addEventListener("click", closeDialog);
+
+  // Обработка валидации поля ввода суммы
+  form.addEventListener("input", (event) => {
+    const target = event.target;
+    if (target.matches(".modalInput")) {
+      handleSumInput(target.id, event);
+    }
+  });
+}
+
+// Обработчик для режима создания транзакции
+function handleCreateMode(event) {
+  const modal = formTransactions.modalElement;
+  const form = document.getElementById("modalForm");
+  const target = event.target;
+  const dropdownTrigger = target.closest(".modalDropdown");
+
+  // Обработчик для создания события
+  // Универсальный обработчик для проверки заполненности обязательных полей
+  form.addEventListener("input", (event) => {
+    const target = event.target;
+    if (target.classList.contains("requiredField")) {
+      checkRequiredFields(form.id);
+    }
+  });
+  if (dropdownTrigger) {
+    // Проверяем конкретный ID выпадающего списка
+    if (dropdownTrigger.id === "modalDropdownSourceAccount") {
+      toggleModalDropdown(dropdownTrigger.id);
+      checkRequiredFields("modalForm");
+    } else if (dropdownTrigger.id === "modalDropdownTargetAccount") {
+      toggleModalDropdown(dropdownTrigger.id);
+      checkRequiredFields("modalForm");
+    } else if (dropdownTrigger.id === "modalDropdownCategory") {
+      toggleModalDropdown(dropdownTrigger.id);
+      checkRequiredFields("modalForm");
+    }
+  }
+  // Обработка кнопки "Создать расход"
+  if (target.id === "buttonCreateExpense") {
+    if (target.classList.contains("disable")) {
+      return;
+    }
+    createNewTransaction("Expense");
+  }
+
+  // Обработка кнопки "Создать доход"
+  if (target.id === "buttonCreateIncome") {
+    if (target.classList.contains("disable")) {
+      return;
+    }
+
+    createNewTransaction("Income");
+  }
+
+  // Обработка кнопки "Создать перевод"
+  if (target.id === "buttonCreateTransfer") {
+    if (target.classList.contains("disable")) {
+      return;
+    }
+
+    createNewTransaction("Transfer");
+  }
+}
+
+// Обработчик для режима изменения транзакции
+function handleEditMode(event) {
+  const modal = formTransactions.modalElement;
+  const target = event.target;
+  const dropdownTrigger = target.closest(".modalDropdown");
+  const form = document.getElementById("modalForm");
+
+  // Подключаем обработчики для отслеживания изменений
+  addInputListeners(originalTransactionValues);
+
+  // Обработчик для создания события
+
+  if (dropdownTrigger) {
+    // Проверяем конкретный ID выпадающего списка
+    if (dropdownTrigger.id === "modalDropdownSourceAccount") {
+      toggleModalDropdown(dropdownTrigger.id);
+      // checkRequiredFields("modalForm");
+    } else if (dropdownTrigger.id === "modalDropdownTargetAccount") {
+      toggleModalDropdown(dropdownTrigger.id);
+      // checkRequiredFields("modalForm");
+    } else if (dropdownTrigger.id === "modalDropdownCategory") {
+      toggleModalDropdown(dropdownTrigger.id);
+      // checkRequiredFields("modalForm");
+    }
+  }
+  // Обработка кнопки "Создать расход"
+  if (target.id === "buttonEditExpense") {
+    if (target.classList.contains("disable")) {
+      return;
+    }
+    updateTransaction("Expense");
+  }
+
+  // Обработка кнопки "Создать доход"
+  if (target.id === "buttonEditIncome") {
+    if (target.classList.contains("disable")) {
+      return;
+    }
+    updateTransaction("Income");
+  }
+
+  // Обработка кнопки "Создать перевод"
+  if (target.id === "buttonEditTransfer") {
+    if (target.classList.contains("disable")) {
+      return;
+    }
+    updateTransaction("Transfer");
+  }
+}
+
+let isProcessing = false;
+
+// Добавляем обработчики для всех полей ввода
+function addInputListeners(originalTransactionValues) {
+  const form = document.getElementById("modalForm");
+  const editButton = form.querySelector(".editButton");
+
+  if (!form) return;
+
+  // Навешиваем обработчик на все input, textarea и элементы выпадающих списков
+  form.querySelectorAll("input, textarea").forEach((element) => {
+    element.addEventListener("input", () => {
+      if (isProcessing) return; // Если обработка уже идет, пропускаем повторный вызов
+
+      isProcessing = true; // Устанавливаем флаг, что обработка началась
+
+      // Проверяем изменения
+      const changesDetected = hasChanges(originalTransactionValues);
+      const allRequiredFieldsFilled = checkRequiredChangeFields(form.id);
+
+      // Если изменения есть и обязательные поля заполнены, активируем кнопку
+      if (changesDetected && allRequiredFieldsFilled) {
+        editButton.classList.remove("disable");
+        editButton.removeAttribute("data-tooltip");
+      } else {
+        editButton.classList.add("disable");
+        editButton.setAttribute(
+          "data-tooltip",
+          "Заполните обязательные параметры"
+        );
+      }
+
+      isProcessing = false; // Сбрасываем флаг после обработки
+    });
+  });
+
+  // Добавляем обработчики для выпадающих списков (например, "Счет зачисления", "Категория")
+  form.querySelectorAll(".modalDropdown").forEach((dropdown) => {
+    dropdown.addEventListener("click", (event) => {
+      if (event.target.closest(".modalOption")) {
+        const changesDetected = hasChanges(originalTransactionValues);
+        const allRequiredFieldsFilled = checkRequiredChangeFields(form.id);
+
+        // Если изменения есть и обязательные поля заполнены, активируем кнопку
+        if (changesDetected && allRequiredFieldsFilled) {
+          editButton.classList.remove("disable");
+          editButton.removeAttribute("data-tooltip");
+        } else {
+          editButton.classList.add("disable");
+          editButton.setAttribute(
+            "data-tooltip",
+            "Заполните обязательные параметры"
+          );
+        }
+      }
+    });
+  });
+}
+
+// Проверка заполненности всех обязательных полей в диалоговом окне
+export function checkRequiredChangeFields(formId) {
+  const form = document.getElementById(formId);
+  const requiredFields = form.querySelectorAll(".requiredField");
+
+  let allFieldsFilled = true;
+
+  requiredFields.forEach((field) => {
+    if (!field.value.trim()) {
+      allFieldsFilled = false;
+    }
+  });
+
+  return allFieldsFilled; // Возвращаем состояние, заполены ли все обязательные поля
+}
+
+// Функция для проверки изменений
+function hasChanges(originalTransactionValues) {
+  const modal = document.querySelector(".modal[open='true']"); // Определяем текущую открытую форму
+  if (!modal) {
+    console.error("Не найдена открытая форма для сравнения значений.");
+    return false;
+  }
+
+  const currentValues = {};
+  const formId = modal.id;
+
+  // Собираем текущие значения из соответствующей формы
+  currentValues["id"] = modal.querySelector("#inputId")?.value || "";
+  currentValues["transactionDate"] =
+    modal.querySelector("#dateTransaction")?.value || "";
+  currentValues["transactionTime"] =
+    modal.querySelector("#timeTransaction")?.value || "";
+  currentValues["description"] =
+    modal.querySelector("#modalInputDescription")?.value || "";
+
+  // Проверяем форму по её типу (id контейнера)
+  if (formId === "modalIncome") {
+    currentValues["category"] =
+      modal.querySelector("#modalInputCategoryId")?.value || "";
+    currentValues["amount"] =
+      modal.querySelector("#inputAmountIncome")?.value || "";
+    currentValues["targetAccount"] =
+      modal.querySelector("#modalInputTargetAccountId")?.value || "";
+  } else if (formId === "modalExpense") {
+    currentValues["category"] =
+      modal.querySelector("#modalInputCategoryId")?.value || "";
+    currentValues["amount"] =
+      modal.querySelector("#inputAmountExpense")?.value || "";
+    currentValues["sourceAccount"] =
+      modal.querySelector("#modalInputSourceAccountId")?.value || "";
+  } else if (formId === "modalTransfer") {
+    currentValues["amount"] =
+      modal.querySelector("#inputAmountTransfer")?.value || "";
+    currentValues["sourceAccount"] =
+      modal.querySelector("#modalInputSourceAccountId")?.value || "";
+    currentValues["targetAccount"] =
+      modal.querySelector("#modalInputTargetAccountId")?.value || "";
+  } else {
+    console.error(`Неизвестный тип формы: ${formId}`);
+    return false;
+  }
+
+  // Сравниваем оригинальные и текущие значения
+  for (const key in originalTransactionValues) {
+    if (originalTransactionValues[key] !== currentValues[key]) {
+      return true;
+    }
+  }
+
+  // Если не найдено изменений
+  return false;
+}
+
+function handleFocusIn(event) {
+  const target = event.target;
+  if (target.matches(".modalDescription")) {
+    target.classList.add("focused");
+  }
+}
+
+function handleFocusOut(event) {
+  const target = event.target;
+  if (target.matches(".modalDescription")) {
+    target.classList.remove("focused");
+  }
+}
+
+// Обработчик для режима просмотра события
+function handleViewMode(event) {
+  const modal = formTransactions.modalElement;
+  const createEventButton = modal.querySelector(".createButton");
+
+  // Убираем старый обработчик и добавляем новый для кнопки создания
+  createEventButton.removeEventListener("click", handleCreateEvent);
+  createEventButton.addEventListener("click", handleCreateEvent(event));
+}
+// Обработчик для создания события
+function handleCreateEvent(event) {
+  const modal = formTransactions.modalElement;
+  const createEventButton = modal.querySelector(".createButton");
+
+  // Проверка, если кнопка заблокирована
+  if (createEventButton.classList.contains("disable")) {
+    event.preventDefault();
+    return;
+  }
+}
+
+// Обработчик для режима удаления события
+function handleDeleteMode(event) {
+  const modal = formTransactions.modalElement;
+  const createEventButton = modal.querySelector(".createButton");
+
+  // Убираем старый обработчик и добавляем новый для кнопки удаления
+  createEventButton.removeEventListener("click", handleDeleteEvent);
+  createEventButton.addEventListener("click", (e) => handleDeleteEvent(e));
+}
+
+// Обработчик для удаления транзакции
+function handleDeleteEvent(event) {
+  console.log("Обработчик вызван"); // Логирование для отладки
+  event.preventDefault(); // Останавливаем стандартное поведение
+  const modal = formTransactions.modalElement;
+  const createEventButton = modal.querySelector(".createButton");
+
+  if (
+    createEventButton.classList.contains("disable") ||
+    createEventButton.disabled
+  ) {
+    console.log("Кнопка заблокирована, ничего не делаем");
+    return;
+  }
+
+  console.log("Удаляем транзакцию");
+  createEventButton.classList.add("disable");
+  createEventButton.setAttribute("disabled", "true");
+
+  deleteTransactions(); // Удаляем транзакцию
+
+  closeDialog(); // Закрываем диалог
+}
+// Функция для открытия диалогового окна
+function openDialog() {
+  const modal = formTransactions.modalElement;
+  modal.setAttribute("open", "true");
+}
+
+// Функция для закрытия диалоговых окон
+export function closeDialog() {
+  const modal = formTransactions.modalElement;
+  modal.removeAttribute("open");
+}
+
+// функция удаления транзакции
+export async function deleteTransactions() {
+  const access_token = localStorage.getItem("access_token");
+  const transactionId = localStorage.getItem("transactionId");
+  try {
+    const response = await deleteTransaction(transactionId, access_token);
+
+    const successMessage = `Транзакция успешно удалена`;
+    createToast("success", successMessage);
+    manageLogicTransactions();
+  } catch (error) {}
+}
+
+function populateTableWithTransactions(
+  responseData,
+  offset = 0,
+  append = false
+) {
+  const userId = parseInt(localStorage.getItem("user_id"), 10);
+  const eventRole = localStorage.getItem("eventRole");
+  countTr = 0;
+  let countTrValue = 0;
+  let table = document.querySelector(".custom-table");
+
+  const tbody = document.querySelector("tbody");
+  const label = document.getElementById("infoTransactionsLabel");
+  let totalRow = table.querySelector('td[data-name="Total"]')?.parentElement;
+  let countTrTotal = countTrValue + countTr;
+  let rowHTML = ``;
+
+  // Функция, которая определяет нужно ли отображать лейбл "Еще"
+  getTransactionsForPaginations(false);
+
+  if (responseData.length === 0) {
+    label.classList.remove("disable");
+    tbody.innerHTML = "";
+    return;
+  } else {
+    label.classList.add("disable");
+  }
+  if (!append) {
+    tbody.innerHTML = "";
+  }
+
+  responseData.forEach((transaction) =>
+    addTransactionRow(tbody, transaction, idToNameMap, userId, eventRole)
+  );
+
+  rowHTML = calculateTotalRow(totalRow, countTr);
+  const newRow = document.createElement("tr");
+  newRow.innerHTML = rowHTML;
+  tbody.appendChild(newRow);
+
+  if (append) {
+    getTransactionsForPaginations(true);
+  }
+}
+// Функция для добавления строки в таблицу
+function addTransactionRow(tbody, transaction, idToNameMap, userId, eventRole) {
+  const formattedTime = formatDateTime(transaction.transaction_date);
+  const categoryTran = idToNameMap[transaction.category_id];
+  const type =
+    transaction.type === "Income"
+      ? "Доход"
+      : transaction.type === "Transfer"
+      ? "Перевод"
+      : "Расход";
+  const color =
+    type === "Доход" ? "green" : type === "Перевод" ? "blue" : "red";
+
+  const sign = type === "Доход" ? "+" : type === "Перевод" ? "" : "-";
+
+  const account = getAccount(transaction, transaction.type);
+  const user = transaction.user_id === userId ? "Вы" : transaction.user.name;
+  const receipt_id = transaction.receipt_id || "";
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${transaction.number}</td>
+    <td>${formattedTime}</td>
+    <td>${type}</td>
+    <td>${categoryTran}</td>
+    <td style="color: ${color}">${sign}${transaction.amount} руб</td>
+    <td>${user}</td>
+    <td>${account}</td>
+    <td class="receipt" data-id="${receipt_id}" style="cursor: ${
+    receipt_id ? "pointer" : "default"
+  }">
+      ${
+        receipt_id
+          ? `<box-icon name='file' type='solid' color='#31bd2c'></box-icon>`
+          : receipt_id
+      }
+    </td>
+    ${
+      eventRole === "Manager" ||
+      (eventRole === "Observer" && transaction.user_id === userId) ||
+      eventRole === "Partner"
+        ? `<td>
+          <img src="../../src/modules/events/asserts/show-regular-60.png" class="iconShow" data-transaction-id="${transaction.id}">
+          <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" class="iconEdit" data-transaction-id="${transaction.id}">
+          <img src="../../src/modules/transactions/asserts/ri-delete-bin-6-line.png" class="iconDelete" data-transaction-id="${transaction.id}">
+        </td>`
+        : `<td>
+          <img src="../../src/modules/events/asserts/show-regular-60.png" class="iconShow" data-transaction-id="${transaction.id}">
+        </td>`
+    }
+  `;
+  tbody.appendChild(row);
+}
+
+export function checkForChanges() {
+  const changeBtn = document.getElementById("changeTra");
+  const currentValues = {
+    date: document.getElementById("dateTr").value,
+    time: document.getElementById("timeTr").value,
+    account: document.querySelector(".accountBox").value,
+    type: document.querySelector('input[name="typeTransaction"]:checked')
+      ?.value,
+    category: document.querySelector(".categoryBox").value,
+    sum: document.getElementById("sumTransaction").value,
+    description: document.getElementById("descriptionTran").value,
+  };
+  const hasChanges = Object.keys(originalValues).some(
+    (key) => originalValues[key] !== currentValues[key]
+  );
+  if (hasChanges) {
+    changeBtn.classList.remove("disable");
+  } else {
+    changeBtn.classList.add("disable");
+  }
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+function formatTime(timeString) {
+  const date = new Date(timeString);
+
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+
+  return `${hours}:${minutes}`;
 }
 
 async function getReceipt(receipt_id) {
@@ -575,21 +1374,21 @@ function generateReceiptHTML(receipt) {
     .map(
       (item, index) => `
 
-                <div class="sc-cTApHj fVRyQa">
-                  <div class="sc-cNKpQo bSevbG">
-                    <div class="sc-bBHHQT iVWrCP">${index + 1}.</div>
-                    <div class="sc-AjmZR juOfWY">
-                      <div>${item.name}</div>
-                    </div>
-                  </div>
-                  <div class="sc-jObXwK cBBNUN">${item.quantity}</div>
-                  <div class="sc-dPiKHq jtMGgR">
-                  ${(item.sum / 100).toLocaleString("ru-RU", {
-                    minimumFractionDigits: 2,
-                  })}</div>
-                </div>
+          <div class="sc-cTApHj fVRyQa">
+            <div class="sc-cNKpQo bSevbG">
+              <div class="sc-bBHHQT iVWrCP">${index + 1}.</div>
+              <div class="sc-AjmZR juOfWY">
+                <div>${item.name}</div>
+              </div>
+            </div>
+            <div class="sc-jObXwK cBBNUN">${item.quantity}</div>
+            <div class="sc-dPiKHq jtMGgR">
+            ${(item.sum / 100).toLocaleString("ru-RU", {
+              minimumFractionDigits: 2,
+            })}</div>
+          </div>
 
-  `
+`
     )
     .join("");
 
@@ -608,142 +1407,142 @@ function generateReceiptHTML(receipt) {
 
   // Формируем HTML-код чека
   return `
-  <div>
-        <div
-          class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
-          data-reach-dialog-overlay=""
-        >
-          <div
-            aria-modal="true"
-            role="dialog"
-            tabindex="-1"
-            aria-label="receipt-details-modal"
-            class="sc-hGPAah hfwvPT"
-            data-reach-dialog-content=""
-          >
-            <div class="sc-dlVyqM fPYzXc">
-              <div id="receipt-container" class="sc-iNGGwv hsrLVo">
-                <div class="sc-cCcYRi kmLPwf">
-                
-                  <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
-                  <span
-                    class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
-                    title=""
-                    id="close-icon"
-                  >
-                    <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-                      <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
-                        fill="#4164E3"
-                      ></path>
-                    </svg>
-                  </span>
-                </div>
-                <span class="sc-caiKgP ipNIuR">Приход</span>
-                <div class="sc-cidCJl gHtjd">
-                  <div class="sc-iUKrWq kSLLaF">
-                    <div class="sc-iAKVOt klLDEA">
-                      <div class="sc-cNKpQo bSevbG">Предмет расчета</div>
-                      <div class="sc-jObXwK cBBNUN">Кол-во</div>
-                      <div class="sc-dPiKHq jtMGgR">Сумма, ₽</div>
-                    </div>
-                      <div class="sc-efQUeY eWLxTJ">
-                    ${itemsHTML}
-                      </div>
-                    </div>
-            </div>
-            <div class="sc-gSQGeZ iOAir">
-              <div class="sc-jeqYYF sc-eJwXpk frkNye jMA-dWh">
-                <div>Итог:</div>
-                <div>${(totalSum / 100).toLocaleString("ru-RU", {
-                  minimumFractionDigits: 2,
-                })} </div>
+<div>
+  <div
+    class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+    data-reach-dialog-overlay=""
+  >
+    <div
+      aria-modal="true"
+      role="dialog"
+      tabindex="-1"
+      aria-label="receipt-details-modal"
+      class="sc-hGPAah hfwvPT"
+      data-reach-dialog-content=""
+    >
+      <div class="sc-dlVyqM fPYzXc">
+        <div id="receipt-container" class="sc-iNGGwv hsrLVo">
+          <div class="sc-cCcYRi kmLPwf">
+          
+            <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+            <span
+              class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+              title=""
+              id="close-icon"
+            >
+              <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+                  fill="#4164E3"
+                ></path>
+              </svg>
+            </span>
+          </div>
+          <span class="sc-caiKgP ipNIuR">Приход</span>
+          <div class="sc-cidCJl gHtjd">
+            <div class="sc-iUKrWq kSLLaF">
+              <div class="sc-iAKVOt klLDEA">
+                <div class="sc-cNKpQo bSevbG">Предмет расчета</div>
+                <div class="sc-jObXwK cBBNUN">Кол-во</div>
+                <div class="sc-dPiKHq jtMGgR">Сумма, ₽</div>
               </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Наличные</div>
-                <div>${cashTotalSum} 
-                </div>
-              
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Безналичные</div>
-                <div>${(totalSum / 100).toLocaleString("ru-RU", {
-                  minimumFractionDigits: 2,
-                })} </div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Предоплата (аванс)</div>
-                <div>${creditSum}</div>
-              </div>
-            </div>
-            <div class="sc-gSQGeZ sc-lbhJmS iOAir gRgzMw">
-              <div class="sc-nVjpj jzhAMS">
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">ИНН</div>
-                  <div>${sellerInn}</div>
-                </div>
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">№ смены</div>
-                  <div>${shiftNumber}</div>
-                </div>
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">Чек №</div>
-                  <div>${requestNumber}</div>
+                <div class="sc-efQUeY eWLxTJ">
+              ${itemsHTML}
                 </div>
               </div>
-              <div class="sc-nVjpj jzhAMS">
-                <div class="sc-jeqYYF frkNye">
-                  <div class="sc-hiwReK iFZavI">№ АВТ</div>
-                  <div>${machineNumber}</div>
-                </div>
-         
-              </div>
-            </div>
-            <div class="sc-gSQGeZ iOAir2">
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Дата/Время</div>
-                <div>${formattedDate}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">ФД №:</div>
-                <div>${documentId}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">ФН:</div>
-                <div>${fiscalDriveNumber}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">РН ККТ:</div>
-                <div>${kktRegId}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">ФП:</div>
-                <div>${fiscalSign}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Кассир:</div>
-                <div class="sc-ehCIER jXeQeS">${operator}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Место расчетов:</div>
-                <div>${retailPlace}</div>
-              </div>
-              <div class="sc-jeqYYF frkNye">
-                <div class="sc-hiwReK iFZavI">Адрес расчетов:</div>
-                <div class="sc-ehCIER jXeQeS">
-                  ${retailPlaceAddress}
-                </div>
-              </div>
-            </div>
+      </div>
+      <div class="sc-gSQGeZ iOAir">
+        <div class="sc-jeqYYF sc-eJwXpk frkNye jMA-dWh">
+          <div>Итог:</div>
+          <div>${(totalSum / 100).toLocaleString("ru-RU", {
+            minimumFractionDigits: 2,
+          })} </div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Наличные</div>
+          <div>${cashTotalSum} 
+          </div>
+        
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Безналичные</div>
+          <div>${(totalSum / 100).toLocaleString("ru-RU", {
+            minimumFractionDigits: 2,
+          })} </div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Предоплата (аванс)</div>
+          <div>${creditSum}</div>
+        </div>
+      </div>
+      <div class="sc-gSQGeZ sc-lbhJmS iOAir gRgzMw">
+        <div class="sc-nVjpj jzhAMS">
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">ИНН</div>
+            <div>${sellerInn}</div>
+          </div>
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">№ смены</div>
+            <div>${shiftNumber}</div>
+          </div>
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">Чек №</div>
+            <div>${requestNumber}</div>
+          </div>
+        </div>
+        <div class="sc-nVjpj jzhAMS">
+          <div class="sc-jeqYYF frkNye">
+            <div class="sc-hiwReK iFZavI">№ АВТ</div>
+            <div>${machineNumber}</div>
+          </div>
+    
+        </div>
+      </div>
+      <div class="sc-gSQGeZ iOAir2">
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Дата/Время</div>
+          <div>${formattedDate}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">ФД №:</div>
+          <div>${documentId}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">ФН:</div>
+          <div>${fiscalDriveNumber}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">РН ККТ:</div>
+          <div>${kktRegId}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">ФП:</div>
+          <div>${fiscalSign}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Кассир:</div>
+          <div class="sc-ehCIER jXeQeS">${operator}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Место расчетов:</div>
+          <div>${retailPlace}</div>
+        </div>
+        <div class="sc-jeqYYF frkNye">
+          <div class="sc-hiwReK iFZavI">Адрес расчетов:</div>
+          <div class="sc-ehCIER jXeQeS">
+            ${retailPlaceAddress}
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-  `;
+</div>
+</div>
+</div>
+`;
 }
 
 function addReceiptToHTML(receipt) {
@@ -761,372 +1560,581 @@ function clearModalReceipt() {
   const container = document.getElementById("receipt-container");
   const receiptHTML = `<div>
 <div
-  class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
-  data-reach-dialog-overlay=""
+class="sc-ezbkgU ilkjkI sc-gWXaA-D fzBOpH"
+data-reach-dialog-overlay=""
 >
-  <div
-    aria-modal="true"
-    role="dialog"
-    tabindex="-1"
-    aria-label="receipt-details-modal"
-    class="sc-hGPAah hfwvPT"
-    data-reach-dialog-content=""
-  >
-    <div class="sc-dlVyqM fPYzXc">
-      <div id="receipt-container" class="sc-iNGGwv hsrLVo">
-        <div class="sc-cCcYRi kmLPwf">
-          </span>
-          <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
-          <span
-            class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
-            title=""
-            id="close-icon"
-          >
-          <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
-              fill="#4164E3"
-            ></path>
-          </svg>
-          </span>
+<div
+aria-modal="true"
+role="dialog"
+tabindex="-1"
+aria-label="receipt-details-modal"
+class="sc-hGPAah hfwvPT"
+data-reach-dialog-content=""
+>
+<div class="sc-dlVyqM fPYzXc">
+<div id="receipt-container" class="sc-iNGGwv hsrLVo">
+  <div class="sc-cCcYRi kmLPwf">
+    </span>
+    <span class="sc-jcFkyM ihvgJG">КАССОВЫЙ ЧЕК</span>
+    <span
+      class="sc-crHlIS hWTept sc-jgrIVw DBTfN"
+      title=""
+      id="close-icon"
+    >
+    <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M16.9393 0.93934C17.5251 0.353553 18.4749 0.353553 19.0607 0.93934C19.6464 1.52513 19.6464 2.47487 19.0607 3.06066L12.1213 10L19.0607 16.9393C19.6464 17.5251 19.6464 18.4749 19.0607 19.0607C18.4749 19.6464 17.5251 19.6464 16.9393 19.0607L10 12.1213L3.06066 19.0607C2.47487 19.6464 1.52513 19.6464 0.939339 19.0607C0.353554 18.4749 0.353554 17.5251 0.939339 16.9393L7.87868 10L0.93934 3.06066C0.353553 2.47487 0.353553 1.52513 0.93934 0.93934C1.52513 0.353553 2.47487 0.353553 3.06066 0.93934L10 7.87868L16.9393 0.93934Z"
+        fill="#4164E3"
+      ></path>
+    </svg>
+    </span>
 
-        </div>
-          <span class="sc-caiKgP ipNIuR"> <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b' ></box-icon></span>
-        </div>
-    </div>
   </div>
+    <span class="sc-caiKgP ipNIuR"> <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b' ></box-icon></span>
+  </div>
+</div>
+</div>
 </div>
 </div>`;
   container.innerHTML = receiptHTML;
 }
 
-let originalValues = {};
+// Проверка заполненности всех обязательных полей в диалоговом окне
+export function checkRequiredFields(formId) {
+  const form = document.getElementById(formId);
+  const requiredFields = form.querySelectorAll(".requiredField");
+  const createButton = form.querySelector(".createButton");
 
-function saveOriginalValues() {
-  originalValues = {
-    date: document.getElementById("dateTr").value,
-    time: document.getElementById("timeTr").value,
-    account: document.querySelector(".accountBox").value,
-    type: document.querySelector('input[name="typeTransaction"]:checked')
-      ?.value,
-    category: document.querySelector(".categoryBox").value,
-    sum: document.getElementById("sumTransaction").value,
-    description: document.getElementById("descriptionTran").value,
-  };
-}
+  let allFieldsFilled = true;
 
-export function checkForChanges() {
-  const changeBtn = document.getElementById("changeTra");
-  const currentValues = {
-    date: document.getElementById("dateTr").value,
-    time: document.getElementById("timeTr").value,
-    account: document.querySelector(".accountBox").value,
-    type: document.querySelector('input[name="typeTransaction"]:checked')
-      ?.value,
-    category: document.querySelector(".categoryBox").value,
-    sum: document.getElementById("sumTransaction").value,
-    description: document.getElementById("descriptionTran").value,
-  };
-  const hasChanges = Object.keys(originalValues).some(
-    (key) => originalValues[key] !== currentValues[key]
-  );
-  if (hasChanges) {
-    changeBtn.classList.remove("disable");
+  requiredFields.forEach((field) => {
+    if (!field.value.trim()) {
+      allFieldsFilled = false;
+    }
+  });
+
+  if (allFieldsFilled) {
+    createButton.classList.remove("disable");
+    createButton.disabled = false;
+    createButton.removeAttribute("data-tooltip");
   } else {
-    changeBtn.classList.add("disable");
+    createButton.classList.add("disable");
+    createButton.disabled = true;
+    createButton.setAttribute(
+      "data-tooltip",
+      "Заполните обязательные параметры"
+    );
   }
 }
 
-function fillModalWithData(
-  id,
-  date,
-  time,
-  account,
-  type,
-  category,
-  amount,
-  description
-) {
-  const InputId = document.getElementById("InputId");
-  const radioButtons = document.querySelectorAll(
-    'input[name="typeTransaction"]'
-  );
-  InputId.value = id;
-  formTransactions.dateTransaction.value = date;
-  formTransactions.timeTransaction.value = time;
-  formTransactions.accountBox.value = account;
-  radioButtons.forEach((getTransactionButton) => {
-    if (getTransactionButton.value === type) {
-      getTransactionButton.checked = true;
-    }
-  });
-  formTransactions.catTransaction.value = category;
-  formTransactions.sumTransaction.value = amount;
-  formTransactions.description.value = description;
-  saveOriginalValues();
-  const changeBtn = document.getElementById("changeTra");
-  changeBtn.classList.add("disable");
-}
+export function handleSumInput(inputId, event) {
+  const input = document.getElementById(inputId);
+  let inputSumValue = input.value;
 
-function fillModaShowlWithData(
-  id,
-  date,
-  time,
-  account,
-  type,
-  category,
-  amount,
-  description
-) {
-  const radioButtons = document.querySelectorAll(
-    'input[name="showTypeTransaction"]'
-  );
-  formTransactions.showIdTransaction.value = id;
-  formTransactions.showDateTransaction.value = date;
-  formTransactions.showTimeTransaction.value = time;
-  formTransactions.showAccountTransaction.value = account;
-  radioButtons.forEach((getTransactionButton) => {
-    if (getTransactionButton.value === type) {
-      getTransactionButton.checked = true;
-    }
-  });
-  formTransactions.showCatTransaction.value = category;
-  formTransactions.showSumTransaction.value = amount;
-  formTransactions.showDescription.value = description;
-}
+  // Убираем всё, кроме цифр и точки
+  inputSumValue = inputSumValue.replace(/[^\d.]/g, "");
+  let formattedInputValue = "";
 
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
+  // Сохраняем текущую позицию курсора
+  const cursorPosition = input.selectionStart;
 
-  return `${year}-${month}-${day}`;
-}
-
-function formatTime(timeString) {
-  const date = new Date(timeString);
-
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const seconds = date.getSeconds().toString().padStart(2, "0");
-
-  return `${hours}:${minutes}`;
-}
-
-export async function getEvent() {
-  const token = localStorage.getItem("access_token");
-  try {
-    const events = await getAllMyEvents(token);
-    const user_id = parseInt(localStorage.getItem("user_id"), 10);
-
-    events.forEach((event) => {
-      const eventId = event.id;
-      const eventName = event.name;
-      const participants = event.participants;
-      const user = participants.find(
-        (participant) => participant.user_id === user_id
-      );
-      const userRole = user.role;
-
-      var lista = document.querySelector(".option");
-      var listItem = document.createElement("li");
-
-      listItem.textContent = eventName;
-      listItem.setAttribute("data-id", eventId);
-      listItem.setAttribute("data-role", userRole);
-      lista.appendChild(listItem);
-    });
-
-    // Вызываем функцию foo() после добавления элементов списка
-    foo();
-  } catch (error) {}
-}
-
-const foo = () => {
-  const list = document.querySelector(".option");
-  const input = document.querySelector(".text-box");
-
-  for (let i = 0; i < list.children.length; i++) {
-    list?.children[i].addEventListener("click", (e) => {
-      const selectedId = list.children[i].getAttribute("data-id");
-      const selectedIdEvent = list.children[i].getAttribute("data-role");
-      const selectedValue = list.children[i].innerHTML;
-
-      input.value = selectedValue;
-      localStorage.setItem("event", selectedId);
-      localStorage.setItem("eventRole", selectedIdEvent);
-
-      checkForm();
-      checkEvent();
-    });
-  }
-};
-
-export function sidebar() {
-  const sidebar = document.querySelector(".sidebar");
-  sidebar.addEventListener("mouseenter", function () {
-    this.classList.remove("close");
-  });
-
-  sidebar.addEventListener("mouseleave", function () {
-    this.classList.add("close");
-  });
-}
-
-export function getDate() {
-  // Функция для получения даты в формате YYYY-MM-DD
-  function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+  // Проверка на то, если значение равно "0." и пользователь нажимает Backspace
+  if (inputSumValue === "0." && event.inputType === "deleteContentBackward") {
+    input.value = "";
+    return;
   }
 
-  // Получаем текущую дату
-  const currentDate = new Date();
-
-  // Устанавливаем первый день текущего месяца
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1
-  );
-  const formattedFirstDay = formatDate(firstDayOfMonth);
-  document.getElementById("start-date").value = formattedFirstDay;
-
-  // Устанавливаем последний день текущего месяца
-  const lastDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0
-  );
-  const formattedLastDay = formatDate(lastDayOfMonth);
-  document.getElementById("end-date").value = formattedLastDay;
-}
-
-export function changeStyleBorder() {
-  // Изменяем стиль границы
-  this.style.borderColor = "#409eff"; // Измените цвет границы по вашему вкусу
-  // Удаляем плейсхолдер
-  this.removeAttribute("placeholder");
-}
-
-export function customTextArea() {
-  // Возвращаем исходный цвет границы
-  this.style.borderColor = ""; // Вернуть стандартный цвет границы
-  // Возвращаем плейсхолдер
-  this.setAttribute("placeholder", "Введите описание к транзакции");
-}
-
-export function exit() {
-  localStorage.clear();
-  window.location.href = "/pages/auth/index.html";
-}
-
-export function toggleDropdown(event) {
-  formTransactions.dropdown.classList.toggle("active");
-  formTransactions.dropdown2.classList.remove("active");
-  event.stopPropagation();
-}
-
-export function closeDropdown(event) {
-  if (!formTransactions.option.contains(event.target)) {
-    formTransactions.dropdown.classList.remove("active");
-    formTransactions.dropdown2.classList.remove("active");
-  }
-}
-
-export function toggleDropdownCat(event) {
-  formTransactions.dropdownCat.classList.toggle("active");
-  formTransactions.dropdown2.classList.remove("active");
-  event.stopPropagation();
-}
-
-export function closeDropdownTransaction(event) {
-  if (!formTransactions.option1.contains(event.target)) {
-    formTransactions.dropdown1.classList.remove("active");
-  }
-}
-
-export function getInputSumValue(input) {
-  return input.value.replace(/[^\d.]/g, ""); // Убираем всё, кроме цифр и точки
-}
-
-export function onSumInput(e) {
-  let input = e.target,
-    inputSumValue = getInputSumValue(input),
-    formattedInputValue = "";
-
+  // Если введен пустой ввод, очищаем значение
   if (!inputSumValue) {
-    return (input.value = "");
+    input.value = "";
+    return;
   }
 
-  const dotCount = (inputSumValue.match(/\./g) || []).length; // Считаем количество точек
+  // Считаем количество точек
+  const dotCount = (inputSumValue.match(/\./g) || []).length;
 
+  // Если точек больше одной, убираем последнюю
   if (dotCount > 1) {
-    // Если количество точек больше 1, убираем последнюю точку
     inputSumValue = inputSumValue.slice(0, -1);
   }
 
   // Если есть точка и более двух цифр после неё, обрезаем лишние
   if (inputSumValue.includes(".")) {
-    let [wholePart, decimalPart] = inputSumValue.split("."); // Разделяем целую и дробную части
+    let [wholePart, decimalPart] = inputSumValue.split(".");
     if (decimalPart.length > 2) {
-      decimalPart = decimalPart.slice(0, 2); // Оставляем только первые две цифры после точки
+      decimalPart = decimalPart.slice(0, 2);
     }
-    inputSumValue = `${wholePart}.${decimalPart}`; // Объединяем обратно
+    inputSumValue = `${wholePart}.${decimalPart}`;
   }
 
+  // Ограничение максимальной длины до 20 символов
+  if (inputSumValue.length > 20) {
+    inputSumValue = inputSumValue.slice(0, 20);
+  }
+
+  // Если введен 0 в начале и нет точки, добавляем "0."
   if (dotCount === 0 && inputSumValue === "0") {
-    // Если введен 0 в начале и нет точки, добавляем 0.
     formattedInputValue = "0.";
   } else {
     formattedInputValue = inputSumValue;
   }
 
-  input.value = formattedInputValue; // Устанавливаем отформатированное значение
-}
+  // Устанавливаем отформатированное значение
+  input.value = formattedInputValue;
 
-export function onPhoneKeyDown(e) {
-  let input = e.target;
-  let inputValue = getInputSumValue(input);
-
-  if (
-    e.keyCode === 8 && // Проверка нажатия клавиши Backspace
-    inputValue.length == 2 &&
-    inputValue[inputValue.length - 1] == "." // Проверяем, что последний символ - точка
-  ) {
-    input.value = ""; // Очищаем поле
+  // Восстанавливаем курсор после точки
+  if (formattedInputValue === "0.") {
+    input.setSelectionRange(2, 2); // Устанавливаем курсор после точки
+  } else {
+    input.setSelectionRange(cursorPosition, cursorPosition); // Восстанавливаем курсор
   }
 }
 
-export async function getAllCategory() {
+function convertTimeToUtc(localDate, localTime) {
+  const transactionDateTime = `${localDate}T${localTime}:00`;
+
+  const transactionDateLocal = new Date(transactionDateTime);
+
+  const transactionDateUTC = new Date(
+    transactionDateLocal.getTime() -
+      transactionDateLocal.getTimezoneOffset() * 60000
+  );
+  const transactionDateUTCString = transactionDateUTC.toISOString();
+
+  return transactionDateUTCString;
+}
+
+export async function createNewTransaction(type) {
+  const form = document.querySelector(".modal");
+  const button = form.querySelector(`#buttonCreate${type}`);
+  button.classList.add("disable");
+
+  // Общие поля
+  const event_id = parseInt(localStorage.getItem("event"), 10);
+  const dateTransaction = form.querySelector("#dateTransaction").value;
+  const timeTransaction =
+    form.querySelector("#timeTransaction").value || "00:00";
+  const dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
+  const description =
+    form.querySelector("#modalInputDescription").value || null;
+  const access_token = localStorage.getItem("access_token");
+
+  // Переменные для хранения данных
+  let source_account_id,
+    target_account_id,
+    category_id,
+    amount,
+    destinationAccountId,
+    receipt_id,
+    transfer_fee;
+
   try {
-    const allCategories = await getCategoryTransaction();
+    let response;
 
-    allCategories.forEach((item) => {
-      idToNameMap[item.id] = item.name;
+    // Развилка по типу транзакции
+    if (type === "Expense") {
+      category_id = parseInt(localStorage.getItem("transactionCategoryId"), 10);
+      source_account_id = parseInt(localStorage.getItem("sourceAccountId"), 10);
+      amount = parseFloat(form.querySelector("#inputAmountExpense").value);
 
-      if (item.sub_categories && item.sub_categories.length > 0) {
-        // Проход по подкатегориям
-        item.sub_categories.forEach((subCategory) => {
-          idToNameMap[subCategory.id] = subCategory.name;
-        });
+      if (isNaN(amount) || amount <= 0) {
+        const errorMessage = `Сумма должна быть больше 0`;
+        createToast("error", errorMessage);
+        return;
       }
-    });
+
+      // Вызываем API для создания расхода
+      response = await createTransactionApi(
+        event_id,
+        type,
+        category_id,
+        amount,
+        dateUTCString,
+        description,
+        receipt_id,
+        source_account_id,
+        target_account_id,
+        access_token
+      );
+    } else if (type === "Income") {
+      category_id = parseInt(localStorage.getItem("transactionCategoryId"), 10);
+      target_account_id = parseInt(localStorage.getItem("sourceTargetId"), 10);
+      amount = parseFloat(form.querySelector("#inputAmountIncome").value);
+
+      if (isNaN(amount) || amount <= 0) {
+        const errorMessage = `Сумма должна быть больше 0`;
+        createToast("error", errorMessage);
+        return;
+      }
+
+      // Вызываем API для создания дохода
+      response = await createTransactionApi(
+        event_id,
+        type,
+        category_id,
+        amount,
+        dateUTCString,
+        description,
+        receipt_id,
+        source_account_id,
+        target_account_id,
+        access_token
+      );
+    } else if (type === "Transfer") {
+      category_id = 18;
+      source_account_id = parseInt(localStorage.getItem("sourceAccountId"), 10);
+      target_account_id = parseInt(localStorage.getItem("sourceTargetId"), 10);
+      amount = parseFloat(form.querySelector("#inputAmountTransfer").value);
+      transfer_fee =
+        parseFloat(form.querySelector("#inputTransferFee").value) || 0;
+
+      if (isNaN(amount) || amount <= 0) {
+        const errorMessage = `Сумма должна быть больше 0`;
+        createToast("error", errorMessage);
+        return;
+      }
+
+      // Вызываем API для создания перевода
+      response = await createTransactionApi(
+        event_id,
+        type,
+        category_id,
+        amount,
+        dateUTCString,
+        description,
+        receipt_id,
+        source_account_id,
+        target_account_id,
+        access_token,
+        transfer_fee
+      );
+    } else {
+      throw new Error("Неизвестный тип транзакции");
+    }
+
+    // Если все прошло успешно
+    closeDialog();
+    const successMessage = `Транзакция успешно изменена`;
+    createToast("success", successMessage);
+    setTimeout(manageLogicTransactions, 10);
   } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
+    // В случае ошибки
+    closeDialog();
+    const errorMessage = error.message || "Произошла ошибка";
+    createToast("error", errorMessage);
+
+    // Восстановление состояния кнопки
+    setTimeout(() => {
+      button.classList.remove("disable");
+    }, 10000);
   }
+}
+
+export async function updateTransaction(type) {
+  const form = document.querySelector(".modal");
+  const button = form.querySelector(`#buttonEdit${type}`);
+  button.classList.add("disable");
+
+  // Общие поля
+  const event_id = parseInt(localStorage.getItem("event"), 10);
+  const transaction_id = parseInt(localStorage.getItem("transactionId"), 10);
+  const dateTransaction = form.querySelector("#dateTransaction").value;
+  const timeTransaction =
+    form.querySelector("#timeTransaction").value || "00:00";
+  const dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
+  const description =
+    form.querySelector("#modalInputDescription").value || null;
+  const access_token = localStorage.getItem("access_token");
+
+  // Переменные для хранения данных
+  let source_account_id,
+    target_account_id,
+    category_id,
+    amount,
+    receipt_id,
+    transfer_fee;
+
+  try {
+    let response;
+
+    // Развилка по типу транзакции
+    if (type === "Expense") {
+      const inputCategory = form.querySelector("#modalInputCategoryId");
+      category_id = parseInt(inputCategory.dataset.categoryId, 10);
+      const inputSourceAccountId = form.querySelector(
+        "#modalInputSourceAccountId"
+      );
+      source_account_id = parseInt(
+        inputSourceAccountId.dataset.sourceAccountId,
+        10
+      );
+
+      amount = parseFloat(form.querySelector("#inputAmountExpense").value);
+
+      if (isNaN(amount) || amount <= 0) {
+        const errorMessage = `Сумма должна быть больше 0`;
+        createToast("error", errorMessage);
+        return;
+      }
+
+      response = await updateTransactionApi(
+        transaction_id,
+        event_id,
+        type,
+        category_id,
+        amount,
+        dateUTCString,
+        description,
+        receipt_id,
+        source_account_id,
+        target_account_id,
+        access_token
+      );
+    } else if (type === "Income") {
+      const inputCategory = form.querySelector("#modalInputCategoryId");
+      category_id = parseInt(inputCategory.dataset.categoryId, 10);
+
+      const inputTargetAccountId = form.querySelector(
+        "#modalInputTargetAccountId"
+      );
+      console.log(inputTargetAccountId);
+      target_account_id = parseInt(
+        inputTargetAccountId.dataset.targetAccountId,
+        10
+      );
+
+      amount = parseFloat(form.querySelector("#inputAmountIncome").value);
+
+      if (isNaN(amount) || amount <= 0) {
+        const errorMessage = `Сумма должна быть больше 0`;
+        createToast("error", errorMessage);
+        return;
+      }
+
+      response = await updateTransactionApi(
+        transaction_id,
+        event_id,
+        type,
+        category_id,
+        amount,
+        dateUTCString,
+        description,
+        receipt_id,
+        source_account_id,
+        target_account_id,
+        access_token
+      );
+    } else if (type === "Transfer") {
+      category_id = 18;
+
+      const inputSourceAccountId = form.querySelector(
+        "#modalInputSourceAccountId"
+      );
+      source_account_id = parseInt(
+        inputSourceAccountId.dataset.sourceAccountId,
+        10
+      );
+
+      const inputTargetAccountId = form.querySelector(
+        "#modalInputTargetAccountId"
+      );
+
+      target_account_id = parseInt(
+        inputTargetAccountId.dataset.targetAccountId,
+        10
+      );
+
+      amount = parseFloat(form.querySelector("#inputAmountTransfer").value);
+      transfer_fee =
+        parseFloat(form.querySelector("#inputTransferFee").value) || 0;
+
+      if (isNaN(amount) || amount <= 0) {
+        const errorMessage = `Сумма должна быть больше 0`;
+        createToast("error", errorMessage);
+        return;
+      }
+
+      response = await updateTransactionApi(
+        transaction_id,
+        event_id,
+        type,
+        category_id,
+        amount,
+        dateUTCString,
+        description,
+        receipt_id,
+        source_account_id,
+        target_account_id,
+        access_token,
+        transfer_fee
+      );
+    } else {
+      throw new Error("Неизвестный тип транзакции");
+    }
+
+    // Если все прошло успешно
+    closeDialog();
+    const successMessage = `Транзакция успешно добавлена`;
+    createToast("success", successMessage);
+    setTimeout(manageLogicTransactions, 10);
+  } catch (error) {
+    // В случае ошибки
+    closeDialog();
+    const errorMessage = error.message || "Произошла ошибка";
+    createToast("error", errorMessage);
+
+    // Восстановление состояния кнопки
+    setTimeout(() => {
+      button.classList.remove("disable");
+    }, 10000);
+  }
+}
+
+const MIN_PRELOADER_DURATION = 1000;
+
+export function toggleModalDropdown(dropdownId) {
+  const dropdown = document.getElementById(dropdownId);
+  const optionsContainer = document.querySelector(
+    `#${dropdownId} .modalOption`
+  );
+  const isActive = dropdown.classList.contains("active");
+
+  // Определение и вызов нужной функции для загрузки данных
+  switch (dropdownId) {
+    case "modalDropdownSourceAccount":
+      fillSourceAccountDirectory(optionsContainer);
+      break;
+    case "modalDropdownTargetAccount":
+      fillTargetAccountDirectory(optionsContainer);
+      break;
+    case "modalDropdownCategory":
+      fillCategoryDirectory(optionsContainer);
+      break;
+    default:
+      console.warn(`Unknown dropdownId: ${dropdownId}`);
+  }
+
+  toggleDropdownState(dropdown, isActive);
+
+  document.addEventListener("click", (event) =>
+    closeDropdownOnClick(event, dropdown, dropdownId)
+  );
+}
+
+// Функция для заполнения справочника значениями и установки значения в инпут
+function fillSourceAccountDirectory(options) {
+  options = options;
+  options.innerHTML = "";
+  if (!cachedActiveAccounts || cachedActiveAccounts.length === 0) {
+    options.classList.add("empty");
+    options.innerHTML = `
+    <div class="emptyMessage">
+      <span> Нет активных счетов. <a href="https://sweetcash.org/pages/events/index.html" class="createLink">Создай</a></span>
+    </div>
+    `;
+  } else {
+    cachedActiveAccounts.forEach((cachedActiveAccount) => {
+      var lista = options;
+      var listItem = document.createElement("li");
+      listItem.textContent = cachedActiveAccount.name;
+      listItem.setAttribute("data-id", cachedActiveAccount.id);
+
+      listItem.addEventListener("click", () => {
+        const inputElement = document.getElementById(
+          "modalInputSourceAccountId"
+        );
+        inputElement.value = cachedActiveAccount.name;
+        localStorage.setItem("sourceAccountId", cachedActiveAccount.id);
+      });
+
+      lista.appendChild(listItem);
+    });
+  }
+}
+
+function fillTargetAccountDirectory(options) {
+  options = options;
+  options.innerHTML = "";
+  if (!cachedActiveAccounts || cachedActiveAccounts.length === 0) {
+    options.classList.add("empty");
+    options.innerHTML = `
+    <div class="emptyMessage">
+      <span> Нет активных счетов. <a href="https://sweetcash.org/pages/events/index.html" class="createLink">Создай</a></span>
+    </div>
+    `;
+  } else {
+    cachedActiveAccounts.forEach((cachedActiveAccount) => {
+      var lista = options;
+      var listItem = document.createElement("li");
+      listItem.textContent = cachedActiveAccount.name;
+      listItem.setAttribute("data-id", cachedActiveAccount.id);
+
+      listItem.addEventListener("click", () => {
+        const inputElement = document.getElementById(
+          "modalInputTargetAccountId"
+        );
+        localStorage.setItem("sourceTargetId", cachedActiveAccount.id);
+        inputElement.value = cachedActiveAccount.name;
+      });
+
+      lista.appendChild(listItem);
+    });
+  }
+}
+
+// Функция для заполнения справочника значениями и установки значения в инпут
+function fillCategoryDirectory(options) {
+  options.innerHTML = "";
+  if (!cachedCategories || cachedCategories.length === 0) {
+    options.classList.add("empty");
+    options.innerHTML = `
+                        <div class="emptyMessage">
+                          <span> Нет категорий. Обратитесь в поддержку</span>
+                        </div>
+                        `;
+  } else {
+    const modal = document.querySelector(".modal");
+    const type = modal.id === "modalExpense" ? "Expense" : "Income";
+    renderCategoryTree(options, type);
+  }
+}
+
+// Функция для управления состоянием "active"
+function toggleDropdownState(dropdown, isActive) {
+  if (isActive) {
+    dropdown.classList.remove("active");
+  } else {
+    if (currentOpenDropdown) {
+      currentOpenDropdown.classList.remove("active");
+    }
+    dropdown.classList.add("active");
+    currentOpenDropdown = dropdown;
+  }
+}
+
+// Функция для закрытия dropdown при клике вне его
+function closeDropdownOnClick(event, dropdown, dropdownId) {
+  if (!event.target.closest(`#${dropdownId}`)) {
+    dropdown.classList.remove("active");
+    currentOpenDropdown = null;
+    document.removeEventListener("click", (e) =>
+      closeDropdownOnClick(e, dropdown, dropdownId)
+    );
+  }
+}
+
+function renderCategoryTree(lista, type) {
+  const filteredCategories = cachedCategories.filter(
+    (category) => category.type === type
+  );
+  lista.innerHTML = "";
+  createCategoryTree(filteredCategories, lista);
 }
 
 function createCategoryTree(categories, parentElement) {
-  // Находим элемент input с классом "categoryBox"
-  const inputElement = document.querySelector(".categoryBox");
-
-  // Создаем контейнер для дерева категорий
+  const inputElement = document.querySelector("#modalInputCategoryId");
   const treeContainer = document.createElement("div");
   treeContainer.classList.add("category-tree");
   parentElement.appendChild(treeContainer);
@@ -1175,22 +2183,18 @@ function createCategoryTree(categories, parentElement) {
   // Создаем дерево категорий
   createTree(categories, treeContainer);
 
-  // Обработчик кликов на контейнер дерева
   treeContainer.addEventListener("click", function (event) {
     const target = event.target;
 
-    // Если клик на элемент с классом toggle
     if (target.classList.contains("toggle")) {
-      event.stopPropagation(); // Предотвращаем всплытие события
+      event.stopPropagation();
 
       const listItem = target.parentNode;
       const subList = listItem.querySelector("ul");
 
       if (subList) {
-        // Переключаем видимость подкатегорий
         subList.hidden = !subList.hidden;
 
-        // Обновляем класс и текст toggleSpan
         if (subList.hidden) {
           target.classList.remove("minus");
           target.classList.add("plus");
@@ -1199,434 +2203,13 @@ function createCategoryTree(categories, parentElement) {
           target.classList.add("minus");
         }
       }
-    }
-    // Если клик на <li> или <span> (с именем категории)
-    else if (target.tagName === "SPAN" || target.tagName === "LI") {
-      // Определяем элемент <li>, на который был произведен клик
+    } else if (target.tagName === "SPAN" || target.tagName === "LI") {
       const listItem = target.tagName === "SPAN" ? target.parentNode : target;
-      inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
-
-      localStorage.setItem("cat_transaction", listItem.getAttribute("data-id"));
-      formTransactions.dropdown1.classList.remove("active");
-
-      event.stopPropagation();
-      checkForChanges();
-    }
-  });
-}
-
-export async function getCategory() {
-  try {
-    const categories = await getCategoryTransaction();
-    cachedCategories = categories;
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
-}
-
-export function renderCategoryTree(type) {
-  const filteredCategories = cachedCategories.filter(
-    (category) => category.type === type
-  );
-
-  const lista = document.getElementById("optionCat");
-  lista.innerHTML = "";
-
-  // Создание корневого элемента UL
-  const rootUl = document.createElement("ul");
-  rootUl.classList.add("tree");
-  rootUl.id = "tree";
-  lista.appendChild(rootUl);
-
-  // Создание дерева категорий
-  createCategoryTree(filteredCategories, rootUl);
-}
-
-export function checkCreateTranForm() {
-  const dateTransaction = formTransactions.dateTransaction.value;
-  // const timeTransaction = formTransactions.timeTransaction.value;
-  const accountBox = formTransactions.accountBox.value;
-  const catTransaction = formTransactions.catTransaction.value;
-  const typeTransaction = formTransactions.typeTransaction.value;
-  const sumTransaction = formTransactions.sumTransaction.value;
-  if (
-    dateTransaction &&
-    // timeTransaction &&
-    sumTransaction &&
-    catTransaction &&
-    accountBox
-  ) {
-    formTransactions.createTra.classList.remove("disable");
-  } else {
-    formTransactions.createTra.classList.add("disable");
-  }
-}
-
-function getSelectedRadioValue() {
-  // Получаем все радиокнопки с классом 'custom-radio'
-  var radios = document.querySelectorAll(".custom-radio");
-
-  // Перебираем радиокнопки, чтобы найти выбранную
-  for (var i = 0; i < radios.length; i++) {
-    if (radios[i].checked) {
-      // Возвращаем значение выбранной радиокнопки
-      return radios[i].value;
-    }
-  }
-
-  // Если ни одна радиокнопка не выбрана, возвращаем null
-  return null;
-}
-
-function convertTimeToUtc(localDate, localTime) {
-  const transactionDateTime = `${localDate}T${localTime}:00`;
-
-  const transactionDateLocal = new Date(transactionDateTime);
-
-  const transactionDateUTC = new Date(
-    transactionDateLocal.getTime() -
-      transactionDateLocal.getTimezoneOffset() * 60000
-  );
-  const transactionDateUTCString = transactionDateUTC.toISOString();
-
-  return transactionDateUTCString;
-}
-
-export async function createNewTransaction() {
-  let buttonClicked = false;
-  formTransactions.createTra.classList.add("disable");
-  buttonClicked = true;
-
-  const eventId = localStorage.getItem("event");
-  const dateTransaction = formTransactions.dateTransaction.value;
-  let timeTransaction = formTransactions.timeTransaction.value;
-  const accountTransactionId = localStorage.getItem("account_id");
-  const catTransactionId = localStorage.getItem("cat_transaction");
-  const sumTransaction = formTransactions.sumTransaction.value;
-  const accessToken = localStorage.getItem("access_token");
-  // const dateTime = new Date(`${dateTransaction}T${timeTransaction}:00`);
-  const description = formTransactions.description.value || null;
-  const typeTransaction = getSelectedRadioValue();
-
-  if (!timeTransaction) {
-    timeTransaction = "00:00";
-  }
-
-  let dateUTCString = "";
-  dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
-
-  try {
-    const response = await createTransactionApi(
-      eventId,
-      typeTransaction,
-      catTransactionId,
-      sumTransaction,
-      dateUTCString,
-      description,
-      accountTransactionId,
-      accessToken
-    );
-
-    handleClickTra();
-    const successMessage = `Транзакция успешно добавленна`;
-    createToast("success", successMessage);
-    setTimeout(getTransactions, 100);
-    clearModalData();
-  } catch (error) {
-    setTimeout(() => {
-      formTransactions.createTra.classList.remove("disable");
-      buttonClicked = false;
-    }, 10000);
-  }
-}
-
-export async function updateTransaction() {
-  let buttonClicked = false;
-  formTransactions.createTra.classList.add("disable");
-  buttonClicked = true;
-  const eventId = localStorage.getItem("event");
-  const idTransaction = formTransactions.idTransaction.value;
-  const dateTransaction = formTransactions.dateTransaction.value;
-  const timeTransaction = formTransactions.timeTransaction.value;
-  const catTransactionId = localStorage.getItem("cat_transaction");
-  const sumTransaction = formTransactions.sumTransaction.value;
-  const accessToken = localStorage.getItem("access_token");
-
-  const description = formTransactions.description.value || null;
-  const typeTransaction = getSelectedRadioValue();
-
-  let dateUTCString = "";
-  dateUTCString = convertTimeToUtc(dateTransaction, timeTransaction);
-
-  try {
-    const response = await updateTransactionApi(
-      idTransaction,
-      eventId,
-      typeTransaction,
-      catTransactionId,
-      sumTransaction,
-      dateUTCString,
-      description,
-      accessToken
-    );
-
-    handleClickTra();
-    const successMessage = `Транзакция успешно обновлена`;
-    createToast("success", successMessage);
-    setTimeout(getTransactions, 100);
-    clearModalData();
-    const changeBtn = document.getElementById("changeTra");
-    changeBtn.classList.add("disable");
-  } catch (error) {
-    setTimeout(() => {
-      buttonClicked = false;
-    }, 10000);
-  }
-}
-
-export function clearModalData() {
-  const InputId = document.getElementById("InputId");
-  InputId.value = "";
-  formTransactions.dateTransaction.value = ""; // Очищаем поле "Дата"
-  formTransactions.timeTransaction.value = ""; // Очищаем поле "Время"
-  formTransactions.accountBox.value = "";
-  // Очищаем выбранные радиокнопки
-  formTransactions.radioButtons.forEach((getTransactionButton) => {
-    getTransactionButton.checked = false;
-  });
-  formTransactions.catTransaction.value = ""; // Очищаем поле "Категория"
-  formTransactions.sumTransaction.value = ""; // Очищаем поле "Сумма"
-  formTransactions.description.value = ""; // Очищаем поле "Описание"
-}
-
-export function checkEditTranForm() {
-  const formTransactions = {
-    dateTransaction: document.getElementById("dateTr"),
-    timeTransaction: document.getElementById("timeTr"),
-    catTransaction: document.querySelector(".categoryBox"),
-    typeTransaction: document.querySelector(
-      'input[name="typeTransaction"]:checked'
-    ),
-
-    sumTransaction: document.getElementById("sumTransaction"),
-    description: document.getElementById("descriptionTran"),
-  };
-
-  const initialValues = {
-    dateTransaction: formTransactions.dateTransaction.value,
-    timeTransaction: formTransactions.timeTransaction.value,
-    catTransaction: formTransactions.catTransaction.value,
-    typeTransaction: formTransactions.typeTransaction
-      ? formTransactions.typeTransaction.value
-      : null,
-    sumTransaction: formTransactions.sumTransaction.value,
-    description: formTransactions.description.value,
-  };
-
-  const handleChange = (e) => {
-    const { id, value, type, name, checked } = e.target;
-    let currentValue =
-      type === "radio" && checked ? value : formTransactions[id]?.value || "";
-
-    if (type === "radio") {
-      currentValue = document.querySelector(
-        `input[name="${name}"]:checked`
-      )?.value;
-    }
-
-    const initial = initialValues[id];
-    if (currentValue !== undefined && currentValue !== initial) {
-    } else {
-    }
-  };
-
-  Object.values(formTransactions).forEach((field) => {
-    if (field.type === "radio") {
-      const radios = document.querySelectorAll(`input[name="${field.name}"]`);
-      radios.forEach((radio) => {
-        radio.addEventListener("change", handleChange);
-      });
-    } else {
-      field.addEventListener("input", handleChange);
-    }
-  });
-}
-
-export async function checkAndUpdateToken() {
-  const expireAt = localStorage.getItem("expire_at");
-  if (!expireAt) return;
-
-  const expireTime = new Date(expireAt).getTime();
-  const currentTime = Date.now();
-  const timeLeft = expireTime - currentTime;
-
-  if (timeLeft <= 2 * 60 * 10000) {
-    // 2 минуты в миллисекундах
-    try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      await refreshAccessToken(refreshToken);
-    } catch (error) {
-      setTimeout(() => {
-        checkAndUpdateToken();
-      }, 60 * 1000); // Повторить попытку через 1 минуту
-    }
-  } else if (timeLeft > 2 * 60 * 1000) {
-    setTimeout(checkAndUpdateToken, timeLeft - 2 * 60 * 1000); // Запланировать обновление за 2 минуты до истечения
-  }
-}
-
-export function redirectToAuth() {
-  const access_token = localStorage.getItem("access_token");
-  if (!access_token) {
-    window.location.href = "../../pages/auth/index.html";
-  }
-}
-
-function validateQrCode(message) {
-  const regex =
-    /^t=\w{1,}&s=[a-zA-Z0-9.]{1,}&fn=\w{1,}&i=\w{1,}&fp=\w{1,}&n=\w{1,}$/;
-  return regex.test(message);
-}
-
-async function onScanSuccess(decodedText, decodedResult) {
-  // handle the scanned code as you like, for example:
-
-  const access_token = localStorage.getItem("access_token");
-  const event_id = localStorage.getItem("event");
-
-  html5QrcodeScanner
-    .clear()
-    .then((ignore) => {
-      // QR Code scanning is stopped.
-    })
-    .catch((err) => {
-      // Stop failed, handle it.
-    });
-
-  if (!validateQrCode(decodedText)) {
-    alert("Это не QR код");
-    formTransactions.modalElementScan.close();
-    formTransactions.buttonScanQr.classList.remove("disable");
-    formTransactions.buttonScanQr.disabled = false;
-  } else {
-  }
-
-  try {
-    const response = await createReceiptApi(
-      event_id,
-      decodedText,
-      access_token
-    );
-  } catch (error) {
-  } finally {
-    formTransactions.buttonScanQr.classList.remove("disable");
-    formTransactions.buttonScanQr.disabled = false;
-    formTransactions.modalElementScan.close();
-  }
-}
-
-function onScanFailure(error) {
-  // handle scan failure, usually better to ignore and keep scanning.
-  // for example:
-  console.warn(`Code scan error = ${error}`);
-}
-
-let html5QrcodeScanner = new Html5QrcodeScanner(
-  "reader",
-  { fps: 50, qrbox: { width: 250, height: 250 } },
-  /* verbose= */ false
-);
-
-export function openQrScanner() {
-  formTransactions.buttonScanQr.disabled = true;
-  formTransactions.buttonScanQr.classList.add("disable");
-  formTransactions.modalElementScan.showModal();
-
-  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-}
-
-const MIN_PRELOADER_DURATION = 1000; // Минимальная продолжительность в миллисекундах (1 секунда)
-
-export function hidePreloader() {
-  const preloader = document.getElementById("preloader");
-  if (preloader) {
-    // Устанавливаем текущее время и время, когда прелоадер должен исчезнуть
-    const startTime = new Date().getTime();
-    const hideTime = startTime + MIN_PRELOADER_DURATION;
-
-    // Функция для скрытия прелоадера
-    function removePreloader() {
-      preloader.style.opacity = "0"; // Плавное исчезновение
-      setTimeout(() => {
-        preloader.style.display = "none"; // Полное удаление с экрана
-      }, 500); // Время плавного исчезновения
-    }
-
-    // Определяем текущее время и вычисляем оставшееся время
-    const currentTime = new Date().getTime();
-    const delay = Math.max(0, hideTime - currentTime);
-
-    // Устанавливаем таймер на минимальное время или задержку до текущего времени
-    setTimeout(removePreloader, delay);
-  }
-}
-
-export async function getActiveAccounts() {
-  try {
-    const access_token = localStorage.getItem("access_token");
-    const activeAccounts = await getAllMyAccountsApi(access_token, false);
-    cachedActiveAccounts = activeAccounts;
-
-    renderAccount();
-  } catch (error) {
-    console.error("Ошибка при выполнении запроса:", error);
-  }
-}
-
-export function toggleDropdownAcc(event) {
-  formTransactions.dropdownAcc.classList.toggle("active");
-  event.stopPropagation();
-  formTransactions.dropdown1.classList.remove("active");
-}
-
-export function renderAccount() {
-  const inputElement = document.querySelector(".accountBox");
-
-  const lista = document.getElementById("optionAcc");
-  lista.innerHTML = "";
-
-  const treeContainer = document.createElement("div");
-  treeContainer.classList.add("account-div");
-  lista.appendChild(treeContainer);
-
-  cachedActiveAccounts.forEach((account) => {
-    const accountId = account.id;
-    const accountName = account.name;
-
-    const listItem = document.createElement("li");
-    listItem.setAttribute("data-id", accountId);
-    listItem.setAttribute("data-name", accountName);
-
-    const span = document.createElement("span");
-    span.textContent = accountName;
-
-    listItem.appendChild(span);
-    treeContainer.appendChild(listItem);
-  });
-
-  treeContainer.addEventListener("click", function (event) {
-    const target = event.target;
-
-    // Если клик на <li> или <span> (с именем категории)
-    if (target.tagName === "SPAN" || target.tagName === "LI") {
-      // Определяем элемент <li>, на который был произведен клик
-      const listItem = target.tagName === "SPAN" ? target.parentNode : target;
-      inputElement.value = listItem.getAttribute("data-name"); // Заполняем input именем категории
-
-      localStorage.setItem("account_id", listItem.getAttribute("data-id"));
-      formTransactions.dropdown2.classList.remove("active");
-
-      event.stopPropagation();
+      inputElement.value = listItem.getAttribute("data-name");
+      localStorage.setItem(
+        "transactionCategoryId",
+        listItem.getAttribute("data-id")
+      );
     }
   });
 }

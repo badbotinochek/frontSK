@@ -1,4 +1,12 @@
 export const formEvent = {
+  buttonsOpenModal: document.querySelector(".buttonOpenModal"),
+
+  modalMain: document.getElementById("mainModal"),
+  modalMainContent: document.querySelector(".modalMainContent"),
+
+  modalMinor: document.getElementById("minorModal"),
+  modalMinorContent: document.querySelector(".modalMinorContent"),
+
   createEventButton: document.getElementById("createEventButton"),
   modalEvent: document.getElementById("modalEvent"),
   idEventInput: document.getElementById("eventId"),

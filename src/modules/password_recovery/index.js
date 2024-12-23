@@ -6,8 +6,17 @@ import {
   recoveryPassword,
   removeEmailErrorStyle,
 } from "./utils.js";
+import {
+  hidePreloader,
+  handleTooltipMouseEnter,
+  handleTooltipMouseLeave,
+} from "../other_functions/shared_functions.js";
 
 window.onload = function () {
+  // Обработчики для отображению тултипов
+  document.addEventListener("mouseenter", handleTooltipMouseEnter, true);
+  document.addEventListener("mouseleave", handleTooltipMouseLeave, true);
+
   formPasswordRecovery.redirectAuthButton.addEventListener(
     "click",
     redirectAuth
@@ -24,4 +33,5 @@ window.onload = function () {
   );
 
   formPasswordRecovery.email.addEventListener("focus", removeEmailErrorStyle);
+  hidePreloader();
 };

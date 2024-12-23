@@ -10,134 +10,516 @@ import {
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { formEvent } from "./constants.js";
+import { eventsTemplateElements } from "./templates.js";
 
-export function sidebar() {
-  const sidebar = document.querySelector(".sidebar");
-  sidebar.addEventListener("mouseenter", function () {
-    this.classList.remove("close");
-  });
-
-  sidebar.addEventListener("mouseleave", function () {
-    this.classList.add("close");
-  });
-}
-
-let eventData = [];
-
-function fillModaShowlWithData(
-  id,
-  name,
-  start,
-  end,
-  description,
-  participants
-) {
-  formEvent.eventShowId.value = id;
-  formEvent.inputEventShowName.value = name;
-  formEvent.dateStartShowEvent.value = start;
-  formEvent.dateEndShowEvent.value = end;
-  formEvent.descriptionShowEvent.value = description;
-
-  const tableBody = document.querySelector(
-    "#modalShowEvent .tableContainer tbody"
-  );
-
-  tableBody.innerHTML = ""; // Очищаем таблицу перед добавлением новых участников
-
-  participants.forEach((participant) => {
-    const newRow = document.createElement("tr");
-    newRow.innerHTML = `
-      <td>${participant.id}</td>
-      <td>${participant.role}</td>
-    `;
-    tableBody.appendChild(newRow);
-  });
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-
-  return `${year}-${month}-${day}`;
-}
-
-let eventsData = [];
-
-function fillModalWithData(id, name, start, end, description, participants) {
-  formEvent.idEventInput.value = id;
-  formEvent.nameEventInput.value = name;
-  formEvent.dateStartEventInput.value = start;
-  formEvent.dateEndEventInput.value = end;
-  formEvent.descriptionEvent.value = description;
-
-  eventData = (id, name, start, end, description, participants);
-
-  const tableBody = document.querySelector(".tableContainer tbody");
-  tableBody.innerHTML = "";
-
-  participants.forEach((participant) => {
-    const newRow = document.createElement("tr");
-    newRow.dataset.userId = participant.id;
-    newRow.dataset.role = participant.role;
-    newRow.innerHTML = `
-        <td data-user-id="${participant.id}">${participant.id}</td>
-        <td data-role="${participant.role}">${participant.role}</td>
-      `;
-
-    tableBody.appendChild(newRow);
-  });
-  saveOriginalValues(id, name, start, end, description, participants);
-
-  checkForChanges();
-}
-
+// Общая функция, которая заполняет данными таблицу и навешивает обработчики
 export async function getMyEvents() {
   try {
     const access_token = localStorage.getItem("access_token");
     const responseData = await getMyEventsApi(access_token);
+
+    if (!responseData) {
+      throw new Error("API response is empty or undefined.");
+    }
+
+    // Передаем данные в функцию, которая заполняет таблицу
+    populateTableWithLiabilities(responseData);
+
+    // Добавляем обработчики событий
+    addListenersForIconsEdit(responseData);
+    addListenersForIconsShow(responseData);
+  } catch (error) {
+    console.error("Произошла ошибка:", error);
+    alert("Произошла ошибка при обращении к серверу.");
+  }
+}
+// Функция для заполнения данных в таблицу Счета
+function populateTableWithLiabilities(responseData) {
+  const tbody = document.querySelector("#MyEventsTable tbody");
+  tbody.innerHTML = "";
+
+  responseData.forEach((event) => {
+    const startDate = new Date(event.start);
+    const startday = ("0" + startDate.getDate()).slice(-2);
+    const startmonth = ("0" + (startDate.getMonth() + 1)).slice(-2);
+    const startyear = startDate.getFullYear();
+    const starthours = ("0" + startDate.getHours()).slice(-2);
+    const startminutes = ("0" + startDate.getMinutes()).slice(-2);
+    const startseconds = ("0" + startDate.getSeconds()).slice(-2);
+    const formattedStartDate = `${startday}.${startmonth}.${startyear}`;
+
+    let formattedEndDate = "";
+    if (event.end) {
+      const endDate = new Date(event.end);
+      const endtday = ("0" + endDate.getDate()).slice(-2);
+      const endmonth = ("0" + (endDate.getMonth() + 1)).slice(-2);
+      const endyear = endDate.getFullYear();
+      const endhours = ("0" + endDate.getHours()).slice(-2);
+      const endminutes = ("0" + endDate.getMinutes()).slice(-2);
+      const endseconds = ("0" + endDate.getSeconds()).slice(-2);
+      formattedEndDate = `${endtday}.${endmonth}.${endyear}`;
+    } else {
+      formattedEndDate = "";
+    }
+
+    const participantsCount = event.participants.length;
+
+    const newRow = document.createElement("tr");
+    newRow.innerHTML = `
+            <td>${event.name}</td>
+            <td>${formattedStartDate}</td>
+            <td>${formattedEndDate}</td>
+            <td>${participantsCount}</td>
+            <td> 
+                  <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShowEvent" data-measure-id="${event.id}" > 
+                  <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEditEvent" data-measure-id="${event.id}">
+            </td>`;
+
+    tbody.appendChild(newRow);
+  });
+}
+// Функция для навешивания обработчиков на иконку Редактирование счета
+function addListenersForIconsEdit(responseData) {
+  const iconsEdit = document.querySelectorAll(".iconEditEvent");
+  iconsEdit.forEach(function (icon) {
+    icon.addEventListener("click", function (event) {
+      const row = icon.closest("tr");
+      const idMeasureEdit =
+        row.querySelector(".iconEditEvent").dataset.measureId;
+      const measure = responseData.find(
+        (measure) => measure.id == idMeasureEdit
+      );
+      handleOpenMainModal("edit", measure);
+    });
+  });
+}
+// Функция для навешивания обработчиков на иконку Просмотра счета
+function addListenersForIconsShow(responseData) {
+  const iconsEdit = document.querySelectorAll(".iconShowEvent");
+  iconsEdit.forEach(function (icon) {
+    icon.addEventListener("click", function (event) {
+      const row = icon.closest("tr");
+      const idMeasureShow =
+        row.querySelector(".iconShowEvent").dataset.measureId;
+      const measure = responseData.find(
+        (measure) => measure.id == idMeasureShow
+      );
+      handleOpenMainModal("view", measure);
+    });
+  });
+}
+// Общая функция для управления диалогового окна "Просмотр/редактирование счета"
+function handleOpenMainModal(mode, measure) {
+  // Добавляем в диалог HTML
+  fillMainDialogWithHTML(mode);
+
+  // Если measure передан, заполняем форму данными
+  if (measure) {
+    fillEventDialogFields(measure);
+  }
+
+  // Добавляем класс disabled ко всем элементам для режима veiw и убираем placeholders
+  if (mode === "view") {
+    disableModalInputs();
+  }
+
+  // Устанавливаем на диалоговое окно обработчики
+  addEventListeners(mode);
+
+  // Отображаем диалоговое окно
+  openDialog();
+}
+// Единая функция, которая вставляет в диалоговое окно HTML
+function fillMainDialogWithHTML(mode) {
+  const modalMainContent = formEvent.modalMainContent;
+
+  // Очищаем текущее содержимое
+  modalMainContent.innerHTML = "";
+
+  // Создаём заголовок
+  const title = document.createElement("h2");
+  title.id = "modalMainTitle";
+
+  if (mode === "create") {
+    title.textContent = "Создание мероприятия";
+  } else if (mode === "edit") {
+    title.textContent = "Редактирование мероприятия";
+  } else if (mode === "view") {
+    title.textContent = "Просмотр мероприятия";
+  } else {
+    title.textContent = "Неизвестный режим";
+  }
+
+  // Создаём форму
+  const form = document.createElement("form");
+  form.id = "modalForm";
+
+  // Формируем содержимое формы в зависимости от сущности
+  let formHTML = "";
+  if (mode === "create") {
+    formHTML += eventsTemplateElements.name;
+    formHTML += eventsTemplateElements.period;
+    formHTML += eventsTemplateElements.description;
+    formHTML += eventsTemplateElements.buttons.create;
+  } else if (mode === "edit") {
+    formHTML += eventsTemplateElements.id;
+    formHTML += eventsTemplateElements.name;
+    formHTML += eventsTemplateElements.period;
+    formHTML += eventsTemplateElements.description;
+    formHTML += eventsTemplateElements.participant;
+    formHTML += eventsTemplateElements.addParticipantButton;
+    formHTML += eventsTemplateElements.buttons.edit;
+  } else if (mode === "view") {
+    formHTML += eventsTemplateElements.id;
+    formHTML += eventsTemplateElements.name;
+    formHTML += eventsTemplateElements.period;
+    formHTML += eventsTemplateElements.description;
+    formHTML += eventsTemplateElements.participant;
+    formHTML += eventsTemplateElements.buttons.view;
+  }
+
+  // Устанавливаем содержимое формы
+  form.innerHTML = formHTML;
+
+  // Добавляем заголовок и форму в модальное окно
+  modalMainContent.appendChild(title);
+  modalMainContent.appendChild(form);
+
+  // Не знаю почему но в поле "Описание" при создании диалогового окна создается 3 пробела. Код ниже удаляет это
+  const textInput = document.getElementById("modalInputDescription");
+  const cleanedText = textInput.value.trim();
+  textInput.value = cleanedText;
+}
+function fillEventDialogFields(event) {
+  if (!event || typeof event !== "object") {
+    console.error("Передан некорректный объект для заполнения диалога.");
+    return;
+  }
+
+  // Уникальный идентификатор
+  const inputId = document.getElementById("inputId");
+  if (inputId) {
+    inputId.value = event.id || "";
+  }
+
+  // Наименование мероприятия
+  const inputName = document.getElementById("inputName");
+  if (inputName) {
+    inputName.value = event.name || "";
+  }
+
+  // Дата начала
+  const dateStart = document.getElementById("dateStartEvent");
+  if (dateStart) {
+    dateStart.value = event.start ? event.start.split("T")[0] : ""; // Убираем время
+  }
+
+  // Дата окончания
+  const dateEnd = document.getElementById("dateEndEvent");
+  if (dateEnd) {
+    dateEnd.value = event.end ? event.end.split("T")[0] : ""; // Убираем время
+  }
+
+  // Описание
+  const inputDescription = document.getElementById("modalInputDescription");
+  if (inputDescription) {
+    inputDescription.value = event.description || "";
+  }
+
+  // Заполнение таблицы с участниками
+  populateTableWithParticipants(event.participants);
+}
+function populateTableWithParticipants(participants) {
+  const tableBody = document.querySelector(".customTableParticipant tbody");
+  tableBody.innerHTML = "";
+
+  const roleMap = {
+    Manager: "Менеджер",
+    Observer: "Контролер",
+    Partner: "Партнер",
+  };
+
+  // Заполняем таблицу участниками
+  participants.forEach((participant) => {
+    const mappedRole = roleMap[participant.role] || "Роль не указана";
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${participant.user_id}</td>
+      <td>${participant.user.name || "Без имени"}</td>
+     <td>${mappedRole}</td>`;
+    tableBody.appendChild(row);
+  });
+}
+// Добавляем класс disabled ко всем элементам для режима veiw
+function disableModalInputs() {
+  const modalMainContent = document.getElementById("mainModal"); // Получаем основной элемент модального окна
+  const elements = modalMainContent.querySelectorAll(
+    "input, textarea, modalInputStatus , button"
+  );
+
+  elements.forEach((element) => {
+    // Для кнопки "Добавить участника" добавляем атрибут disabled и класс disabled
+    if (element.classList.contains("closeDialogButton")) {
+      return;
+    } else {
+      // Для остальных элементов (кроме кнопки "Добавить участника") не изменяем состояние
+      element.classList.add("disabled");
+    }
+  });
+}
+// Основная функция для добавления обработчиков событий
+function addEventListeners(mode) {
+  const modal = formEvent.modalMain;
+  const closeButton = document.querySelector(".closeDialogButton");
+
+  // Обработчик кликов на кнопку Закрытия диалогового окна
+  closeButton.addEventListener("click", closeDialog);
+
+  // Обработчик кликов по форме
+  document.getElementById("modalForm").addEventListener("click", (event) => {
+    // В зависимости от режима выполняем соответствующие действия
+    if (mode === "create") {
+      handleCreateMode(modal);
+    } else if (mode === "edit") {
+      handleEditMode(event, modal);
+    }
+  });
+}
+// Обработчик для режима создания события
+function handleCreateMode(modal) {
+  const createEventButton = modal.querySelector(".createButton");
+
+  // Убираем старый обработчик и добавляем новый для кнопки создания
+  createEventButton.removeEventListener("click", handleCreateEvent);
+  createEventButton.addEventListener("click", handleCreateEvent);
+}
+// Обработчик для создания события
+function handleCreateEvent(e) {
+  const modal = formEvent.modalMain;
+  const createEventButton = modal.querySelector(".createButton");
+
+  // Проверка, если кнопка заблокирована
+  if (createEventButton.classList.contains("disable")) {
+    e.preventDefault();
+    return;
+  }
+
+  // Если кнопка активна, вызываем функцию создания события
+  createNewEvent();
+}
+async function createNewEvent() {
+  const accessToken = localStorage.getItem("access_token");
+  const modal = formEvent.modalMain;
+  const button = document.querySelector(".createButton");
+  const name = modal.querySelector("#inputName").value.trim();
+  const dateStart = modal.querySelector("#dateStartEvent").value.trim();
+  const dateEnd = modal.querySelector("#dateEndEvent").value.trim() || null;
+  const description =
+    modal.querySelector("#modalInputDescription").value.trim() || null;
+
+  button.classList.add("disable");
+
+  const formatDate = (dateString) => {
+    const dateParts = dateString.split("-");
+    if (dateParts.length !== 3) {
+      throw new Error("Неверный формат даты");
+    }
+    const year = dateParts[0];
+    const month = dateParts[1].padStart(2, "0");
+    const day = dateParts[2].padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formattedStartDate = `${formatDate(dateStart)}T00:00:00.000Z`;
+  const formattedEndDate = dateEnd
+    ? `${formatDate(dateEnd)}T23:59:59.999Z`
+    : null;
+
+  try {
+    const response = await createEventApi(
+      name,
+      formattedStartDate,
+      formattedEndDate,
+      description,
+      accessToken
+    );
+
+    setTimeout(getMyEvents, 1000);
+    closeDialog();
+    const successMessage = `Мероприятие создано`;
+    createToast("success", successMessage);
+  } catch (error) {
+    setTimeout(() => {
+      button.classList.remove("disable");
+    }, 10000);
+  }
+}
+
+// Обработчик для режима редактирования
+function handleEditMode(event, modal) {
+  const target = event.target;
+
+  // Обработчик для кнопки "Поделиться счетом"
+  const shareButton = document.getElementById("openModalAddParticipanButton");
+  if (target === shareButton) {
+    event.stopPropagation();
+    event.preventDefault();
+    handleOpenAdditionalModal();
+  }
+
+  // Обработчик для сохранения изменений
+  // const saveChangeAccountButton = modal.querySelector(".editButton");
+  // saveChangeAccountButton.addEventListener("click", (e) => {
+  //   if (saveChangeAccountButton.classList.contains("disable")) {
+  //     e.preventDefault();
+  //     return;
+  //   }
+  //   updateAccount();
+  // });
+}
+// Единая функция для открытия диалогового окна "Добавить пользователя"
+function handleOpenAdditionalModal() {
+  // Добавляем в диалог HTML
+  fillAdditionalModalWithHTML();
+
+  // // Накидываем обработчики на вторичное диалоговое окно
+  // if (type == "addUser") {
+  //   addEventListenersForAdditionalModal();
+  // } else {
+  //   addEventListenersForDeleteUserModal(deleteUserId);
+  // }
+
+  // Отображаем диалоговое окно
+  openAdditionalModal();
+}
+// Единая функция, которая вставляет во вторичное диалоговое окно HTML
+function fillAdditionalModalWithHTML() {
+  const modal = document.getElementById("minorModal");
+  const modalContent = modal.querySelector(".modalMinorContent");
+
+  // Очищаем текущее содержимое
+  modalContent.innerHTML = "";
+
+  // Устанавливаем класс модального окна
+  modal.className = `modal modal${"participant"}`;
+
+  // Создаём заголовок
+  const title = document.createElement("h2");
+  title.id = "modalTitle";
+  title.textContent = "Добавление участника";
+
+  // Создаём форму
+  const form = document.createElement("form");
+  form.id = "additionalModalForm";
+
+  // Формируем содержимое формы в зависимости от сущности
+  let formHTML = "";
+
+  formHTML += addParticipantTemplateElements.addParticipant;
+
+  // Устанавливаем содержимое формы
+  form.innerHTML = formHTML;
+
+  // Добавляем заголовок и форму в модальное окно
+  modalContent.appendChild(title);
+  modalContent.appendChild(form);
+}
+
+// Навешиваем обработчики для диалогового окна "Просмотра/редактирования счета"
+function retert(mode) {
+  const modal = formEvent.modalMain;
+  const closeButton = document.querySelector(".closeDialogButton");
+
+  const inputId = document.getElementById("inputId");
+  const inputName = document.getElementById("inputName");
+  const inputStatus = document.getElementById("modalInputStatus");
+  const inputDescription = document.getElementById("modalInputDescription");
+  const saveChangeAccountButton = modal.querySelector(".editButton");
+
+  // Общий обработчик для закрытия окна
+  closeButton.addEventListener("click", () => {
+    closeDialog();
+  });
+
+  // Универсальный обработчик кликов для всего модального окна
+  document.getElementById("modalForm").addEventListener("click", (event) => {
+    const target = event.target;
+    if (mode === "create") {
+      const createEventButton = modal.querySelector(".createButton");
+      createEventButton.removeEventListener("click", handleCreateEvent);
+      createEventButton.addEventListener("click", handleCreateEvent);
+    } else if (mode === "view") {
+      const saveButton = document.querySelector(".viewButton");
+      if (target === saveButton) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    } else if (mode === "edit") {
+      // Проверяем клик по выпадающему списку и выполняем нужные действия
+      if (target.closest(".modalDropdown")) {
+        toggleDropdownState(target);
+      }
+      // Если кликнули по элементу списка, выбираем его и закрываем список
+      if (target.closest(".modalOption li")) {
+        selectDropdownItem(event);
+      }
+      // Закрытие выпадающего списка при клике вне его
+      document.addEventListener("click", (event) => {
+        closeDropdownOnClick(event);
+      });
+
+      // Обработчик для кнопки "Поделиться счетом"
+      const shareButton = document.getElementById("openModalAddUserButton");
+      if (target === shareButton) {
+        event.stopPropagation();
+        event.preventDefault();
+        handleOpenAdditionalModal("addUser");
+        // Ваш код для обработки действия по кнопке "Поделиться счетом"
+      }
+
+      // Обработчик для кнопки удаления пользователя
+      const deleteIcon = target.closest(".iconModalDelete"); // Ищем ближайший элемент с классом iconModalDelete
+      if (deleteIcon) {
+        const deleteUserId = deleteIcon.getAttribute("data-user-id"); // Получаем id пользователя из атрибута
+        handleOpenAdditionalModal("deleteUser", deleteUserId);
+      }
+      // Обработчики для отслеживания изменений
+
+      // Навешиваем обработчики
+      inputName.addEventListener("input", handleFieldChange);
+      inputDescription.addEventListener("input", handleFieldChange);
+
+      // Для изменения статуса через выпадающий список
+      inputStatus.addEventListener("click", () => {
+        const statusItems = document.querySelectorAll("#modalOptionStatus li");
+        statusItems.forEach((item) => {
+          item.addEventListener("click", () => {
+            inputStatus.value = item.textContent; // Обновляем значение поля
+            handleFieldChange(); // Проверяем изменения и обновляем состояние кнопки
+          });
+        });
+      });
+
+      saveChangeAccountButton.addEventListener("click", (e) => {
+        if (saveChangeAccountButton.classList.contains("disable")) {
+          e.preventDefault();
+          return;
+        }
+        updateAccount();
+      });
+    }
+  });
+}
+
+export async function getMyEventsенг() {
+  try {
+    const access_token = localStorage.getItem("access_token");
+
     eventsData = responseData;
-    const tbody = document.querySelector("#MyEventsTable tbody");
+
     tbody.innerHTML = "";
 
     responseData.forEach((event) => {
-      const startDate = new Date(event.start);
-      const startday = ("0" + startDate.getDate()).slice(-2);
-      const startmonth = ("0" + (startDate.getMonth() + 1)).slice(-2);
-      const startyear = startDate.getFullYear();
-      const starthours = ("0" + startDate.getHours()).slice(-2);
-      const startminutes = ("0" + startDate.getMinutes()).slice(-2);
-      const startseconds = ("0" + startDate.getSeconds()).slice(-2);
-      const formattedStartDate = `${startday}.${startmonth}.${startyear}`;
-
-      let formattedEndDate = "";
-      if (event.end) {
-        const endDate = new Date(event.end);
-        const endtday = ("0" + endDate.getDate()).slice(-2);
-        const endmonth = ("0" + (endDate.getMonth() + 1)).slice(-2);
-        const endyear = endDate.getFullYear();
-        const endhours = ("0" + endDate.getHours()).slice(-2);
-        const endminutes = ("0" + endDate.getMinutes()).slice(-2);
-        const endseconds = ("0" + endDate.getSeconds()).slice(-2);
-        formattedEndDate = `${endtday}.${endmonth}.${endyear}`;
-      } else {
-        formattedEndDate = "";
-      }
-
-      const participantsCount = event.participants.length;
-
-      const newRow = document.createElement("tr");
-      newRow.innerHTML = `
-              <td>${event.name}</td>
-              <td>${formattedStartDate}</td>
-              <td>${formattedEndDate}</td>
-              <td>${participantsCount}</td>
-              <td> 
-                    <img src="../../src/modules/events/asserts/show-regular-60.png" alt="Иконка" class="iconShow1" > 
-                    <img src="../../src/modules/transactions/asserts/pencil-solid-60.png" alt="Иконка" class="iconEdit" data-event-id="${event.id}">
-              </td>`;
-
       newRow.addEventListener("click", function () {
         const idEventEdit = event.id;
         const nameEvent = event.name;
@@ -254,6 +636,140 @@ export async function getMyEvents() {
     console.error("Произошла ошибка:", error);
     alert("Произошла ошибка при обращении к серверу.");
   }
+}
+
+// Функция для закрытия диалоговых окон
+export function closeDialog() {
+  // Получаем переменные из объекта formEvent
+  const modalMain = formEvent.modalMain;
+  const modalMinor = formEvent.modalMinor;
+  const additionalModal = formEvent.additionalModal;
+
+  // Если дополнительное модальное окно открыто, закрываем его и открываем основное
+  if (additionalModal && additionalModal.style.display === "flex") {
+    additionalModal.style.display = "none";
+    if (modalMain) {
+      modalMain.setAttribute("open", "false"); // Закрываем основное окно
+    }
+  } else if (modalMain && modalMain.hasAttribute("open")) {
+    modalMain.removeAttribute("open"); // Удаляем атрибут open, чтобы закрыть диалог
+  }
+}
+
+// Функция для управления диалогового окна "Создание счета"
+export function handleOpenModalCreate(event) {
+  const entity = event.target.dataset.entity;
+  const mode = event.target.dataset.mode;
+  fillMainDialogWithHTML(mode);
+  openDialog();
+  addEventListeners(mode);
+}
+
+// Функция для открытия диалогового окна "Создание счета"
+function openDialog() {
+  const modalMain = formEvent.modalMain;
+  modalMain.setAttribute("open", "true");
+}
+
+// Функция для проверки заполненности обязательных параметров
+export function checkRequiredFields(formId) {
+  const form = document.getElementById(formId);
+  const requiredFields = form.querySelectorAll(".requiredField");
+  const createButton = form.querySelector(".createButton");
+
+  if (createButton) {
+    let allFieldsFilled = true;
+
+    requiredFields.forEach((field) => {
+      if (!field.value.trim()) {
+        allFieldsFilled = false;
+      }
+    });
+
+    if (allFieldsFilled) {
+      createButton.classList.remove("disable");
+      createButton.disabled = false;
+      createButton.removeAttribute("data-tooltip");
+    } else {
+      createButton.classList.add("disable");
+      createButton.disabled = true;
+      createButton.setAttribute(
+        "data-tooltip",
+        "Заполните обязательные параметры"
+      );
+    }
+  }
+}
+
+let eventData = [];
+
+function fillModaShowlWithData(
+  id,
+  name,
+  start,
+  end,
+  description,
+  participants
+) {
+  formEvent.eventShowId.value = id;
+  formEvent.inputEventShowName.value = name;
+  formEvent.dateStartShowEvent.value = start;
+  formEvent.dateEndShowEvent.value = end;
+  formEvent.descriptionShowEvent.value = description;
+
+  const tableBody = document.querySelector(
+    "#modalShowEvent .tableContainer tbody"
+  );
+
+  tableBody.innerHTML = ""; // Очищаем таблицу перед добавлением новых участников
+
+  participants.forEach((participant) => {
+    const newRow = document.createElement("tr");
+    newRow.innerHTML = `
+      <td>${participant.id}</td>
+      <td>${participant.role}</td>
+    `;
+    tableBody.appendChild(newRow);
+  });
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${year}-${month}-${day}`;
+}
+
+let eventsData = [];
+
+function fillModalWithData(id, name, start, end, description, participants) {
+  formEvent.idEventInput.value = id;
+  formEvent.nameEventInput.value = name;
+  formEvent.dateStartEventInput.value = start;
+  formEvent.dateEndEventInput.value = end;
+  formEvent.descriptionEvent.value = description;
+
+  eventData = (id, name, start, end, description, participants);
+
+  const tableBody = document.querySelector(".tableContainer tbody");
+  tableBody.innerHTML = "";
+
+  participants.forEach((participant) => {
+    const newRow = document.createElement("tr");
+    newRow.dataset.userId = participant.id;
+    newRow.dataset.role = participant.role;
+    newRow.innerHTML = `
+        <td data-user-id="${participant.id}">${participant.id}</td>
+        <td data-role="${participant.role}">${participant.role}</td>
+      `;
+
+    tableBody.appendChild(newRow);
+  });
+  saveOriginalValues(id, name, start, end, description, participants);
+
+  checkForChanges();
 }
 
 let originalEventData = {};
@@ -743,74 +1259,6 @@ export function checkEventForm() {
   }
 }
 
-export async function createEvent() {
-  let buttonClicked = false;
-  formEvent.createModalEventButton.classList.add("disable");
-  buttonClicked = true;
-
-  const accessToken = localStorage.getItem("access_token");
-  const nameEventInput = formEvent.nameEventInput.value;
-  const dateStartEventInput = formEvent.dateStartEventInput.value;
-  const dateEndEventInput = formEvent.dateEndEventInput.value || null;
-  const descriptionEvent = formEvent.descriptionEvent.value || null;
-
-  const formatDate = (dateString) => {
-    const dateParts = dateString.split("-");
-    if (dateParts.length !== 3) {
-      throw new Error("Неверный формат даты");
-    }
-    const year = dateParts[0];
-    const month = dateParts[1].padStart(2, "0");
-    const day = dateParts[2].padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const formattedStartDate = `${formatDate(dateStartEventInput)}T00:00:00.000Z`;
-  const formattedEndDate = dateEndEventInput
-    ? `${formatDate(dateEndEventInput)}T23:59:59.999Z`
-    : null;
-
-  try {
-    const response = await createEventApi(
-      nameEventInput,
-      formattedStartDate,
-      formattedEndDate,
-      descriptionEvent,
-      accessToken
-    );
-
-    setTimeout(getMyEvents, 1000);
-
-    setTimeout(handleClickModelEvent, 1000);
-
-    const successMessage = `Мероприятие создано`;
-    createToast("success", successMessage);
-
-    // Добавляем вызов API метода createParticipantApi для каждой строки таблицы
-    const table = document.querySelector("#modalEvent .customTable");
-    const rows = table.querySelectorAll("tbody tr");
-
-    rows.forEach((row, index) => {
-      setTimeout(() => {
-        const eventId = response.id;
-        const userId = row.getAttribute("data-user-id");
-        const role = row.getAttribute("data-role");
-
-        createParticipantApi(eventId, userId, role, accessToken)
-          .then((response) => {})
-          .catch((error) => {
-            console.error("Ошибка при добавлении участника:", error);
-          });
-      }, index * 1000); // Задержка в миллисекундах, увеличиваемая на 1 секунду с каждой итерацией
-    });
-  } catch (error) {
-    setTimeout(() => {
-      formEvent.createModalEventButton.classList.remove("disable");
-      buttonClicked = false;
-    }, 10000);
-  }
-}
-
 export async function editEvent() {
   formEvent.editModalEventButton.classList.add("disable");
 
@@ -921,41 +1369,4 @@ export function clearModalData() {
 
   const tbodyedit = document.querySelector("#modalEvent .customTable tbody");
   tbodyedit.innerHTML = "";
-}
-
-export function redirectToAuth() {
-  const access_token = localStorage.getItem("access_token");
-  if (!access_token) {
-    window.location.href = "../auth/index.html";
-  }
-}
-
-export function exit() {
-  localStorage.clear();
-  window.location.href = "/pages/auth/index.html";
-}
-
-const MIN_PRELOADER_DURATION = 1000; // Минимальная продолжительность в миллисекундах (1 секунда)
-export function hidePreloader() {
-  const preloader = document.getElementById("preloader");
-  if (preloader) {
-    // Устанавливаем текущее время и время, когда прелоадер должен исчезнуть
-    const startTime = new Date().getTime();
-    const hideTime = startTime + MIN_PRELOADER_DURATION;
-
-    // Функция для скрытия прелоадера
-    function removePreloader() {
-      preloader.style.opacity = "0"; // Плавное исчезновение
-      setTimeout(() => {
-        preloader.style.display = "none"; // Полное удаление с экрана
-      }, 500); // Время плавного исчезновения
-    }
-
-    // Определяем текущее время и вычисляем оставшееся время
-    const currentTime = new Date().getTime();
-    const delay = Math.max(0, hideTime - currentTime);
-
-    // Устанавливаем таймер на минимальное время или задержку до текущего времени
-    setTimeout(removePreloader, delay);
-  }
 }

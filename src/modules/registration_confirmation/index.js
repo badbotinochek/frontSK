@@ -1,5 +1,9 @@
 import { formRegistrationConfirmation } from "./constants.js";
 import { redirectToReg, redirectToAuth } from "./utils.js";
+import {
+  handleTooltipMouseEnter,
+  handleTooltipMouseLeave,
+} from "../other_functions/shared_functions.js";
 
 window.onload = function () {
   formRegistrationConfirmation.redirectToAuthButton.addEventListener(

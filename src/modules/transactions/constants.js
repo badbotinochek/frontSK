@@ -1,38 +1,59 @@
 export const formTransactions = {
+  /* Переменные для sidebar */
+  sidebar: document.querySelector(".sidebar"),
+  exitButton: document.getElementById("exist"),
+
+  /* Переменные для navbar */
+  eventDropdown: document.getElementById("eventDropdown"),
+  eventOption: document.querySelector(".dropdownOptions"),
+  inputEvent: document.querySelector(".dropdownInput"),
+
+  startDateEvent: document.getElementById("startDate"),
+  endDateEvent: document.getElementById("endDate"),
+  buttonOpenModalExpense: document.getElementById("buttonOpenModalExpense"),
+  buttonOpenModalIncome: document.getElementById("buttonOpenModalIncome"),
+  buttonOpenModalTransaction: document.getElementById(
+    "buttonOpenModalTransaction"
+  ),
+  getTransactionButton: document.querySelector(".buttonGetAllTransaction"),
+  userIdElement: document.getElementById("user_id"),
+
+  /* Переменные для модального окна */
+
+  modalElement: document.querySelector(".modal"),
+
+  modalElementTr: document.getElementById("modalTransaction"),
+  dateTransaction: document.getElementById("dateTr"),
+  timeTransaction: document.getElementById("timeTr"),
+
+  modalDropdownAccount: document.getElementById("modalDropdownAccount"),
+  modalOptionAccount: document.getElementById("modalOptionAccount"),
+  modalInputAccount: document.getElementById(".modalInputAccount"),
+
+  option1: document.querySelector(".option1"),
+  dropdown1: document.querySelector(".dropdown1"),
+
+  sumTransactionInput: document.getElementById("inputAmountExpense"),
+
+  dropdownCat: document.getElementById("dropdownCat"),
+
+  descriptionTextarea: document.querySelector(".description"),
+
+  /* Переменные для sidebar */
   idTransaction: document.getElementById("InputId"),
-  start_date: document.getElementById("start-date"),
-  end_date: document.getElementById("end-date"),
-  input_event: document.querySelector(".text-box"),
-  getTransactionButton: document.querySelector(".get-button"),
+
   delete: document.querySelector(".delete-button"),
   aprove_delete: document.getElementById("deleteBtn"),
   cancel: document.getElementById("closeBtn"),
   create_transaction: document.getElementById("create-submit"),
   cancelTra: document.getElementById("closeBtnTra"),
-  events: document.querySelector(".text-box").value,
 
-  modalElement: document.getElementById("modal"),
-  modalElementTr: document.getElementById("modalTransaction"),
-  userIdElement: document.getElementById("user_id"),
-  descriptionTextarea: document.querySelector(".description"),
-  exit: document.getElementById("exist"),
-  dropdown: document.querySelector(".dropdown"),
-  option: document.querySelector(".option"),
-  option1: document.querySelector(".option1"),
-  dropdown1: document.querySelector(".dropdown1"),
-  sumTransactionInput: document.getElementById("sumTransaction"),
-  optionCat: document.getElementById("optionCat"),
-  dropdownCat: document.getElementById("dropdownCat"),
-  dropdownAcc: document.getElementById("dropdownAcc"),
-
-  dateTransaction: document.getElementById("dateTr"),
-  timeTransaction: document.getElementById("timeTr"),
-  accountBox: document.querySelector(".accountBox"),
-  typeTransaction: document.querySelector(".radio"),
   catTransaction: document.querySelector(".categoryBox"),
   sumTransaction: document.getElementById("sumTransaction"),
   description: document.getElementById("descriptionTran"),
-  createTra: document.getElementById("createTra"),
+
+  buttonCreateExpense: document.getElementById("buttonCreateExpense"),
+
   editTransactionButton: document.getElementById("changeTra"),
   row: document.querySelector(".custom-table tbody"),
   radioButtons: document.querySelectorAll('input[name="typeTransaction"]'),
@@ -49,13 +70,11 @@ export const formTransactions = {
 
   labelMoreTransaction: document.getElementById("more"),
 
-  buttonScanQr: document.getElementById("button_scan_qr"),
-
-  modalElementScan: document.getElementById("scanner-form"),
-  modalReceiptDetails: document.getElementById("receipt-details"),
-
   closeIcon: document.getElementById("close-icon"),
 
   dropdown2: document.querySelector(".dropdown2"),
   dropdownAcc: document.getElementById("dropdownAcc"),
+
+  modalTransaction: document.getElementById("modalTransaction"),
+  createExpenseButton: document.getElementById("createExpenseButton"),
 };

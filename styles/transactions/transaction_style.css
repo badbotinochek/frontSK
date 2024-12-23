@@ -1,0 +1,953 @@
+/* ===== Navbar ===== */
+.wrapper > div {
+  margin-right: 20px;
+}
+
+.dropdown {
+  position: relative;
+  width: 350px;
+}
+
+.dropdownInput {
+  width: 350px;
+  height: 40px;
+  padding: 0 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  outline: none;
+  background: #fff;
+  font-size: 15px;
+}
+
+.dropdownInput::placeholder {
+  color: var(--placeholder);
+  font-size: 15px;
+}
+
+.dropdownOptions {
+  position: absolute;
+  height: 115px;
+  top: 45px;
+  left: 0;
+  right: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: none;
+  z-index: 2;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.dropdownOptions.empty {
+  position: absolute;
+  height: 40px;
+  top: 45px;
+  left: 0;
+  right: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: none;
+  z-index: 2;
+  padding: 0;
+}
+
+.dropdown.active .dropdownOptions.empty {
+  display: block;
+}
+
+.dropdown.active .dropdownOptions {
+  display: block;
+}
+
+.dropdownOptions li {
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.dropdownOptions li:hover {
+  background: #f5f7fa;
+}
+
+.select_shevron {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.dropdown.active .select_shevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.emptyMessage {
+  padding: 10px;
+  color: var(--text);
+  text-align: center;
+  font-size: 15px;
+}
+
+.emptyMessage a.createLink {
+  color: #1242a2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.emptyMessage a.createLink:hover {
+  text-decoration: none;
+}
+
+.modalOption.empty {
+  position: absolute;
+  height: 40px;
+  top: 45px;
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: none;
+  z-index: 2;
+  padding: 0;
+  width: 103%;
+}
+
+.modalDropdown.active .modalOption.empty {
+  display: block;
+}
+
+.modalSelectShevron {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.modalDropdown.active .modalSelectShevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+input:focus,
+input[type="date"]:focus,
+input[type="time"]:focus {
+  border: 1px solid var(--border-selected);
+  outline: none;
+}
+
+/* ===== Поля выбора дат мероприятия ===== */
+
+.dateTimeTransaction {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 15px;
+}
+
+input[type="date"] {
+  padding: 12px 20px;
+  height: 40px;
+  width: 150px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 5px;
+  font-family: "Noto Sans SC";
+  font-size: 15px;
+}
+
+#timeTransaction {
+  width: 155px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  border-radius: 5px;
+  font-size: 15px;
+}
+
+input[type="date"].error {
+  border: 1px solid var(--error);
+}
+
+input:focus,
+input[type="date"]:focus,
+input[type="time"]:focus {
+  border: 1px solid var(--border-selected) !important;
+  outline: none;
+}
+
+.buttonGetAllTransaction,
+.buttonOpenModal {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 93px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 15px;
+}
+
+.buttonGetAllTransaction:hover,
+.buttonOpenModal:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.buttonGetAllTransaction.disable,
+.buttonOpenModal.disable {
+  background-color: var(--primary-button-color-disable);
+  pointer-events: all;
+  cursor: not-allowed;
+}
+
+#buttonOpenModalExpense {
+  background-color: #8f1c1cc4;
+}
+
+#buttonOpenModalExpense:hover {
+  background-color: #8f1c1ca6;
+}
+
+#buttonOpenModalExpense.disable {
+  pointer-events: all;
+  cursor: not-allowed;
+  background-color: #d3a6a6;
+}
+
+#buttonOpenModalIncome {
+  background-color: #368b15c2;
+}
+
+#buttonOpenModalIncome:hover {
+  background-color: #368b15a9;
+}
+
+#buttonOpenModalIncome.disable {
+  pointer-events: all;
+  cursor: not-allowed;
+  background-color: #b2d2a4;
+}
+
+/* ===== Информация о пользователе ===== */
+
+.user-info-container {
+  position: absolute;
+  top: 30px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  color: #5b5b5b;
+}
+
+.user-id-label {
+  display: inline-block;
+  color: #5b5b5b;
+  margin-right: 8px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+#user_id {
+  display: inline-block;
+  color: #5b5b5b;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+@media (max-width: 1550px) {
+  .user-info-container {
+    position: static;
+    margin-top: 10px;
+    justify-content: center;
+  }
+}
+
+/* ===== Таблица ===== */
+
+.table-container {
+  margin-left: 110px;
+  margin-right: 20px;
+  margin-top: 10px;
+  overflow-x: auto;
+  width: calc(100% - 130px);
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.custom-table {
+  height: auto;
+  width: 100%;
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  table-layout: fixed;
+  user-select: none;
+  table-layout: fixed;
+}
+
+th,
+td {
+  border-top: 1px solid #e4e7ed;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 10px 10px;
+  text-align: center;
+  height: 48px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: var(--sidebar-icon);
+  background-color: #faf8f8;
+  text-align: center;
+}
+
+td img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  text-align: center;
+}
+
+td img:hover {
+  filter: brightness(1%);
+}
+
+.numberTransaction {
+  width: 170px;
+}
+
+.receiptTransaction {
+  width: 80px;
+}
+
+.actionsTransaction {
+  width: 120px;
+}
+
+/* ===== Лейблы ===== */
+
+#transactionsLabel {
+  display: inline-block;
+  margin-left: 110px;
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+#infoTransactionsLabel {
+  margin-top: 20px;
+  font-size: 18px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#infoTransactionsLabel.disable {
+  display: none;
+}
+
+.dataBlockMore {
+  display: inline-block;
+  margin-left: 110px;
+  margin-top: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  position: relative;
+  color: #06c;
+}
+
+.dataBlockMore.disable {
+  display: none;
+}
+/* ===== Общие стили для модальных окон Транзакций ===== */
+
+.modalLabel {
+  margin-top: 25px;
+  color: #303131;
+  font-size: 18px;
+}
+.time {
+  margin-left: 148px;
+}
+
+.modalDropdown {
+  position: relative;
+  width: 350px;
+  margin-top: 5px;
+}
+
+.modalDropdown input {
+  position: relative;
+  background: #ffffff;
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  cursor: pointer;
+  outline: none;
+  font-size: 16px;
+}
+
+.modalDropdown input::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalOption {
+  background: #ffffff;
+  position: absolute;
+  width: 360px;
+  top: 50px;
+  border: 1px solid var(--border);
+  list-style: none;
+  border-radius: 5px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-y: scroll;
+  max-height: 125px;
+  display: none;
+  z-index: 2;
+}
+
+.modalDropdown.active .modalOption {
+  display: block;
+}
+
+.modalDropdown .modalOption {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modalDropdown .modalOption li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  background: transparent;
+  list-style-type: none;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.modalDropdown .modalOption li:hover {
+  background: #f5f7fa;
+  border-radius: 5px;
+}
+
+.select_shevron {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.dropdown.active .select_shevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.emptyMessage {
+  padding: 10px;
+  color: var(--text);
+  text-align: center;
+  font-size: 15px;
+}
+
+.emptyMessage a.createLink {
+  color: #1242a2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.emptyMessage a.createLink:hover {
+  text-decoration: none;
+}
+
+.toggle {
+  cursor: pointer;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  text-align: center;
+  line-height: 10px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.toggle.plus::before {
+  content: "+";
+}
+
+.toggle.minus::before {
+  content: "-";
+}
+
+.modalInput {
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+.modalInput::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalDescription {
+  margin-top: 5px;
+  width: 360px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+  font-size: 16px;
+  padding-top: 6px;
+}
+
+.modalDescription::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalDescription.focused {
+  border: 1px solid var(--border-selected);
+}
+
+.modal .buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: left;
+}
+
+.modal .createButton {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modal .createButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.modal .createButton.disable {
+  background-color: var(--primary-button-color-disable);
+  cursor: not-allowed;
+  pointer-events: all;
+}
+
+.createButton.Off {
+  display: none;
+}
+
+.modal .editButton {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modal .editButton.disable {
+  pointer-events: none;
+  background-color: var(--primary-button-color-disable);
+  opacity: 0.5;
+}
+
+.modal .editButton:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.editButton.Off {
+  display: none;
+}
+
+.closeDialogButton {
+  background: #82848a;
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  height: 40px;
+  border: none;
+  margin-left: 20px;
+  font-size: 16px;
+}
+
+.modal .closeDialogButton {
+  background-color: var(--secondary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.modal .closeDialogButton:hover {
+  background-color: var(--secondary-button-color-hover);
+}
+
+/* ===== Диалоговое окно ===== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 30px;
+}
+
+/* Общие стили для всех модальных окон */
+#modalExpense,
+#modalIncome,
+#modalTransfer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  padding: 0 20px 20px 20px;
+  border: none;
+  border-radius: 30px;
+  user-select: none;
+  visibility: hidden;
+  opacity: 0;
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  overflow: auto;
+  background: white;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  height: auto;
+}
+
+/* Стили для модальных окон при активации */
+#modalExpense[open],
+#modalIncome[open],
+#modalTransfer[open] {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Заголовки для каждого типа модального окна */
+#modalExpense #modalTitle {
+  margin-top: 20px;
+  color: #852020;
+  font-size: 28px;
+}
+
+#modalIncome #modalTitle {
+  margin-top: 20px;
+  color: #0f521f;
+  font-size: 28px;
+}
+
+#modalTransfer #modalTitle {
+  margin-top: 20px;
+  color: #10176d;
+  font-size: 28px;
+}
+
+/* Общие стили для всех модальных окон */
+#modalDeleteExpense,
+#modalDeleteIncome,
+#modalDeleteTransfer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  padding: 0 20px 20px 20px;
+  border: none;
+  border-radius: 30px;
+  user-select: none;
+  visibility: hidden;
+  opacity: 0;
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  overflow: auto;
+  background: white;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  height: auto;
+}
+
+/* Стили для модальных окон при активации */
+#modalDeleteExpense[open],
+#modalDeleteIncome[open],
+#modalDeleteTransfer[open] {
+  visibility: visible;
+  opacity: 1;
+}
+
+#modalDeleteExpense #modalTitle,
+#modalDeleteIncome #modalTitle,
+#modalDeleteTransfer #modalTitle {
+  margin-top: 20px;
+  font-size: 28px;
+}
+
+/* ===== Стили для модального окна Просмотр ===== */
+.modalDropdown input.disabled {
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.modalInput.disabled {
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.modalDescription.disabled {
+  border: 1px solid var(--border);
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+input[type="date"].disabled,
+input[type="time"].disabled {
+  background-color: #f5f5f5;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===== Стили для модального окна Удаление транзакции ===== */
+
+.modaltransaction {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 180px;
+  user-select: text;
+  visibility: visible;
+  overflow: auto;
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  opacity: 0;
+  visibility: hidden;
+  border: none;
+  border-radius: 30px;
+  user-select: none;
+  padding: 0 20px 20px 20px;
+}
+
+.modaltransaction[open] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modaltransaction #modalTitle {
+  margin-top: 20px;
+  color: #0b0b0c;
+  font-size: 30px;
+}
+
+.modaltransaction p {
+  padding-top: 2px;
+  color: #303131;
+  font-size: 19px;
+}
+
+p {
+  margin-top: 18px;
+  text-align: left;
+}
+
+.modaltransaction .buttonsConfirmationDeleteTransaction {
+  padding-top: 20px;
+}
+
+.modaltransaction #buttonDeleteTransaction {
+  background-color: var(--primary-button-color);
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  font-size: 16px;
+}
+
+.modaltransaction #buttonDeleteTransaction:hover {
+  background-color: var(--primary-button-color-hover);
+}
+
+.modal #buttonCloseDialogDeleteTransaction {
+  background-color: var(--secondary-button-color);
+  color: #ffffff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.modal #buttonCloseDialogDeleteTransaction:hover {
+  background-color: var(--secondary-button-color-hover);
+}
+
+#ShowdropdownCat {
+  margin-top: 5px;
+  width: 420px;
+}
+
+#showCatTran {
+  width: 420px;
+}
+
+.item {
+  user-select: none;
+}
+
+.text-box {
+  user-select: none;
+}
+
+.modalTr .label {
+  margin-top: 20px;
+}
+
+#dateTr {
+  width: 195px;
+  height: 40px;
+}
+*/
+
+/* ===== Радио кнопка "Тип" */
+
+/* .radio {
+  display: flex;
+  justify-content: left;
+  margin-top: 5px;
+}
+
+.custom-radio {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+} */
+
+/* для элемента label связанного с .custom-radio */
+/* .custom-radio + label {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+} */
+
+/* создание в label псевдоэлемента  before со следующими стилями */
+/* .custom-radio + label::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 50%;
+  margin-right: 0.5em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50% 50%;
+} */
+
+/* стили при наведении курсора на радио */
+.custom-radio:not(:disabled):not(:checked) + label:hover::before {
+  border-color: #b3d7ff;
+}
+
+/* стили для активной радиокнопки (при нажатии на неё) */
+.custom-radio:not(:disabled):active + label::before {
+  background-color: #b3d7ff;
+  border-color: #b3d7ff;
+}
+
+/* стили для радиокнопки, находящейся в фокусе и не находящейся в состоянии checked */
+.custom-radio:focus:not(:checked) + label::before {
+  border-color: #80bdff;
+}
+
+/* стили для радиокнопки, находящейся в состоянии checked */
+.custom-radio:checked + label::before {
+  border-color: #409eff;
+  background-color: #409eff;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+/* стили для радиокнопки, находящейся в состоянии disabled */
+.custom-radio:disabled + label::before {
+  background-color: #e9ecef;
+}
+
+.radio {
+  margin-bottom: 0.4em;
+}

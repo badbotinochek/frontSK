@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sweet Cash</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/modules/auth/asserts/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/modules/auth/asserts/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/modules/auth/asserts/favicon-16x16.png">
+    <link
+      rel="manifest"
+      href="../../src/modules/auth/asserts/site.webmanifest"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../../../styles/style.css" />
+    <link rel="stylesheet" href="../../../styles/debts/debts.css" />
+
+    <style>
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100000;
+        background: #ffffff;
+        backface-visibility: hidden;
+        & > div {
+          display: block;
+          position: relative;
+          left: 50%;
+          top: 50%;
+          width: 150px;
+          height: 150px;
+          margin: -75px 0 0 -75px;
+          border-radius: 50%;
+          border: 3px solid transparent;
+          border-top-color: #3006c7;
+          backface-visibility: hidden;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          animation: spin 2s linear infinite; 
+          &:before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #553ae9;
+            -webkit-animation: spin 3s linear infinite; 
+            animation: spin 3s linear infinite; 
+          }
+          &:after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: rgb(87, 87, 92);
+            animation: spin 1.5s linear infinite; 
+          }
+        }
+
+        .loader {
+          font-size: 12px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="preloader">
+      <div></div>
+    </div>
+
+    <div id="tooltip" class="tooltip">
+      <span id="tooltipText"></span>
+    </div>
+
+    <nav class="sidebar">
+      <header>
+          <div class="image-text" >
+            <span class="image">
+              <img src="../../src/modules/auth/asserts/apple-touch-icon.png" alt="logo">
+        
+            </span> 
+        </div>
+
+      </header>
+      <div class="menu-bar">
+        <div class="menu">
+          <ul class="menu-links">
+            <li class="nav-link" data-tooltip="Транзакции">
+              <i class="bx bx-transfer-alt bx-flip-vertical icon" id="transactions"></i>
+            </li>
+            <li class="nav-link" data-tooltip="Долги">
+              <i class='bx bx-bomb icon activeTab' id="debts"></i>
+            </li>
+            <li class="nav-link" data-tooltip="Аналитика">
+              <i class='bx bx-line-chart icon' id="reports"></i>
+            </li>
+            <li class="nav-link" data-tooltip="Мероприятия">
+                <i class="bx bx-calendar icon" id="events"></i>
+            </li>
+            <li class="nav-link" data-tooltip="Счета">
+              <i class='bx bx-wallet icon' id="accounts"></i>
+          </li>
+            <li class="nav-link" data-tooltip="Уведомления"> 
+                <i class="bx bx-bell icon" id="notifications"></i>
+            </li>
+          </ul>
+      </div>
+      <li class="nav-link" data-tooltip="Выход">
+          <i class="bx bx-log-out icon" id="exist"></i>
+      </li>
+      </div>
+    </nav>
+
+    <div class="wrapper"> 
+      <div>
+        <div>
+          <button 
+          id="buttonOpenModalDebt"
+          class="buttonOpenModal" 
+          data-entity="Debit" 
+          data-mode="create">
+          Создать долг
+        </button>
+      </div>
+      </div>
+      <div>
+        <div>
+          <button 
+          id="buttonOpenModalCredit"
+          class="buttonOpenModal" 
+          data-entity="Credit" 
+          data-mode="create">
+          Создать кредит
+        </button>
+      </div>
+      </div>
+      <div class="userInfoContainer">
+        <label class="userIdLabel" id="userLabel">Пользователь:</label>
+        <span id="userId" data-tooltip-position="bottom"></span>
+      </div>
+    </div>
+
+    <label id = 'debtsLabel' > Долги и кредиты </label>
+    <div class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="number">Номер</th>
+            <th class="smallRow">Тип</th>
+            <th>Дата создания</th>
+            <th>Сумма</th>
+            <th class="smallRow">Валюта</th>
+            <th>Срок возврата долга</th>
+            <th>Дебитор</th>
+            <th>Кредитор</th>
+            <th>Статус</th>
+            <th class="largeRow">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+
+
+    <div id="modal" class="modal">
+      <div class="modalContent">
+        <h2 id="modalTitle">Заголовок</h2>
+        <form id="modalForm">
+          <!-- Ваши поля формы -->
+        </form>
+        <button id="closeModal">Закрыть</button>
+      </div>
+    </div>
+
+
+    <script type="module" src="../../src/modules/debts/index.js"></script>
+    <ul class="ul notifications">
+
+ 
+  </body>
+</html>

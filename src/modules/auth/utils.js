@@ -7,9 +7,16 @@ export function checkForm() {
   const email = formAuth.email.value;
   const password = formAuth.password.value;
   if (email && password) {
-    formAuth.button.classList.remove("disable");
+    formAuth.button.classList.remove("disabled");
+    formAuth.button.disabled = false;
+    formAuth.button.removeAttribute("data-tooltip");
   } else {
-    formAuth.button.classList.add("disable");
+    formAuth.button.classList.add("disabled");
+    formAuth.button.disabled = true;
+    formAuth.button.setAttribute(
+      "data-tooltip",
+      "Введите адрес электронной почты и пароль"
+    );
   }
 }
 
@@ -26,7 +33,16 @@ export function removeErrorStyle() {
 }
 
 export async function loginUser() {
-  let buttonClicked = false;
+  const email = formAuth.email.value;
+  const password = formAuth.password.value;
+
+  if (formAuth.button.disabled) {
+    return;
+  }
+
+  formAuth.button.disabled = true;
+  formAuth.button.classList.add("disabled");
+
   if (formAuth.email.classList.contains("email-error")) {
     formAuth.email.classList.remove("email-error");
   }
@@ -34,31 +50,15 @@ export async function loginUser() {
     formAuth.password.classList.remove("password-error");
   }
 
-  if (buttonClicked) {
-    return;
-  }
-  formAuth.button.classList.add("disable");
-  buttonClicked = true;
-  formAuth.button.disabled = true;
-  const email = formAuth.email.value;
-  const password = formAuth.password.value;
-
   if (!EmailValidator.validate(email)) {
     formAuth.email.classList.add("email-error");
-    formAuth.button.classList.add("disable");
     formAuth.error.classList.add("view");
-    formAuth.button.disabled = false;
-    buttonClicked = false;
     return;
   }
 
   try {
     const loginData = await authenticateUser(email, password);
-    setTimeout(() => {
-      formAuth.button.disabled = false;
-      buttonClicked = false;
-      formAuth.button.classList.remove("disable");
-    }, 1000);
+    setTimeout(() => {}, 1000);
 
     if (loginData.refresh_token) {
       localStorage.setItem("user_id", loginData.user.id);
@@ -67,8 +67,6 @@ export async function loginUser() {
     }
   } catch (error) {
     if (error.message === "Ошибка аутентификации") {
-      console.log(error);
-      formAuth.button.classList.remove("disable");
       const errorMessage = "Неверный логин или пароль.";
       formAuth.email.classList.add("email-error");
       formAuth.password.classList.add("password-error");
@@ -76,8 +74,7 @@ export async function loginUser() {
     }
     setTimeout(() => {
       formAuth.button.disabled = false;
-      formAuth.button.classList.remove("disable");
-      buttonClicked = false;
+      formAuth.button.classList.remove("disabled");
     }, 100);
   }
 }
