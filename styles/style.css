@@ -170,10 +170,10 @@ header .image-text .header-text {
   cursor: pointer;
 }
 
-@media (max-width: 410px) {
+@media (max-width: 1565px) {
   .userInfoContainer {
     position: static;
-    margin-top: 10px;
+    margin-top: 8px;
     justify-content: center;
   }
 }
