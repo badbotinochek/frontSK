@@ -23,7 +23,7 @@
   --sidebar-color: #faf8f8;
   --sidebar-icon: #5b5b5b;
   --sidebar-border-selected: #00349c;
-  --border: #606266;
+  --border: #e4e7ed;
   --border-selected: #2f86e4;
   --placeholder: #999797;
   --text: #303131;
@@ -170,7 +170,7 @@ header .image-text .header-text {
   cursor: pointer;
 }
 
-@media (max-width: 1565px) {
+@media (max-width: 437px) {
   .userInfoContainer {
     position: static;
     margin-top: 8px;

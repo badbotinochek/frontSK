@@ -30,6 +30,14 @@
   background-color: #368b15a9;
 }
 
+@media (max-width: 560px) {
+  .userInfoContainer {
+    position: static;
+    margin-top: 8px;
+    justify-content: center;
+  }
+}
+
 /* ===== Таблица ===== */
 
 .table-container {
