@@ -27,11 +27,10 @@
 
 .dropdownOptions {
   position: absolute;
-  height: 115px;
   top: 45px;
   left: 0;
   right: 0;
-  max-height: 150px;
+  max-height: 115px;
   overflow-y: auto;
   background: #fff;
   border: 1px solid var(--border);
@@ -153,6 +152,14 @@ input[type="date"]:focus,
 input[type="time"]:focus {
   border: 1px solid var(--border-selected);
   outline: none;
+}
+
+@media (max-width: 1565px) {
+  .userInfoContainer {
+    position: static;
+    margin-top: 8px;
+    justify-content: center;
+  }
 }
 
 /* ===== Поля выбора дат мероприятия ===== */
