@@ -1879,8 +1879,8 @@ export async function updateTransaction(type) {
 
     // Развилка по типу транзакции
     if (type === "Expense") {
-      const inputCategory = form.querySelector("#modalInputCategoryId");
-      category_id = parseInt(inputCategory.dataset.categoryId, 10);
+      
+      category_id = parseInt(localStorage.getItem("transactionCategoryId"), 10);
       const inputSourceAccountId = form.querySelector(
         "#modalInputSourceAccountId"
       );
@@ -1912,6 +1912,7 @@ export async function updateTransaction(type) {
       );
     } else if (type === "Income") {
       const inputCategory = form.querySelector("#modalInputCategoryId");
+      
       category_id = parseInt(inputCategory.dataset.categoryId, 10);
 
       const inputTargetAccountId = form.querySelector(
@@ -1994,7 +1995,7 @@ export async function updateTransaction(type) {
 
     // Если все прошло успешно
     closeDialog();
-    const successMessage = `Транзакция успешно добавлена`;
+    const successMessage = `Транзакция успешно изменена`;
     createToast("success", successMessage);
     setTimeout(manageLogicTransactions, 10);
   } catch (error) {
