@@ -44,7 +44,7 @@ const navLinks = {
   events: "../../pages/events/index.html",
   accounts: "../../pages/accounts/index.html",
   debts: "../../pages/debts/index.html",
-  exist: "/pages/auth/index.html",
+  exist: "../../pages/auth/index.html",
 };
 
 // Функция для обработки клика

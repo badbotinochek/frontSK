@@ -61,9 +61,10 @@ export const eventsTemplateElements = {
           <table class="customTableParticipant">
             <thead>
               <tr>
-                <th>Номер</th>
+                <th>ID</th>
                 <th>Имя</th>
-                <th>Роли</th>
+                <th>Роль</th>
+                <th class="small"> </th>
               </tr>
             </thead>
             <tbody>
@@ -138,52 +139,55 @@ export const eventsTemplateElements = {
 };
 export const addParticipantTemplateElements = {
   addParticipant: `
-            <div class="modalLabel">
-              <label>Уникальный идентификатор пользователя</label> 
-              <label class="star">*</label>
-            </div>
-            <div>
-              <input 
-                id="inputIdUser" 
-                class="modalInput requiredField" 
-                placeholder="Введите ID пользователя" 
-                autocomplete="off" 
-            </div>
-            <div class="modalLabel">
-                <label>Статус</label>
-                <label class="star">*</label>
-            </div>
-                <div class="modalDropdown" id="modalDropdownRole">
-            <input 
-                class="modalInput requiredField"   
-                id="modalInputStatus" 
-                readonly />
-            <img
-                class="modalSelectShevron"
-                src="../../src/modules/transactions/asserts/chevron-down-regular-36.png"
-                alt="Chevron"
-                />
-            <div class="modalOption" id="modalOptionRole">
-                <li data-role="Manager">Менеджер</li>
-                <li data-role="Partner">Партнер</li>
-                <li data-role="Observer">Контролёр</li>
-            </div>
-        </div>
-            <div class="buttons">
-              <button 
-                class="createButton disable"
-                data-tooltip="Заполните обязательные параметры"
-                data-tooltip-position="over"
-                >
-                Сохранить
-              </button>
-              <button 
-                id="closeAdditionalModal" 
-                type="button" 
-                class="closeDialogButton"
-                >
-                Закрыть
-              </button>
-            </div>
+
+
+<div class="modalLabel">
+  <label>Роль</label>
+  <label class="star">*</label>
+</div>
+<div class="modalDropdown" id="modalDropdownRole">
+  <input 
+    class="modalInput "   
+    id="modalInputRole" 
+    readonly 
+  />
+  <img
+    class="modalSelectShevron"
+    src="../../src/modules/transactions/asserts/chevron-down-regular-36.png"
+    alt="Chevron"
+  />
+  <div class="modalOption" id="modalOptionRole">
+      <li data-role="Manager">Менеджер</li>
+      <li data-role="Partner">Партнер</li>
+      <li data-role="Observer">Контролёр</li>
+  </div>
+</div>
+<div class="modalLabel">
+  <label>Уникальный идентификатор пользователя</label> 
+  <label class="star">*</label>
+</div>
+
+<input 
+  id="inputIdUser" 
+  class="modalInput requiredField" 
+  placeholder="Введите ID пользователя" 
+  autocomplete="off" 
+/>
+<div class="buttons">
+  <button 
+    class="createButton disable"
+    data-tooltip="Заполните обязательные параметры"
+    data-tooltip-position="over"
+  >
+    Сохранить
+  </button>
+  <button 
+    id="closeAdditionalModal" 
+    type="button" 
+    class="closeDialogButton"
+  >
+    Закрыть
+  </button>
+</div>
           `,
 };
