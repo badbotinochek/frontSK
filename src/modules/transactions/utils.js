@@ -687,6 +687,8 @@ function getCategoryNameById(categoryId, categories) {
 function fillEventDialogFields(entity, data) {
   originalTransactionValues = {};
   if (entity == "Expense" || entity == "Income" || entity == "Transfer") {
+    console.log(data)
+    
     // Уникальный идентификатор
     const inputId = document.getElementById("inputId");
     if (inputId) {
@@ -737,11 +739,16 @@ function fillEventDialogFields(entity, data) {
         "modalInputSourceAccountId"
       );
       if (inputSourceAccountId) {
-        const sourceAccountId = data.source_account.id || ""; // Берем ID счета из данных
-        inputSourceAccountId.value = data.source_account.name || ""; // Устанавливаем отображаемое имя
-        inputSourceAccountId.dataset.sourceAccountId = sourceAccountId; // Добавляем ID в data-атрибут
-        originalTransactionValues["sourceAccount"] = sourceAccountId; // Добавляем ID в объект
-      }
+        if (data.source_account) { // Проверяем, существует ли source_account
+            const sourceAccountId = data.source_account.id || ""; // Берем ID счета из данных
+            inputSourceAccountId.value = data.source_account.name || ""; // Устанавливаем отображаемое имя
+            inputSourceAccountId.dataset.sourceAccountId = sourceAccountId; // Добавляем ID в data-атрибут
+            originalTransactionValues["sourceAccount"] = sourceAccountId; // Добавляем ID в объект
+        } else {
+            inputSourceAccountId.value = "Неизвестно"; // Если source_account отсутствует
+        }
+    }
+    
     } else if (entity == "Income") {
       const categoryName = getCategoryNameById(
         data.category_id,
@@ -783,21 +790,30 @@ function fillEventDialogFields(entity, data) {
         "modalInputSourceAccountId"
       );
       if (inputSourceAccountId) {
-        const sourceAccountId = data.source_account.id || ""; // Берем ID счета из данных
-        inputSourceAccountId.value = data.source_account.name || ""; // Устанавливаем отображаемое имя
-        inputSourceAccountId.dataset.sourceAccountId = sourceAccountId; // Добавляем ID в data-атрибут
-        originalTransactionValues["sourceAccount"] = sourceAccountId; // Добавляем ID в объект
-      }
+        if (data.source_account) { // Проверяем, существует ли source_account
+            const sourceAccountId = data.source_account.id || ""; // Берем ID счета из данных
+            inputSourceAccountId.value = data.source_account.name || ""; // Устанавливаем отображаемое имя
+            inputSourceAccountId.dataset.sourceAccountId = sourceAccountId; // Добавляем ID в data-атрибут
+            originalTransactionValues["sourceAccount"] = sourceAccountId; // Добавляем ID в объект
+        } else {
+            inputSourceAccountId.value = "Неизвестно"; // Если source_account отсутствует
+        }
+    }
       // Счет зачисления
       const inputTargetAccountId = document.getElementById(
         "modalInputTargetAccountId"
       );
       if (inputTargetAccountId) {
-        const targetAccountId = data.target_account.id || ""; // Берем ID счета из данных
-        inputTargetAccountId.value = data.target_account.name || ""; // Устанавливаем отображаемое имя
-        inputTargetAccountId.dataset.targetAccountId = targetAccountId; // Добавляем ID в data-атрибут
-        originalTransactionValues["targetAccount"] = targetAccountId; // Добавляем ID в объект
-      }
+        if (data.target_account) { // Проверяем, существует ли target_account
+            const targetAccountId = data.target_account.id || ""; // Берем ID счета из данных
+            inputTargetAccountId.value = data.target_account.name || ""; // Устанавливаем отображаемое имя
+            inputTargetAccountId.dataset.targetAccountId = targetAccountId; // Добавляем ID в data-атрибут
+            originalTransactionValues["targetAccount"] = targetAccountId; // Добавляем ID в объект
+        } else {
+            inputTargetAccountId.value = "Неизвестно"; // Если target_account отсутствует
+        }
+    }
+    
     }
   }
 }
@@ -1246,6 +1262,8 @@ function addTransactionRow(tbody, transaction, idToNameMap, userId, eventRole) {
   const user = transaction.user_id === userId ? "Вы" : transaction.user.name;
   const receipt_id = transaction.receipt_id || "";
 
+
+
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>${transaction.number}</td>
@@ -1266,7 +1284,7 @@ function addTransactionRow(tbody, transaction, idToNameMap, userId, eventRole) {
     </td>
     ${
       eventRole === "Manager" ||
-      (eventRole === "Observer" && transaction.user_id === userId) ||
+      (eventRole === "Observer" && transaction.user.id === userId) ||
       eventRole === "Partner"
         ? `<td>
           <img src="../../src/modules/events/asserts/show-regular-60.png" class="iconShow" data-transaction-id="${transaction.id}">
@@ -1861,8 +1879,8 @@ export async function updateTransaction(type) {
 
     // Развилка по типу транзакции
     if (type === "Expense") {
-      const inputCategory = form.querySelector("#modalInputCategoryId");
-      category_id = parseInt(inputCategory.dataset.categoryId, 10);
+      
+      category_id = parseInt(localStorage.getItem("transactionCategoryId"), 10);
       const inputSourceAccountId = form.querySelector(
         "#modalInputSourceAccountId"
       );
@@ -1894,6 +1912,7 @@ export async function updateTransaction(type) {
       );
     } else if (type === "Income") {
       const inputCategory = form.querySelector("#modalInputCategoryId");
+      
       category_id = parseInt(inputCategory.dataset.categoryId, 10);
 
       const inputTargetAccountId = form.querySelector(
@@ -1976,7 +1995,7 @@ export async function updateTransaction(type) {
 
     // Если все прошло успешно
     closeDialog();
-    const successMessage = `Транзакция успешно добавлена`;
+    const successMessage = `Транзакция успешно изменена`;
     createToast("success", successMessage);
     setTimeout(manageLogicTransactions, 10);
   } catch (error) {

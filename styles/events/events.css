@@ -124,6 +124,11 @@ td img:hover {
   width: 98%;
 }
 
+.small {
+  width: 40px;
+}
+
+
 /* ===== Общие стили для модальных окон Мероприятие ===== */
 
 .modalLabel {
@@ -377,9 +382,9 @@ input[type="date"].disabled {
   position: fixed;
   top: 50%;
   left: 50%;
+   height: 350px; 
   transform: translate(-50%, -50%);
   width: 400px;
-  height: 695px;
   user-select: text;
   overflow: auto;
   display: block;
@@ -406,6 +411,14 @@ input[type="date"].disabled {
 }
 
 /* ===== Таблица в моадльном окне ===== */
+
+
+
+.modalAddParticipant #modalMinorTitle {
+  margin-top: 20px;
+  color: #0e013f;
+  font-size: 28px;
+}
 
 .tableContainerParticipant {
   margin-top: 5px;
@@ -474,4 +487,93 @@ td img:hover {
   text-align: center;
   margin-top: 10px;
   font-size: 16px;
+}
+
+
+.modalDropdown {
+  position: relative;
+  width: 350px;
+  margin-top: 5px;
+}
+
+.modalDropdown input {
+  position: relative;
+  background: #ffffff;
+  width: 360px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid var(--border);
+  padding: 0 0 0 13px;
+  cursor: pointer;
+  outline: none;
+  font-size: 16px;
+}
+
+.modalDropdown input::placeholder {
+  font-size: 16px;
+  color: var(--placeholder);
+}
+
+.modalOption {
+  background: #ffffff;
+  position: absolute;
+  width: 360px;
+  top: 50px;
+  border: 1px solid var(--border);
+  list-style: none;
+  border-radius: 5px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-y: scroll;
+  max-height: 125px;
+  display: none;
+  z-index: 1000;
+  top: 100%; 
+}
+
+.modalDropdown.active .modalOption {
+  display: block;
+}
+
+.modalDropdown .modalOption {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modalDropdown .modalOption li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  background: transparent;
+  list-style-type: none;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.modalDropdown .modalOption li:hover {
+  background: #f5f7fa;
+  border-radius: 5px;
+}
+
+.modalSelectShevron {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.dropdown.active .modalSelectShevron {
+  transform: translateY(-50%) rotate(180deg);
 }

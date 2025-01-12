@@ -10,7 +10,7 @@ import {
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 import { formEvent } from "./constants.js";
-import { eventsTemplateElements } from "./templates.js";
+import { eventsTemplateElements, addParticipantTemplateElements  } from "./templates.js";
 
 // Общая функция, которая заполняет данными таблицу и навешивает обработчики
 export async function getMyEvents() {
@@ -33,7 +33,7 @@ export async function getMyEvents() {
     alert("Произошла ошибка при обращении к серверу.");
   }
 }
-// Функция для заполнения данных в таблицу Счета
+// Функция для заполнения данных в таблице
 function populateTableWithLiabilities(responseData) {
   const tbody = document.querySelector("#MyEventsTable tbody");
   tbody.innerHTML = "";
@@ -78,7 +78,7 @@ function populateTableWithLiabilities(responseData) {
     tbody.appendChild(newRow);
   });
 }
-// Функция для навешивания обработчиков на иконку Редактирование счета
+// Функция для навешивания обработчиков на иконку Редактирование мероприятия
 function addListenersForIconsEdit(responseData) {
   const iconsEdit = document.querySelectorAll(".iconEditEvent");
   iconsEdit.forEach(function (icon) {
@@ -89,11 +89,11 @@ function addListenersForIconsEdit(responseData) {
       const measure = responseData.find(
         (measure) => measure.id == idMeasureEdit
       );
-      handleOpenMainModal("edit", measure);
+      handleOpenMainModal('event', "edit", measure);
     });
   });
 }
-// Функция для навешивания обработчиков на иконку Просмотра счета
+// Функция для навешивания обработчиков на иконку Просмотра мероприятия
 function addListenersForIconsShow(responseData) {
   const iconsEdit = document.querySelectorAll(".iconShowEvent");
   iconsEdit.forEach(function (icon) {
@@ -104,132 +104,186 @@ function addListenersForIconsShow(responseData) {
       const measure = responseData.find(
         (measure) => measure.id == idMeasureShow
       );
-      handleOpenMainModal("view", measure);
+      handleOpenMainModal("event", "view", measure);
     });
   });
 }
 // Общая функция для управления диалогового окна "Просмотр/редактирование счета"
-function handleOpenMainModal(mode, measure) {
+export function handleOpenMainModal(entity, mode, data) {
   // Добавляем в диалог HTML
-  fillMainDialogWithHTML(mode);
 
-  // Если measure передан, заполняем форму данными
-  if (measure) {
-    fillEventDialogFields(measure);
+  fillDialogWithHTML(entity, mode);
+  
+   // Если measure передан, заполняем форму данными
+  if (data) {
+    fillDialogFields(entity, mode, data);
   }
 
-  // Добавляем класс disabled ко всем элементам для режима veiw и убираем placeholders
+   // Добавляем класс disabled ко всем элементам для режима veiw и убираем placeholders
   if (mode === "view") {
     disableModalInputs();
   }
 
   // Устанавливаем на диалоговое окно обработчики
-  addEventListeners(mode);
+   addEventListeners(entity, mode);
 
   // Отображаем диалоговое окно
-  openDialog();
+  openDialog(entity);
+
 }
 // Единая функция, которая вставляет в диалоговое окно HTML
-function fillMainDialogWithHTML(mode) {
-  const modalMainContent = formEvent.modalMainContent;
-
+function fillDialogWithHTML(entity, mode) {
+  const modalContent = entity === "event" ? formEvent.modalMainContent : formEvent.modalMinorContent;
+  
   // Очищаем текущее содержимое
-  modalMainContent.innerHTML = "";
+  modalContent.innerHTML = "";
 
   // Создаём заголовок
   const title = document.createElement("h2");
-  title.id = "modalMainTitle";
+  title.id = entity === "event" ? "modalMainTitle" : "modalMinorTitle";
 
-  if (mode === "create") {
-    title.textContent = "Создание мероприятия";
-  } else if (mode === "edit") {
-    title.textContent = "Редактирование мероприятия";
-  } else if (mode === "view") {
-    title.textContent = "Просмотр мероприятия";
-  } else {
-    title.textContent = "Неизвестный режим";
+  // Устанавливаем текст заголовка в зависимости от режима и сущности
+  if (entity === "event") {
+    if (mode === "create") {
+      title.textContent = "Создание мероприятия";
+    } else if (mode === "edit") {
+      title.textContent = "Редактирование мероприятия";
+    } else if (mode === "view") {
+      title.textContent = "Просмотр мероприятия";
+    } else {
+      title.textContent = "Неизвестный режим";
+    }
+  } else if (entity === "participant") {
+    if (mode === "create") {
+      title.textContent = "Добавление участника";
+    } else if (mode === "edit") {
+      title.textContent = "Изменение роли";
+    } else {
+      title.textContent = "Неизвестный режим";
+    }
   }
 
   // Создаём форму
   const form = document.createElement("form");
   form.id = "modalForm";
 
-  // Формируем содержимое формы в зависимости от сущности
+  // Формируем содержимое формы в зависимости от сущности и режима
   let formHTML = "";
-  if (mode === "create") {
-    formHTML += eventsTemplateElements.name;
-    formHTML += eventsTemplateElements.period;
-    formHTML += eventsTemplateElements.description;
-    formHTML += eventsTemplateElements.buttons.create;
-  } else if (mode === "edit") {
-    formHTML += eventsTemplateElements.id;
-    formHTML += eventsTemplateElements.name;
-    formHTML += eventsTemplateElements.period;
-    formHTML += eventsTemplateElements.description;
-    formHTML += eventsTemplateElements.participant;
-    formHTML += eventsTemplateElements.addParticipantButton;
-    formHTML += eventsTemplateElements.buttons.edit;
-  } else if (mode === "view") {
-    formHTML += eventsTemplateElements.id;
-    formHTML += eventsTemplateElements.name;
-    formHTML += eventsTemplateElements.period;
-    formHTML += eventsTemplateElements.description;
-    formHTML += eventsTemplateElements.participant;
-    formHTML += eventsTemplateElements.buttons.view;
+  if (entity === "event") {
+    if (mode === "create") {
+      formHTML += eventsTemplateElements.name;
+      formHTML += eventsTemplateElements.period;
+      formHTML += eventsTemplateElements.description;
+      formHTML += eventsTemplateElements.buttons.create;
+    } else if (mode === "edit") {
+      formHTML += eventsTemplateElements.id;
+      formHTML += eventsTemplateElements.name;
+      formHTML += eventsTemplateElements.period;
+      formHTML += eventsTemplateElements.description;
+      formHTML += eventsTemplateElements.participant;
+      formHTML += eventsTemplateElements.addParticipantButton;
+      formHTML += eventsTemplateElements.buttons.edit;
+    } else if (mode === "view") {
+      formHTML += eventsTemplateElements.id;
+      formHTML += eventsTemplateElements.name;
+      formHTML += eventsTemplateElements.period;
+      formHTML += eventsTemplateElements.description;
+      formHTML += eventsTemplateElements.participant;
+      formHTML += eventsTemplateElements.buttons.view;
+    }
+  } else if (entity === "participant") {
+    if (mode === "create" || mode === "edit") {
+      formHTML += addParticipantTemplateElements.addParticipant;
+  
+      // Если режим edit, добавляем атрибут disabled к input
+      if (mode === "edit") {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(formHTML, 'text/html');
+        const inputElement = doc.querySelector('#inputIdUser');
+        if (inputElement) {
+          inputElement.setAttribute('disabled', 'disabled');
+        }
+        formHTML = doc.body.innerHTML; // Сохраняем изменения
+      }
+    }
   }
 
   // Устанавливаем содержимое формы
   form.innerHTML = formHTML;
 
   // Добавляем заголовок и форму в модальное окно
-  modalMainContent.appendChild(title);
-  modalMainContent.appendChild(form);
+  modalContent.appendChild(title);
+  modalContent.appendChild(form);
 
-  // Не знаю почему но в поле "Описание" при создании диалогового окна создается 3 пробела. Код ниже удаляет это
-  const textInput = document.getElementById("modalInputDescription");
-  const cleanedText = textInput.value.trim();
-  textInput.value = cleanedText;
+  // Не знаю почему но в поле "Описание" при создании диалогового окна создается 3 пробела. Код ниже удаляет это, если сущность event
+  if (entity === "event") {
+    const textInput = document.getElementById("modalInputDescription");
+    const cleanedText = textInput.value.trim();
+    textInput.value = cleanedText;
+  }
 }
-function fillEventDialogFields(event) {
-  if (!event || typeof event !== "object") {
+function fillDialogFields(entity, mode, data) {
+  if (!data || typeof data !== "object") {
     console.error("Передан некорректный объект для заполнения диалога.");
     return;
   }
 
-  // Уникальный идентификатор
-  const inputId = document.getElementById("inputId");
-  if (inputId) {
-    inputId.value = event.id || "";
-  }
+  if (entity === "event") {
+    // Уникальный идентификатор
+    const inputId = document.getElementById("inputId");
+    if (inputId) {
+      inputId.value = data.id || "";
+    }
 
-  // Наименование мероприятия
-  const inputName = document.getElementById("inputName");
-  if (inputName) {
-    inputName.value = event.name || "";
-  }
+    // Наименование мероприятия
+    const inputName = document.getElementById("inputName");
+    if (inputName) {
+      inputName.value = data.name || "";
+    }
 
-  // Дата начала
-  const dateStart = document.getElementById("dateStartEvent");
-  if (dateStart) {
-    dateStart.value = event.start ? event.start.split("T")[0] : ""; // Убираем время
-  }
+    // Дата начала
+    const dateStart = document.getElementById("dateStartEvent");
+    if (dateStart) {
+      dateStart.value = data.start ? data.start.split("T")[0] : ""; // Убираем время
+    }
 
-  // Дата окончания
-  const dateEnd = document.getElementById("dateEndEvent");
-  if (dateEnd) {
-    dateEnd.value = event.end ? event.end.split("T")[0] : ""; // Убираем время
-  }
+    // Дата окончания
+    const dateEnd = document.getElementById("dateEndEvent");
+    if (dateEnd) {
+      dateEnd.value = data.end ? data.end.split("T")[0] : ""; // Убираем время
+    }
 
-  // Описание
-  const inputDescription = document.getElementById("modalInputDescription");
-  if (inputDescription) {
-    inputDescription.value = event.description || "";
-  }
+    // Описание
+    const inputDescription = document.getElementById("modalInputDescription");
+    if (inputDescription) {
+      inputDescription.value = data.description || "";
+    }
 
-  // Заполнение таблицы с участниками
-  populateTableWithParticipants(event.participants);
+    // Заполнение таблицы с участниками
+    populateTableWithParticipants(mode, data.participants);
+  } else if (entity === "participant") {
+    // Уникальный идентификатор
+    const inputId = document.getElementById("inputIdUser");
+    if (inputId) {
+      inputId.value = data.user_id || "";
+    }
+
+    // Роль
+    const roleMap = {
+      Manager: "Менеджер",
+      Observer: "Контролер",
+      Partner: "Партнер",
+    };
+
+    const inputRole = document.getElementById("modalInputRole");
+    if (inputRole) {
+      inputRole.value = roleMap[data.role] || "Роль не указана";
+    }
+  } else {
+    console.error("Неизвестный тип сущности:", entity);
+  }
 }
-function populateTableWithParticipants(participants) {
+function populateTableWithParticipants(mode, participants) {
   const tableBody = document.querySelector(".customTableParticipant tbody");
   tableBody.innerHTML = "";
 
@@ -243,11 +297,41 @@ function populateTableWithParticipants(participants) {
   participants.forEach((participant) => {
     const mappedRole = roleMap[participant.role] || "Роль не указана";
     const row = document.createElement("tr");
-    row.innerHTML = `
+    const user_id = parseInt(localStorage.getItem("user_id"), 10);
+    
+    if (mode === "view") {
+      row.innerHTML = `
       <td>${participant.user_id}</td>
       <td>${participant.user.name || "Без имени"}</td>
      <td>${mappedRole}</td>`;
+
+    }else {
+    
+    if (participant.user_id === user_id){
+      row.innerHTML = `
+      <td>${participant.user_id}</td>
+      <td>${participant.user.name || "Без имени"}</td>
+     <td>${mappedRole}</td>`;
+    }else {
+      row.innerHTML = `
+      <td>${participant.user_id}</td>
+      <td>${participant.user.name || "Без имени"}</td>
+     <td>${mappedRole}</td>
+     <td class="small" ><img src="../../src/modules/transactions/asserts/pencil-solid-60.png" class="iconEdit" data-user-id="${participant.user_id}" data-role="${participant.role}"></td>`;
+    }
+  }
     tableBody.appendChild(row);
+    // Навешиваем обработчик на иконку "Edit"
+    const editIcon = row.querySelector(".iconEdit");
+    if (editIcon) {
+      editIcon.addEventListener("click", () => {
+        const data = {
+          user_id: editIcon.getAttribute("data-user-id"),
+          role: editIcon.getAttribute("data-role"),
+        };
+        handleOpenMainModal("participant", "edit", data);
+      });
+    }
   });
 }
 // Добавляем класс disabled ко всем элементам для режима veiw
@@ -268,7 +352,8 @@ function disableModalInputs() {
   });
 }
 // Основная функция для добавления обработчиков событий
-function addEventListeners(mode) {
+function addEventListeners(entity, mode) {
+  if(entity === "event"){
   const modal = formEvent.modalMain;
   const closeButton = document.querySelector(".closeDialogButton");
 
@@ -276,17 +361,56 @@ function addEventListeners(mode) {
   closeButton.addEventListener("click", closeDialog);
 
   // Обработчик кликов по форме
-  document.getElementById("modalForm").addEventListener("click", (event) => {
+  document.getElementById("mainModal").addEventListener("click", (event) => {
     // В зависимости от режима выполняем соответствующие действия
     if (mode === "create") {
-      handleCreateMode(modal);
+      console.log(12314)
+
+      // handleCreateMode(event, modal);
     } else if (mode === "edit") {
-      handleEditMode(event, modal);
+      // handleEditMode(event, modal);
+      console.log(5555)
     }
   });
+}else  {
+  const dropdown = document.getElementById('modalDropdownRole');
+  const isActive = dropdown.classList.contains("active");
+
+  dropdown.addEventListener('click', () => {
+    const isActive = dropdown.classList.contains("active");
+    toggleDropdownState(dropdown, isActive);
+  });
+
+
+
+  const closeButton = document.getElementById("closeAdditionalModal");
+  // Обработчик кликов на кнопку Закрытия диалогового окна
+  closeButton.addEventListener("click", closeDialog);
+ 
+  document.getElementById("minorModal").addEventListener("click", (event) => {
+    // В зависимости от режима выполняем соответствующие действия
+    if (mode === "create") {
+   console.log(1)
+    } else if (mode === "edit") {
+      // handleEditMode(event, modal);
+    }
+  });
+
+  
+}
 }
 // Обработчик для режима создания события
-function handleCreateMode(modal) {
+function handleCreateMode(event, modal) {
+  
+   // Обработчик для создания события
+    // Универсальный обработчик для проверки заполненности обязательных полей
+    modal.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.classList.contains("requiredField")) {
+        checkRequiredFields(modal.id);
+      }
+    });
+  
   const createEventButton = modal.querySelector(".createButton");
 
   // Убираем старый обработчик и добавляем новый для кнопки создания
@@ -305,8 +429,10 @@ function handleCreateEvent(e) {
   }
 
   // Если кнопка активна, вызываем функцию создания события
+
   createNewEvent();
 }
+
 async function createNewEvent() {
   const accessToken = localStorage.getItem("access_token");
   const modal = formEvent.modalMain;
@@ -364,7 +490,7 @@ function handleEditMode(event, modal) {
   if (target === shareButton) {
     event.stopPropagation();
     event.preventDefault();
-    handleOpenAdditionalModal();
+    handleOpenMainModal("participant", "create");
   }
 
   // Обработчик для сохранения изменений
@@ -376,299 +502,57 @@ function handleEditMode(event, modal) {
   //   }
   //   updateAccount();
   // });
+
 }
-// Единая функция для открытия диалогового окна "Добавить пользователя"
-function handleOpenAdditionalModal() {
-  // Добавляем в диалог HTML
-  fillAdditionalModalWithHTML();
-
-  // // Накидываем обработчики на вторичное диалоговое окно
-  // if (type == "addUser") {
-  //   addEventListenersForAdditionalModal();
-  // } else {
-  //   addEventListenersForDeleteUserModal(deleteUserId);
-  // }
-
-  // Отображаем диалоговое окно
-  openAdditionalModal();
-}
-// Единая функция, которая вставляет во вторичное диалоговое окно HTML
-function fillAdditionalModalWithHTML() {
-  const modal = document.getElementById("minorModal");
-  const modalContent = modal.querySelector(".modalMinorContent");
-
-  // Очищаем текущее содержимое
-  modalContent.innerHTML = "";
-
-  // Устанавливаем класс модального окна
-  modal.className = `modal modal${"participant"}`;
-
-  // Создаём заголовок
-  const title = document.createElement("h2");
-  title.id = "modalTitle";
-  title.textContent = "Добавление участника";
-
-  // Создаём форму
-  const form = document.createElement("form");
-  form.id = "additionalModalForm";
-
-  // Формируем содержимое формы в зависимости от сущности
-  let formHTML = "";
-
-  formHTML += addParticipantTemplateElements.addParticipant;
-
-  // Устанавливаем содержимое формы
-  form.innerHTML = formHTML;
-
-  // Добавляем заголовок и форму в модальное окно
-  modalContent.appendChild(title);
-  modalContent.appendChild(form);
-}
-
-// Навешиваем обработчики для диалогового окна "Просмотра/редактирования счета"
-function retert(mode) {
-  const modal = formEvent.modalMain;
-  const closeButton = document.querySelector(".closeDialogButton");
-
-  const inputId = document.getElementById("inputId");
-  const inputName = document.getElementById("inputName");
-  const inputStatus = document.getElementById("modalInputStatus");
-  const inputDescription = document.getElementById("modalInputDescription");
-  const saveChangeAccountButton = modal.querySelector(".editButton");
-
-  // Общий обработчик для закрытия окна
-  closeButton.addEventListener("click", () => {
-    closeDialog();
-  });
-
-  // Универсальный обработчик кликов для всего модального окна
-  document.getElementById("modalForm").addEventListener("click", (event) => {
-    const target = event.target;
-    if (mode === "create") {
-      const createEventButton = modal.querySelector(".createButton");
-      createEventButton.removeEventListener("click", handleCreateEvent);
-      createEventButton.addEventListener("click", handleCreateEvent);
-    } else if (mode === "view") {
-      const saveButton = document.querySelector(".viewButton");
-      if (target === saveButton) {
-        event.stopPropagation();
-        event.preventDefault();
-      }
-    } else if (mode === "edit") {
-      // Проверяем клик по выпадающему списку и выполняем нужные действия
-      if (target.closest(".modalDropdown")) {
-        toggleDropdownState(target);
-      }
-      // Если кликнули по элементу списка, выбираем его и закрываем список
-      if (target.closest(".modalOption li")) {
-        selectDropdownItem(event);
-      }
-      // Закрытие выпадающего списка при клике вне его
-      document.addEventListener("click", (event) => {
-        closeDropdownOnClick(event);
-      });
-
-      // Обработчик для кнопки "Поделиться счетом"
-      const shareButton = document.getElementById("openModalAddUserButton");
-      if (target === shareButton) {
-        event.stopPropagation();
-        event.preventDefault();
-        handleOpenAdditionalModal("addUser");
-        // Ваш код для обработки действия по кнопке "Поделиться счетом"
-      }
-
-      // Обработчик для кнопки удаления пользователя
-      const deleteIcon = target.closest(".iconModalDelete"); // Ищем ближайший элемент с классом iconModalDelete
-      if (deleteIcon) {
-        const deleteUserId = deleteIcon.getAttribute("data-user-id"); // Получаем id пользователя из атрибута
-        handleOpenAdditionalModal("deleteUser", deleteUserId);
-      }
-      // Обработчики для отслеживания изменений
-
-      // Навешиваем обработчики
-      inputName.addEventListener("input", handleFieldChange);
-      inputDescription.addEventListener("input", handleFieldChange);
-
-      // Для изменения статуса через выпадающий список
-      inputStatus.addEventListener("click", () => {
-        const statusItems = document.querySelectorAll("#modalOptionStatus li");
-        statusItems.forEach((item) => {
-          item.addEventListener("click", () => {
-            inputStatus.value = item.textContent; // Обновляем значение поля
-            handleFieldChange(); // Проверяем изменения и обновляем состояние кнопки
-          });
-        });
-      });
-
-      saveChangeAccountButton.addEventListener("click", (e) => {
-        if (saveChangeAccountButton.classList.contains("disable")) {
-          e.preventDefault();
-          return;
-        }
-        updateAccount();
-      });
-    }
-  });
-}
-
-export async function getMyEventsенг() {
-  try {
-    const access_token = localStorage.getItem("access_token");
-
-    eventsData = responseData;
-
-    tbody.innerHTML = "";
-
-    responseData.forEach((event) => {
-      newRow.addEventListener("click", function () {
-        const idEventEdit = event.id;
-        const nameEvent = event.name;
-        const startEvent = event.start;
-        const endEvent = event.end;
-        const descriptionEvent = event.description;
-
-        const participants = event.participants.map((participant) => {
-          return {
-            id: participant.user_id,
-            role: participant.role,
-          };
-        });
-
-        const formatterDateStart = formatDate(startEvent);
-
-        let formatterDateEnd = "";
-        if (endEvent) {
-          formatterDateEnd = formatDate(endEvent);
-        } else {
-          formatterDateEnd = "";
-        }
-
-        fillModalWithData(
-          idEventEdit,
-          nameEvent,
-          formatterDateStart,
-          formatterDateEnd,
-          descriptionEvent,
-          participants
-        );
-
-        fillModaShowlWithData(
-          idEventEdit,
-          nameEvent,
-          formatterDateStart,
-          formatterDateEnd,
-          descriptionEvent,
-          participants
-        );
-      });
-
-      tbody.appendChild(newRow);
-    });
-
-    const iconsShow = document.querySelectorAll(".iconShow1");
-    iconsShow.forEach(function (icon) {
-      icon.addEventListener("click", function () {
-        const inputs = formEvent.modalShowEvent.querySelectorAll(
-          "input, textarea, button"
-        );
-
-        formEvent.eventShowId.style.background = "#f5f7fa";
-        formEvent.inputEventShowName.style.background = "#f5f7fa";
-        formEvent.dateStartShowEvent.style.background = "#f5f7fa";
-        formEvent.dateEndShowEvent.style.background = "#f5f7fa";
-        formEvent.descriptionShowEvent.style.background = "#f5f7fa";
-        formEvent.addParticipantShowButton.style.pointerEvents = "none";
-        formEvent.addParticipantShowButton.style.backgroundColor = "#409eff";
-        formEvent.addParticipantShowButton.style.opacity = "0.5";
-
-        inputs.forEach((input) => {
-          if (input.id !== "closeModalEvent") {
-            input.disabled = true;
-          }
-        });
-        document.getElementById("closeModalShowEvent").disabled = false;
-
-        var table = document.getElementById("customTableShow");
-        var rows = table.querySelectorAll("tr");
-        if (rows.length == 1 || rows.length == 2) {
-          modalShowEvent.style.height = "761px";
-        } else {
-          modalShowEvent.style.height = "804px";
-        }
-
-        formEvent.modalShowEvent.showModal();
-      });
-    });
-
-    const iconsEdit = document.querySelectorAll(".iconEdit");
-    iconsEdit.forEach(function (icon) {
-      icon.addEventListener("click", function (event) {
-        const row = icon.closest("tr");
-
-        const idEventEdit = row.querySelector(".iconEdit").dataset.eventId;
-        const eventData = eventsData.find((event) => event.id == idEventEdit);
-
-        if (eventData) {
-          const { id, name, start, end, description, participants } = eventData;
-          const formatterDateStart = formatDate(start);
-
-          fillModalWithData(
-            id,
-            name,
-            formatterDateStart,
-            end,
-            description,
-            participants.map((p) => ({ id: p.user_id, role: p.role }))
-          );
-        }
-
-        var buttonEdit = formEvent.editModalEventButton;
-        buttonEdit.classList.remove("Off");
-
-        buttonEdit.classList.add("disable");
-        var buttonCreate = formEvent.createModalEventButton;
-        buttonCreate.classList.add("Off");
-
-        formEvent.modalEvent.showModal();
-      });
-    });
-  } catch (error) {
-    console.error("Произошла ошибка:", error);
-    alert("Произошла ошибка при обращении к серверу.");
+ 
+// Функция для управления состоянием "active"
+function toggleDropdownState(dropdown, isActive) {
+  if (isActive) {
+    dropdown.classList.remove("active");
+  } else {
+    dropdown.classList.add("active");
   }
 }
+
 
 // Функция для закрытия диалоговых окон
 export function closeDialog() {
   // Получаем переменные из объекта formEvent
   const modalMain = formEvent.modalMain;
   const modalMinor = formEvent.modalMinor;
-  const additionalModal = formEvent.additionalModal;
+
 
   // Если дополнительное модальное окно открыто, закрываем его и открываем основное
-  if (additionalModal && additionalModal.style.display === "flex") {
-    additionalModal.style.display = "none";
+  if (modalMinor &&modalMinor.hasAttribute("open")) {
+    modalMinor.removeAttribute("open");
+    
     if (modalMain) {
-      modalMain.setAttribute("open", "false"); // Закрываем основное окно
+      modalMain.setAttribute("open", "true"); // Закрываем основное окно
     }
   } else if (modalMain && modalMain.hasAttribute("open")) {
-    modalMain.removeAttribute("open"); // Удаляем атрибут open, чтобы закрыть диалог
+    modalMain.removeAttribute("open"); 
   }
 }
 
-// Функция для управления диалогового окна "Создание счета"
-export function handleOpenModalCreate(event) {
-  const entity = event.target.dataset.entity;
-  const mode = event.target.dataset.mode;
-  fillMainDialogWithHTML(mode);
-  openDialog();
-  addEventListeners(mode);
-}
 
 // Функция для открытия диалогового окна "Создание счета"
-function openDialog() {
-  const modalMain = formEvent.modalMain;
-  modalMain.setAttribute("open", "true");
+function openDialog(entity) {
+  let modalToOpen;
+  let modalToClosed;
+
+  if (entity === "event") {
+    modalToOpen = formEvent.modalMain;
+  } else if (entity === "participant") {
+    modalToOpen = formEvent.modalMinor;
+    modalToClosed = formEvent.modalMain;
+
+    modalToClosed.removeAttribute("open"); 
+  } else {
+    console.error("Неизвестная сущность:", entity);
+    return;
+  }
+
+  modalToOpen.setAttribute("open", "true");
 }
 
 // Функция для проверки заполненности обязательных параметров
@@ -1167,32 +1051,8 @@ export function customTextArea() {
   this.setAttribute("placeholder", "Введите описание мероприятия");
 }
 
-export function handleClickModelEvent() {
-  clearModalData();
 
-  const participants = Array.from(
-    document.querySelectorAll(".tableContainer tbody tr")
-  ).map((row) => {
-    return {
-      id: row.dataset.userId,
-      role: row.dataset.role,
-    };
-  });
 
-  const hasChanged =
-    originalEventData.name !== name ||
-    originalEventData.start !== start ||
-    originalEventData.end !== end ||
-    originalEventData.description !== description ||
-    originalEventData.participants.length !== participants.length;
-
-  formEvent.modalEvent.close();
-}
-
-export function handleClickModelShowEvent() {
-  clearModalData();
-  formEvent.modalShowEvent.close();
-}
 
 export function showModalParticipant() {
   formEvent.modalEvent.close();
@@ -1213,16 +1073,7 @@ export function handleClickModelParticipant() {
   formEvent.modalEvent.showModal();
 }
 
-export function checkCreateParticipantForm() {
-  const userId = formEvent.idUserInput.value;
-  const checkedRadioButton = document.querySelector(".custom-radio:checked");
-  const typeParticipant = checkedRadioButton ? checkedRadioButton.value : null;
-  if (userId && typeParticipant !== null) {
-    formEvent.createParticipantButton.classList.remove("disable");
-  } else {
-    formEvent.createParticipantButton.classList.add("disable");
-  }
-}
+
 
 export function validationUserId(e) {
   let input = e.target,
@@ -1259,114 +1110,4 @@ export function checkEventForm() {
   }
 }
 
-export async function editEvent() {
-  formEvent.editModalEventButton.classList.add("disable");
 
-  const accessToken = localStorage.getItem("access_token");
-  const eventId = formEvent.idEventInput.value;
-  const nameEventInput = formEvent.nameEventInput.value;
-  const dateStartEventInput = formEvent.dateStartEventInput.value;
-  const dateEndEventInput = formEvent.dateEndEventInput.value || null;
-  const descriptionEvent = formEvent.descriptionEvent.value || null;
-
-  const formatDate = (dateString) => {
-    const dateParts = dateString.split("-");
-    if (dateParts.length !== 3) {
-      throw new Error("Неверный формат даты");
-    }
-    const year = dateParts[0];
-    const month = dateParts[1].padStart(2, "0");
-    const day = dateParts[2].padStart(2, "0");
-    return `${year}-${month}-${day}T00:00:00.000Z`;
-  };
-
-  const formatEndDate = (dateString) => {
-    const dateParts = dateString.split("-");
-    if (dateParts.length !== 3) {
-      throw new Error("Неверный формат даты");
-    }
-    const year = dateParts[0];
-    const month = dateParts[1].padStart(2, "0");
-    const day = dateParts[2].padStart(2, "0");
-    return `${year}-${month}-${day}T23:59:59.999Z`;
-  };
-
-  const formattedStartDate = formatDate(dateStartEventInput);
-  let formattedEndDate = "";
-  if (dateEndEventInput) {
-    formattedEndDate = formatEndDate(dateEndEventInput);
-  }
-
-  try {
-    const response = await updateEventApi(
-      eventId,
-      nameEventInput,
-      formattedStartDate,
-      formattedEndDate,
-      descriptionEvent,
-      accessToken
-    );
-
-    setTimeout(getMyEvents, 1000);
-
-    setTimeout(handleClickModelEvent, 1000);
-
-    const successMessage = `Мероприятие измененно`;
-
-    const participants = Array.from(
-      document.querySelectorAll("#modalEvent .customTable tbody tr")
-    ).map((row) => {
-      return {
-        id: row.dataset.userId,
-        role: row.dataset.role,
-      };
-    });
-
-    createToast("success", successMessage);
-
-    if (originalEventData.participants.length !== participants.length) {
-      const table = document.querySelector("#modalEvent .customTable");
-      const rows = table.querySelectorAll("tbody tr");
-
-      rows.forEach((row, index) => {
-        const userId = parseInt(row.getAttribute("data-user-id"));
-        const role = row.getAttribute("data-role");
-
-        // Проверка, есть ли участник в originalEventData.participants
-        const participantExists = originalEventData.participants.some(
-          (participant) => participant.id === userId
-        );
-
-        if (!participantExists) {
-          setTimeout(() => {
-            createParticipantApi(eventId, userId, role, accessToken)
-              .then((response) => {})
-              .catch((error) => {
-                console.error("Ошибка при добавлении участника:", error);
-              });
-          }, index * 2000);
-        }
-      });
-    } else {
-    }
-
-    // Добавляем вызов API метода createParticipantApi для каждой строки таблицы
-  } catch (error) {
-    setTimeout(() => {
-      formEvent.createModalEventButton.classList.remove("disable");
-    }, 10000);
-  }
-}
-
-export function clearModalData() {
-  formEvent.idEventInput.value = "";
-  formEvent.nameEventInput.value = "";
-  formEvent.dateStartEventInput.value = "";
-  formEvent.dateEndEventInput.value = "";
-  formEvent.descriptionEvent.value = "";
-  const tbody = document.querySelector(".customTable tbody");
-  tbody.innerHTML = "";
-
-  const tbodyedit = document.querySelector("#modalEvent .customTable tbody");
-  tbodyedit.innerHTML = "";
-}
