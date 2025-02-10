@@ -894,3 +894,23 @@ export async function updateLiabilityitApi(
     throw error;
   }
 }
+
+
+export async function getAccountBalanceApi(access_token, id) {
+  try {
+    const response = await fetch(
+      BASE_URL + `v1/analytics/accountBalance/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error("Ошибка при выполнении запроса:", error);
+  }
+}
