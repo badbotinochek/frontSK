@@ -10,6 +10,7 @@ import {
   updateAccountApi,
   addUserAccountApi,
   deleteUserAccountApi,
+  getAccountBalanceApi
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
 
@@ -37,26 +38,58 @@ export async function getAllMyAccounts() {
     alert("Произошла ошибка при обращении к серверу.");
   }
 }
+
+export async function getAccountBalance(id) {
+  try {
+    const access_token = localStorage.getItem("access_token");
+    
+    // Проверяем наличие токена
+    if (!access_token) {
+      throw new Error("Access token отсутствует.");
+    }
+
+    const responseData = await getAccountBalanceApi(access_token, id);
+
+    if (!responseData) {
+      throw new Error("API вернул пустой или неопределённый ответ.");
+    }
+
+    return responseData.balance; // Вернем корректное значение баланса
+  } catch (error) {
+    console.error("Произошла ошибка:", error);
+    alert("Произошла ошибка при обращении к серверу.");
+    return "Ошибка";
+  }
+}
+
+
+
+
 // Функция для заполнения данных в таблицу Счета
-function populateTableWithLiabilities(responseData) {
+async function populateTableWithLiabilities(responseData) {
   const tbody = document.querySelector(".custom-table tbody");
   tbody.innerHTML = "";
 
-  responseData.forEach((account) => {
+  const userId = localStorage.getItem("user_id");
+
+  for (const account of responseData) {
     const newRow = document.createElement("tr");
-    const userId = localStorage.getItem("user_id");
     const createdDate = new Date(account.created_at);
     const startday = ("0" + createdDate.getDate()).slice(-2);
     const startmonth = ("0" + (createdDate.getMonth() + 1)).slice(-2);
     const startyear = createdDate.getFullYear();
     const formattedcreatedDate = `${startday}.${startmonth}.${startyear}`;
-    let state = " ";
+    let state = account.is_blocked ? "Архивный" : "Активный";
 
-    if (account.is_blocked) {
-      state = "Архивный";
-    } else {
-      state = "Активный";
+    let balance;
+    try {
+      balance = await getAccountBalance(account.id);
+    } catch (error) {
+      console.error("Ошибка получения баланса:", error);
+      balance = "Ошибка";
     }
+
+    console.log(balance)
 
     if (parseInt(account.user.id, 10) === parseInt(userId, 10)) {
       newRow.innerHTML = `
@@ -65,9 +98,10 @@ function populateTableWithLiabilities(responseData) {
       <td>${formattedcreatedDate}</td>
       <td>${account.user.name}</td>
       <td>${state}</td>
+      <td>${balance}</td>
       <td>
         <img src="../../src/modules/accounts/asserts/icon-show.png" alt="Иконка" class="iconShowAccount" data-account-id="${account.id}">
-       <img src="../../src/modules/accounts/asserts/icon-pencil.png" alt="Иконка" class="iconEditAccount" data-account-id="${account.id}">
+        <img src="../../src/modules/accounts/asserts/icon-pencil.png" alt="Иконка" class="iconEditAccount" data-account-id="${account.id}">
       </td>`;
     } else {
       newRow.innerHTML = `
@@ -76,14 +110,16 @@ function populateTableWithLiabilities(responseData) {
       <td>${formattedcreatedDate}</td>
       <td>${account.user.name}</td>
       <td>${state}</td>
+      <td>${balance}</td>
       <td>
-       <img src="../../src/modules/accounts/asserts/icon-show.png" alt="Иконка" class="iconShowAccount" data-account-id="${account.id}">
+        <img src="../../src/modules/accounts/asserts/icon-show.png" alt="Иконка" class="iconShowAccount" data-account-id="${account.id}">
       </td>`;
     }
 
     tbody.appendChild(newRow);
-  });
+  }
 }
+
 // Функция для навешивания обработчиков на иконку Редактирование счета
 function addListenersForIconsEdit(responseData) {
   const iconsEdit = document.querySelectorAll(".iconEditAccount");
