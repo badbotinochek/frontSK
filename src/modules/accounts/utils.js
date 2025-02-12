@@ -28,7 +28,7 @@ export async function getAllMyAccounts() {
     }
 
     // Передаем данные в функцию, которая заполняет таблицу
-    populateTableWithLiabilities(responseData);
+    await populateTableWithLiabilities(responseData); 
 
     // Добавляем обработчики событий
     addListenersForIconsEdit(responseData);
@@ -89,7 +89,7 @@ async function populateTableWithLiabilities(responseData) {
       balance = "Ошибка";
     }
 
-    console.log(balance)
+
 
     if (parseInt(account.user.id, 10) === parseInt(userId, 10)) {
       newRow.innerHTML = `
@@ -122,6 +122,7 @@ async function populateTableWithLiabilities(responseData) {
 
 // Функция для навешивания обработчиков на иконку Редактирование счета
 function addListenersForIconsEdit(responseData) {
+
   const iconsEdit = document.querySelectorAll(".iconEditAccount");
   iconsEdit.forEach(function (icon) {
     icon.addEventListener("click", function (event) {
@@ -898,7 +899,11 @@ export async function updateAccount() {
   const description = modal
     .querySelector("#modalInputDescription")
     .value.trim();
-  const savedState = localStorage.getItem("stateAccount");
+
+  const inputStatus = document.getElementById("modalInputStatus");
+
+    // Получение значения из поля
+  const savedState = inputStatus.value;
 
   let isBlocked;
   if (savedState === "Активный") {
