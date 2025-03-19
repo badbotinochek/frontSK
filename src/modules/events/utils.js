@@ -366,7 +366,7 @@ function addEventListeners(entity, mode) {
     if (mode === "create") {
       console.log(12314)
 
-      // handleCreateMode(event, modal);
+      handleCreateMode(event, modal);
     } else if (mode === "edit") {
       // handleEditMode(event, modal);
       console.log(5555)
