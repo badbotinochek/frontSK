@@ -162,7 +162,7 @@ header .image-text .header-text {
 #userId {
   display: inline-block;
   color: #5b5b5b;
-  max-width: 70px;
+  max-width: 110px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

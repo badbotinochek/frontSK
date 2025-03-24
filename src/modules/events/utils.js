@@ -108,41 +108,214 @@ function addListenersForIconsShow(responseData) {
     });
   });
 }
+function removeAllModals() {
+  // Получаем все элементы с классом .modal
+  const existingModals = document.querySelectorAll(".modal");
+  
+  // Удаляем все найденные модальные окна
+  existingModals.forEach(modal => {
+    modal.remove();
+  });
+}
+
+// Общая функция для управления диалогового окна "Просмотр/редактирование счета"
+// export function handleOpenMainModal(entity, mode, data) {
+//   // Добавляем в диалог HTML
+//   removeAllModals();
+
+//   // Создаем новое модальное окно
+//   const modal = document.createElement("div");
+//   modal.id = `modal_${entity}_${mode}`;
+//   modal.classList.add("modal");
+
+//   fillDialogWithHTML(entity, mode);
+  
+//    // Если measure передан, заполняем форму данными
+//   if (data) {
+//     fillDialogFields(entity, mode, data);
+//   }
+
+//    // Добавляем класс disabled ко всем элементам для режима veiw и убираем placeholders
+//   if (mode === "view") {
+//     disableModalInputs();
+//   }
+
+//   // Устанавливаем на диалоговое окно обработчики
+//    addEventListeners(entity, mode);
+
+//   // Отображаем диалоговое окно
+//   openDialog(entity);
+
+// }
+
+// // Единая функция, которая вставляет в диалоговое окно HTML
+// function fillDialogWithHTML(entity, mode) {
+//   const modalContent = entity === "event" ? formEvent.modalMainContent : formEvent.modalMinorContent;
+  
+//   // Очищаем текущее содержимое
+//   modalContent.innerHTML = "";
+
+//   // Создаём заголовок
+//   const title = document.createElement("h2");
+//   title.id = entity === "event" ? "modalMainTitle" : "modalMinorTitle";
+
+//   // Устанавливаем текст заголовка в зависимости от режима и сущности
+//   if (entity === "event") {
+//     if (mode === "create") {
+//       title.textContent = "Создание мероприятия";
+//     } else if (mode === "edit") {
+//       title.textContent = "Редактирование мероприятия";
+//     } else if (mode === "view") {
+//       title.textContent = "Просмотр мероприятия";
+//     } else {
+//       title.textContent = "Неизвестный режим";
+//     }
+//   } else if (entity === "participant") {
+//     if (mode === "create") {
+//       title.textContent = "Добавление участника";
+//     } else if (mode === "edit") {
+//       title.textContent = "Изменение роли";
+//     } else {
+//       title.textContent = "Неизвестный режим";
+//     }
+//   }
+
+//   // Создаём форму
+//   const form = document.createElement("form");
+//   form.id = "modalForm";
+
+//   // Формируем содержимое формы в зависимости от сущности и режима
+//   let formHTML = "";
+//   if (entity === "event") {
+//     if (mode === "create") {
+//       formHTML += eventsTemplateElements.name;
+//       formHTML += eventsTemplateElements.period;
+//       formHTML += eventsTemplateElements.description;
+//       formHTML += eventsTemplateElements.buttons.create;
+//     } else if (mode === "edit") {
+//       formHTML += eventsTemplateElements.id;
+//       formHTML += eventsTemplateElements.name;
+//       formHTML += eventsTemplateElements.period;
+//       formHTML += eventsTemplateElements.description;
+//       formHTML += eventsTemplateElements.participant;
+//       formHTML += eventsTemplateElements.addParticipantButton;
+//       formHTML += eventsTemplateElements.buttons.edit;
+//     } else if (mode === "view") {
+//       formHTML += eventsTemplateElements.id;
+//       formHTML += eventsTemplateElements.name;
+//       formHTML += eventsTemplateElements.period;
+//       formHTML += eventsTemplateElements.description;
+//       formHTML += eventsTemplateElements.participant;
+//       formHTML += eventsTemplateElements.buttons.view;
+//     }
+//   } else if (entity === "participant") {
+//     if (mode === "create" || mode === "edit") {
+//       formHTML += addParticipantTemplateElements.addParticipant;
+  
+//       // Если режим edit, добавляем атрибут disabled к input
+//       if (mode === "edit") {
+//         const parser = new DOMParser();
+//         const doc = parser.parseFromString(formHTML, 'text/html');
+//         const inputElement = doc.querySelector('#inputIdUser');
+//         if (inputElement) {
+//           inputElement.setAttribute('disabled', 'disabled');
+//         }
+//         formHTML = doc.body.innerHTML; // Сохраняем изменения
+//       }
+//     }
+//   }
+
+//   // Устанавливаем содержимое формы
+//   form.innerHTML = formHTML;
+
+//   // Добавляем заголовок и форму в модальное окно
+//   modalContent.appendChild(title);
+//   modalContent.appendChild(form);
+
+//   // Не знаю почему но в поле "Описание" при создании диалогового окна создается 3 пробела. Код ниже удаляет это, если сущность event
+//   // if (entity === "event") {
+//   //   const textInput = document.getElementById("modalInputDescription");
+//   //   const cleanedText = textInput.value.trim();
+//   //   textInput.value = cleanedText;
+//   // }
+// }
+
+
 // Общая функция для управления диалогового окна "Просмотр/редактирование счета"
 export function handleOpenMainModal(entity, mode, data) {
-  // Добавляем в диалог HTML
+  // Удаляем все предыдущие модальные окна
+  removeAllModals();
 
+  // Наполняем модальное окно HTML
   fillDialogWithHTML(entity, mode);
-  
-   // Если measure передан, заполняем форму данными
+
+  // Если переданы данные, заполняем форму
   if (data) {
     fillDialogFields(entity, mode, data);
   }
 
-   // Добавляем класс disabled ко всем элементам для режима veiw и убираем placeholders
+  // Добавляем класс disabled ко всем элементам для режима view и убираем placeholders
   if (mode === "view") {
     disableModalInputs();
   }
 
-  // Устанавливаем на диалоговое окно обработчики
-   addEventListeners(entity, mode);
+  // Устанавливаем обработчики событий
+  addEventListeners(entity, mode);
 
-  // Отображаем диалоговое окно
-  openDialog(entity);
 
+  const modal = document.querySelector(".modal")
+  modal.setAttribute("open", "true");
 }
+
 // Единая функция, которая вставляет в диалоговое окно HTML
 function fillDialogWithHTML(entity, mode) {
-  const modalContent = entity === "event" ? formEvent.modalMainContent : formEvent.modalMinorContent;
-  
-  // Очищаем текущее содержимое
-  modalContent.innerHTML = "";
+  let formHTML = "";
 
-  // Создаём заголовок
-  const title = document.createElement("h2");
-  title.id = entity === "event" ? "modalMainTitle" : "modalMinorTitle";
+  // Логика для "event" сущности
+  if (entity === "event") {
+    if (mode === "create") {
+      formHTML += eventsTemplateElements.name;
+      formHTML += eventsTemplateElements.period;
+      formHTML += eventsTemplateElements.description;
+      formHTML += eventsTemplateElements.buttons.create;
+    } else if (mode === "edit") {
+      formHTML += eventsTemplateElements.id;
+      formHTML += eventsTemplateElements.name;
+      formHTML += eventsTemplateElements.period;
+      formHTML += eventsTemplateElements.description;
+      formHTML += eventsTemplateElements.participant;
+      // Убрал пока не поправлю 
+      // formHTML += eventsTemplateElements.addParticipantButton;
+      formHTML += eventsTemplateElements.buttons.edit;
+    } else if (mode === "view") {
+      formHTML += eventsTemplateElements.id;
+      formHTML += eventsTemplateElements.name;
+      formHTML += eventsTemplateElements.period;
+      formHTML += eventsTemplateElements.description;
+      formHTML += eventsTemplateElements.participant;
+      formHTML += eventsTemplateElements.buttons.view;
+    }
+  } else if (entity === "participant") {
+    if (mode === "create" || mode === "edit") {
+      formHTML += addParticipantTemplateElements.addParticipant;
+    }
+  }
 
-  // Устанавливаем текст заголовка в зависимости от режима и сущности
+  // Создаем основной контейнер для модального окна
+  const modal = document.createElement('div');
+  modal.id = 'mainModal';
+  modal.classList.add('modal', 'modalEvent');
+
+
+  // Создаем основной контент модального окна
+  const modalMainContent = document.createElement('div');
+  modalMainContent.classList.add('modalMainContent');
+
+  // Создаем заголовок
+  const title = document.createElement('h2');
+  title.id = 'modalMainTitle';
+
+  // Логика для изменения текста заголовка в зависимости от entity и mode
   if (entity === "event") {
     if (mode === "create") {
       title.textContent = "Создание мероприятия";
@@ -163,65 +336,22 @@ function fillDialogWithHTML(entity, mode) {
     }
   }
 
-  // Создаём форму
-  const form = document.createElement("form");
-  form.id = "modalForm";
-
-  // Формируем содержимое формы в зависимости от сущности и режима
-  let formHTML = "";
-  if (entity === "event") {
-    if (mode === "create") {
-      formHTML += eventsTemplateElements.name;
-      formHTML += eventsTemplateElements.period;
-      formHTML += eventsTemplateElements.description;
-      formHTML += eventsTemplateElements.buttons.create;
-    } else if (mode === "edit") {
-      formHTML += eventsTemplateElements.id;
-      formHTML += eventsTemplateElements.name;
-      formHTML += eventsTemplateElements.period;
-      formHTML += eventsTemplateElements.description;
-      formHTML += eventsTemplateElements.participant;
-      formHTML += eventsTemplateElements.addParticipantButton;
-      formHTML += eventsTemplateElements.buttons.edit;
-    } else if (mode === "view") {
-      formHTML += eventsTemplateElements.id;
-      formHTML += eventsTemplateElements.name;
-      formHTML += eventsTemplateElements.period;
-      formHTML += eventsTemplateElements.description;
-      formHTML += eventsTemplateElements.participant;
-      formHTML += eventsTemplateElements.buttons.view;
-    }
-  } else if (entity === "participant") {
-    if (mode === "create" || mode === "edit") {
-      formHTML += addParticipantTemplateElements.addParticipant;
-  
-      // Если режим edit, добавляем атрибут disabled к input
-      if (mode === "edit") {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(formHTML, 'text/html');
-        const inputElement = doc.querySelector('#inputIdUser');
-        if (inputElement) {
-          inputElement.setAttribute('disabled', 'disabled');
-        }
-        formHTML = doc.body.innerHTML; // Сохраняем изменения
-      }
-    }
-  }
-
-  // Устанавливаем содержимое формы
+  // Создаем форму и наполняем её содержимым из formHTML
+  const form = document.createElement('form');
+  form.id = 'modalForm';
   form.innerHTML = formHTML;
 
   // Добавляем заголовок и форму в модальное окно
-  modalContent.appendChild(title);
-  modalContent.appendChild(form);
+  modalMainContent.appendChild(title);
+  modalMainContent.appendChild(form);
 
-  // Не знаю почему но в поле "Описание" при создании диалогового окна создается 3 пробела. Код ниже удаляет это, если сущность event
-  if (entity === "event") {
-    const textInput = document.getElementById("modalInputDescription");
-    const cleanedText = textInput.value.trim();
-    textInput.value = cleanedText;
-  }
+  // Добавляем основной контент в модальное окно
+  modal.appendChild(modalMainContent);
+
+  // Добавляем модальное окно в DOM
+  document.body.appendChild(modal);
 }
+
 function fillDialogFields(entity, mode, data) {
   if (!data || typeof data !== "object") {
     console.error("Передан некорректный объект для заполнения диалога.");
@@ -322,16 +452,18 @@ function populateTableWithParticipants(mode, participants) {
   }
     tableBody.appendChild(row);
     // Навешиваем обработчик на иконку "Edit"
-    const editIcon = row.querySelector(".iconEdit");
-    if (editIcon) {
-      editIcon.addEventListener("click", () => {
-        const data = {
-          user_id: editIcon.getAttribute("data-user-id"),
-          role: editIcon.getAttribute("data-role"),
-        };
-        handleOpenMainModal("participant", "edit", data);
-      });
-    }
+     //ПОка УБРАЛ НАДО ПОПРАВИТЬ!
+    // const editIcon = row.querySelector(".iconEdit");
+    // if (editIcon) {
+    //   editIcon.addEventListener("click", () => {
+    //     const data = {
+    //       user_id: editIcon.getAttribute("data-user-id"),
+    //       role: editIcon.getAttribute("data-role"),
+    //     };
+        
+    //     handleOpenMainModal("participant", "edit", data);
+    //   });
+    // }
   });
 }
 // Добавляем класс disabled ко всем элементам для режима veiw
@@ -353,10 +485,10 @@ function disableModalInputs() {
 }
 // Основная функция для добавления обработчиков событий
 function addEventListeners(entity, mode) {
-  if(entity === "event"){
-  const modal = formEvent.modalMain;
-  const closeButton = document.querySelector(".closeDialogButton");
 
+  if(entity === "event"){
+  const modal = document.querySelector(".modal");
+  const closeButton = document.querySelector(".closeDialogButton");
   // Обработчик кликов на кнопку Закрытия диалогового окна
   closeButton.addEventListener("click", closeDialog);
 
@@ -368,10 +500,16 @@ function addEventListeners(entity, mode) {
 
       handleCreateMode(event, modal);
     } else if (mode === "edit") {
-      // handleEditMode(event, modal);
+      handleEditMode(event, modal);
       console.log(5555)
     }
   });
+
+
+
+
+
+  
 }else  {
   const dropdown = document.getElementById('modalDropdownRole');
   const isActive = dropdown.classList.contains("active");
@@ -410,16 +548,12 @@ function handleCreateMode(event, modal) {
         checkRequiredFields(modal.id);
       }
     });
-  
   const createEventButton = modal.querySelector(".createButton");
-
-  // Убираем старый обработчик и добавляем новый для кнопки создания
-  createEventButton.removeEventListener("click", handleCreateEvent);
   createEventButton.addEventListener("click", handleCreateEvent);
 }
 // Обработчик для создания события
 function handleCreateEvent(e) {
-  const modal = formEvent.modalMain;
+  const modal = document.querySelector(".modal");
   const createEventButton = modal.querySelector(".createButton");
 
   // Проверка, если кнопка заблокирована
@@ -435,7 +569,7 @@ function handleCreateEvent(e) {
 
 async function createNewEvent() {
   const accessToken = localStorage.getItem("access_token");
-  const modal = formEvent.modalMain;
+  const modal = document.querySelector(".modal");
   const button = document.querySelector(".createButton");
   const name = modal.querySelector("#inputName").value.trim();
   const dateStart = modal.querySelector("#dateStartEvent").value.trim();
@@ -493,17 +627,99 @@ function handleEditMode(event, modal) {
     handleOpenMainModal("participant", "create");
   }
 
-  // Обработчик для сохранения изменений
-  // const saveChangeAccountButton = modal.querySelector(".editButton");
-  // saveChangeAccountButton.addEventListener("click", (e) => {
-  //   if (saveChangeAccountButton.classList.contains("disable")) {
-  //     e.preventDefault();
-  //     return;
-  //   }
-  //   updateAccount();
-  // });
+
+  modal.addEventListener("input", (event) => {
+      checkRequiredEditFields(modal.id);
+  });
+
+
+  const updateEventButton = modal.querySelector(".editButton");
+  updateEventButton.addEventListener("click", handleUpdateEvent);
+// Если кнопка активна, вызываем функцию создания события
+  
 
 }
+
+function handleUpdateEvent(e) {
+  const modal = document.querySelector(".modal");
+  const updateEventButton = modal.querySelector(".editButton ");
+
+  // Проверка, если кнопка заблокирована
+  if (updateEventButton.classList.contains("disable")) {
+    e.preventDefault();
+    return;
+  }
+
+  // Если кнопка активна, вызываем функцию создания события
+
+  updateAccount();
+}
+
+
+
+
+
+
+
+
+
+
+async function updateAccount() {
+  const accessToken = localStorage.getItem("access_token");
+  const id = document.querySelector("#inputId").value.trim();;
+  const modal = document.querySelector(".modal");
+  const button = document.querySelector(".editButton");
+  const name = modal.querySelector("#inputName").value.trim();
+  const dateStart = modal.querySelector("#dateStartEvent").value.trim();
+  const dateEnd = modal.querySelector("#dateEndEvent").value.trim() || null;
+  const description =
+    modal.querySelector("#modalInputDescription").value.trim() || null;
+
+  button.classList.add("disable");
+
+  const formatDate = (dateString) => {
+    const dateParts = dateString.split("-");
+    if (dateParts.length !== 3) {
+      throw new Error("Неверный формат даты");
+    }
+    const year = dateParts[0];
+    const month = dateParts[1].padStart(2, "0");
+    const day = dateParts[2].padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formattedStartDate = `${formatDate(dateStart)}T00:00:00.000Z`;
+  const formattedEndDate = dateEnd
+    ? `${formatDate(dateEnd)}T23:59:59.999Z`
+    : null;
+
+  try {
+    const response = await updateEventApi(
+      id,
+      name,
+      formattedStartDate,
+      formattedEndDate,
+      description,
+      accessToken
+    );
+
+    setTimeout(getMyEvents, 1000);
+    closeDialog();
+    const successMessage = `Мероприятие обновлено`;
+    createToast("success", successMessage);
+  } catch (error) {
+    setTimeout(() => {
+      button.classList.remove("disable");
+    }, 10000);
+  }
+}
+
+
+
+
+
+
+
  
 // Функция для управления состоянием "active"
 function toggleDropdownState(dropdown, isActive) {
@@ -515,45 +731,18 @@ function toggleDropdownState(dropdown, isActive) {
 }
 
 
-// Функция для закрытия диалоговых окон
+
+// Функция для закрытия всех диалоговых окон
 export function closeDialog() {
-  // Получаем переменные из объекта formEvent
-  const modalMain = formEvent.modalMain;
-  const modalMinor = formEvent.modalMinor;
+  // Получаем все элементы с классом "modal"
+  const modals = document.querySelectorAll(".modal");
 
-
-  // Если дополнительное модальное окно открыто, закрываем его и открываем основное
-  if (modalMinor &&modalMinor.hasAttribute("open")) {
-    modalMinor.removeAttribute("open");
-    
-    if (modalMain) {
-      modalMain.setAttribute("open", "true"); // Закрываем основное окно
-    }
-  } else if (modalMain && modalMain.hasAttribute("open")) {
-    modalMain.removeAttribute("open"); 
-  }
+  // Удаляем атрибут "open" у всех модальных окон
+  modals.forEach(modal => {
+    modal.removeAttribute("open");
+  });
 }
 
-
-// Функция для открытия диалогового окна "Создание счета"
-function openDialog(entity) {
-  let modalToOpen;
-  let modalToClosed;
-
-  if (entity === "event") {
-    modalToOpen = formEvent.modalMain;
-  } else if (entity === "participant") {
-    modalToOpen = formEvent.modalMinor;
-    modalToClosed = formEvent.modalMain;
-
-    modalToClosed.removeAttribute("open"); 
-  } else {
-    console.error("Неизвестная сущность:", entity);
-    return;
-  }
-
-  modalToOpen.setAttribute("open", "true");
-}
 
 // Функция для проверки заполненности обязательных параметров
 export function checkRequiredFields(formId) {
@@ -578,6 +767,37 @@ export function checkRequiredFields(formId) {
       createButton.classList.add("disable");
       createButton.disabled = true;
       createButton.setAttribute(
+        "data-tooltip",
+        "Заполните обязательные параметры"
+      );
+    }
+  }
+}
+
+
+// Функция для проверки заполненности обязательных параметров
+export function checkRequiredEditFields(formId) {
+  const form = document.getElementById(formId);
+  const requiredFields = form.querySelectorAll(".requiredField");
+  const editButton = form.querySelector(".editButton");
+
+  if (editButton) {
+    let allFieldsFilled = true;
+
+    requiredFields.forEach((field) => {
+      if (!field.value.trim()) {
+        allFieldsFilled = false;
+      }
+    });
+
+    if (allFieldsFilled) {
+      editButton.classList.remove("disable");
+      editButton.disabled = false;
+      editButton.removeAttribute("data-tooltip");
+    } else {
+      editButton.classList.add("disable");
+      editButton.disabled = true;
+      editButton.setAttribute(
         "data-tooltip",
         "Заполните обязательные параметры"
       );
