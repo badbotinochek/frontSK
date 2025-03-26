@@ -416,6 +416,7 @@ export async function manageLogicTransactions(offset = 0, append = false) {
     addListenersForIconsEdit(responseData);
     addListenersForIconsShow(responseData);
     addListenersForIconsDelete(responseData);
+    addListenersForIconsReceipt(responseData)
   } catch (error) {
     formTransactions.getTransactionButton.classList.remove("disable");
   } finally {
@@ -474,6 +475,30 @@ function addListenersForIconsDelete(responseData) {
       const typeTransactions = transaction.type;
       localStorage.setItem("transactionId", transactionId);
       handleOpenMainModal(typeTransactions, "delete");
+    });
+  });
+}
+
+function addListenersForIconsReceipt(responseData) {
+  const iconsReceipt = document.querySelectorAll(".receipt");
+
+  iconsReceipt.forEach(function (icon) {
+    icon.addEventListener("click", async function () {
+      const receiptId = parseInt(icon.getAttribute("data-id"), 10);
+
+      try {
+        const receipt = await getReceipt(receiptId);
+        console.log(receipt); // Проверка полученных данных
+
+        if (receipt) {
+          addReceiptToHTML(receipt); // Автоматически отображаем чек
+          document.getElementById("receipt-details").showModal();
+        } else {
+          console.error("Чек не найден");
+        }
+      } catch (error) {
+        console.error("Ошибка при получении чека:", error);
+      }
     });
   });
 }
@@ -1341,11 +1366,42 @@ function formatTime(timeString) {
 
 async function getReceipt(receipt_id) {
   const accessToken = localStorage.getItem("access_token");
+  const receiptContainer = document.getElementById("receipt-container");
 
   try {
+    // Показываем индикатор загрузки
+    receiptContainer.innerHTML = `<span class="sc-caiKgP ipNIuR"> 
+      <box-icon name='loader-alt' flip='horizontal' animation='spin' color='#ef6f0b'></box-icon>
+    </span>`;
+
     const receipt = await getReceiptApi(accessToken, receipt_id);
-    addReceiptToHTML(receipt);
-  } catch (error) {}
+    
+    console.log("Полученный чек:", receipt); // Отладка
+    
+    if (!receipt) {
+      throw new Error("API вернул пустой чек");
+    }
+
+    addReceiptToHTML(receipt); // Добавляем чек в HTML
+    return receipt;
+  } catch (error) {
+    console.error("Ошибка при получении чека:", error);
+
+    // Показываем сообщение об ошибке в окне чека
+    receiptContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка загрузки чека</p>`;
+    return null;
+  }
+}
+
+function addReceiptToHTML(receipt) {
+  // Получаем контейнер для чека
+  const container = document.getElementById("receipt-container");
+
+  // Преобразуем объект чека в HTML
+  const receiptHTML = generateReceiptHTML(receipt);
+
+  // Добавляем HTML в контейнер
+  container.innerHTML = receiptHTML;
 }
 
 function generateReceiptHTML(receipt) {
@@ -1561,18 +1617,10 @@ function generateReceiptHTML(receipt) {
 </div>
 </div>
 `;
+
 }
 
-function addReceiptToHTML(receipt) {
-  // Получаем контейнер для чека
-  const container = document.getElementById("receipt-container");
 
-  // Преобразуем объект чека в HTML
-  const receiptHTML = generateReceiptHTML(receipt);
-
-  // Добавляем HTML в контейнер
-  container.innerHTML = receiptHTML;
-}
 
 function clearModalReceipt() {
   const container = document.getElementById("receipt-container");
