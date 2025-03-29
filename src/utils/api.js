@@ -81,7 +81,7 @@ export function redirectAutorize() {
 export async function getAllMyEventsApi(access_token) {
   try {
     const response = await fetch(
-      BASE_URL + "v1/events/by_role?roles=Manager%2CObserver%2CPartner ",
+      BASE_URL + "v1/events/by_role?roles=Manager%2CObserver%2CPartner",
       {
         method: "GET",
         headers: {
@@ -91,12 +91,17 @@ export async function getAllMyEventsApi(access_token) {
       }
     );
 
-    return await response.json();
+    if (response.status === 403) {
+      return { status: 403 }; // сигнализируем о 403
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error("Ошибка при выполнении запроса:", error);
+    return null;
   }
 }
-
 // Transactions
 
 export async function getTransacionsForEvent(

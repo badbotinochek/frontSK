@@ -1,5 +1,11 @@
 import { createToast } from "../notifications/index.js";
 
+import {
+
+  refreshAccessToken,
+
+} from "../../utils/api.js";
+
 export function redirectToAuth() {
   const access_token = localStorage.getItem("access_token");
   if (!access_token) {

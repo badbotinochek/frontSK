@@ -15,6 +15,7 @@ import { createToast } from "../notifications/index.js";
 import { checkDate, isFieldFilled } from "../other_functions/validations.js";
 import { templateElements } from "./templates.js";
 
+
 let cachedActiveAccounts = 0;
 let cachedCategories = [];
 let testCategories = 0;
@@ -44,11 +45,22 @@ export async function getCategory() {
 // Функции для работы поле выбора мероприятий
 async function getEvent() {
   const token = localStorage.getItem("access_token");
+
   try {
     const events = await getAllMyEventsApi(token);
-    const user_id = parseInt(localStorage.getItem("user_id"), 10);
 
+    if (events && events.status === 403) {
+      window.location.href = "../../pages/auth/index.html";
+      return [];
+    }
+
+    if (!events) {
+      return [];
+    }
+
+    const user_id = parseInt(localStorage.getItem("user_id"), 10);
     const userEvents = [];
+
     events.forEach((event) => {
       const user = event.participants.find(
         (participant) => participant.user_id === user_id
@@ -69,6 +81,7 @@ async function getEvent() {
     return [];
   }
 }
+
 
 // Функции для работы поле выбора мероприятий
 export async function fillEventDirectory() {
