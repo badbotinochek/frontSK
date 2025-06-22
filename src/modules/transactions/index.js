@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   formTransactions.labelMoreTransaction.addEventListener("click", () => {
     const offset = getCountRowsTable();
-    manageLogicTransactions(offset, true);
+    manageLogicTransactions(offset-1, true);
   });
 
   hidePreloader();
