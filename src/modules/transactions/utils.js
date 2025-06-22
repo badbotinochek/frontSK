@@ -6,13 +6,11 @@ import {
   getCategoryTransactionApi,
   createTransactionApi,
   updateTransactionApi,
-  refreshAccessToken,
-  createReceiptApi,
   getReceiptApi,
   getAllMyAccountsApi,
 } from "../../utils/api.js";
 import { createToast } from "../notifications/index.js";
-import { checkDate, isFieldFilled } from "../other_functions/validations.js";
+import { checkDate } from "../other_functions/validations.js";
 import { templateElements } from "./templates.js";
 
 
@@ -1239,7 +1237,6 @@ export async function deleteTransactions() {
 
 function populateTableWithTransactions(
   responseData,
-  offset = 0,
   append = false
 ) {
   const userId = parseInt(localStorage.getItem("user_id"), 10);
